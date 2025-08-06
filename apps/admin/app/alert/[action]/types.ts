@@ -17,5 +17,5 @@ export interface PageContent {
 }
 
 export interface ActionPageProps {
-  params: { action: PageKey };
+  params: Promise<{ action: PageKey }>;
 }
