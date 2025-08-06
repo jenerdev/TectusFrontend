@@ -1,0 +1,12 @@
+@use '@tectus/styles/helpers' as *;
+
+.sign-in-form {
+  @extend %flex-center-column;
+  width: 100%;
+  max-width: 40rem;
+  gap: 1.5rem;
+
+  &__submit {
+    margin-top: 5rem;
+  }
+}

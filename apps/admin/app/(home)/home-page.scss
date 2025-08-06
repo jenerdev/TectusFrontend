@@ -1,0 +1,70 @@
+@use '@tectus/styles/helpers' as *;
+
+.home-page {
+  min-height: 100vh;
+  @extend %flex-center-column;
+  gap: 5rem;
+
+  &__content {
+    @extend %flex-center;
+    align-items: stretch;
+    gap: 10rem;
+
+    @include respond-to(tablet-lg) {
+      transform: translateX(10rem);
+    }
+
+    &-left {
+      @extend %flex-center;
+      gap: 2rem;
+
+      > p {
+        display: none;
+      }
+
+      @include respond-to(tablet-lg) {
+        flex-direction: column;
+
+        > p {
+          display: block;
+        }
+      }
+    }
+
+    &-right {
+      @extend %flex-center-column;
+      display: none;
+      gap: 5rem;
+
+      @include respond-to(tablet-lg) {
+        display: flex;
+      }
+    }
+  }
+
+  &__text {
+    color: var(--text-secondary-color);
+    font-size: 2.1rem;
+  }
+
+  &__signin-button {
+    @include respond-to(tablet-lg) {
+      display: none;
+    }
+  }
+
+  &__divider {
+    display: none;
+    width: 1px;
+    background-color: #1a1a1a;
+
+    @include respond-to(tablet-lg) {
+      display: block;
+    }
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 2rem;
+  }
+}

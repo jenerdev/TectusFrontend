@@ -1,0 +1,10 @@
+{
+  "extends": "@repo/typescript-config/react-library.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "types": ["vitest/globals"],
+    "lib": ["DOM", "ESNext"]
+  },
+  "include": ["src", "global.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,41 @@
+:root {
+  --font-fam: 'Inter', sans-serif;
+
+  // BUTTON START
+  --button-primary-background: #fed700;
+  --button-primary-text: #000;
+  --button-primary-background-darken: #d1b209;
+  // BUTTON END
+
+  // TEXT START
+  --text-primary-color: #fed700;
+  --text-secondary-color: #cccccc;
+  // TEXT END
+
+  /* Success */
+  --color-success: #2e7d32;
+  --color-success-light: #dbffdb;
+  --color-success-dark: #0e4110;
+
+  /* Danger */
+  --color-danger: #d32f2f;
+  --color-danger-light: #ffd5d5;
+  --color-danger-dark: #921010;
+
+  /* Warning */
+  --color-warning: #ed6c02;
+  --color-warning-light: #ffe6c4;
+  --color-warning-dark: #a55514;
+
+  /* Info */
+  --color-info: #0288d1;
+  --color-info-light: #c2edff;
+  --color-info-dark: #1376e2;
+
+  /* Disabled States */
+  --color-disabled-bg: #e0e0e0;
+  --color-disabled-text: #a0a0a0;
+  --color-disabled-border: #cccccc;
+
+  --background-primary: #000;
+}

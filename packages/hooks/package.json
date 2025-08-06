@@ -1,0 +1,30 @@
+{
+  "name": "@tectus/hooks",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit",
+    "test": "vitest",
+    "build": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "typescript": "5.8.2",
+    "eslint": "^9.31.0",
+    "vitest": "^3.2.4",
+    "@types/react": "19.1.0",
+    "@types/node": "^22.15.3"
+  },
+  "dependencies": {
+    "react": "^19.1.0"
+  }
+}

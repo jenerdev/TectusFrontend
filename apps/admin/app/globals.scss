@@ -1,0 +1,14 @@
+@use '@tectus/styles/helpers' as *;
+
+html,
+body {
+  background-color: var(--background-primary);
+
+  @include respond-to(tablet-lg) {
+    font-size: 50%;
+  }
+
+  @include respond-to(desktop) {
+    font-size: 45%;
+  }
+}

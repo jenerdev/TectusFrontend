@@ -1,0 +1,16 @@
+@use '@tectus/styles/helpers' as *;
+
+.signin-page {
+  min-height: 100vh;
+  @extend %flex-center-column;
+
+  &__main {
+    flex: 1;
+    @extend %flex-center-column;
+    gap: 5rem;
+  }
+
+  &__forgot {
+    padding: 5rem 0;
+  }
+}

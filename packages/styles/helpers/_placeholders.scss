@@ -1,0 +1,15 @@
+// Centers content both vertically and horizontally in a row layout
+%flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row; // Explicit for clarity
+}
+
+// Centers content both vertically and horizontally in a column layout
+%flex-center-column {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}

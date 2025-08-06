@@ -1,0 +1,47 @@
+{
+  "name": "@tectus/ui",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./*": "./src/*.tsx",
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "generate:component": "turbo gen react-component",
+    "check-types": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@chromatic-com/storybook": "4.0.1",
+    "@repo/typescript-config": "*",
+    "@storybook/addon-a11y": "9.0.18",
+    "@storybook/addon-docs": "9.0.18",
+    "@storybook/addon-onboarding": "9.0.18",
+    "@storybook/addon-vitest": "9.0.18",
+    "@storybook/preview-api": "^8.6.14",
+    "@storybook/react": "^9.0.18",
+    "@storybook/react-vite": "9.0.18",
+    "@tectus/styles": "*",
+    "@types/node": "^22.15.3",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.1",
+    "@vitest/browser": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.31.0",
+    "eslint-plugin-storybook": "9.0.18",
+    "playwright": "^1.54.1",
+    "storybook": "9.0.18",
+    "typescript": "5.8.2",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@tectus/hooks": "*",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
+}

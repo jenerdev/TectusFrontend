@@ -1,0 +1,32 @@
+// ------------------------
+// SCSS VARIABLES (Build-time)
+// ------------------------
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// Border Radius
+$radius-sm: 4px;
+$radius-md: 8px;
+$radius-lg: 12px;
+$radius-full: 9999px;
+
+// Typography
+$font-size-sm: 0.875rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.25rem;
+$font-weight-normal: 400;
+$font-weight-bold: 700;
+
+// Z-index
+$z-index-header: 100;
+$z-index-modal: 1000;
+$z-index-toast: 1100;
+
+// Transitions
+$transition-fast: 150ms ease;
+$transition-base: 300ms ease;
