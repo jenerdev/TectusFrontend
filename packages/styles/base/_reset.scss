@@ -33,17 +33,16 @@ hr {
 /* Set core body defaults */
 html,
 body {
-  font-size: 62.5%; /* 10px */
+  // font-size: 62.5%; /* 10px */
+  font-size: 50%; /* 10px */
 }
 
 body {
   min-height: 100vh;
   line-height: 1.5;
-  font-family: system-ui, sans-serif;
-  // font-family: var(--font-fam);
+  font-family: var(--font-fam);
   text-rendering: optimizeSpeed;
   -webkit-font-smoothing: antialiased;
-  background-color: #fff;
   color: #000;
 }
 

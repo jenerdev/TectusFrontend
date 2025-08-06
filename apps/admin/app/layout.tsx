@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from "next";
 import '@tectus/styles/globals.scss';
-import './globals.scss';
+import './main.scss';
 import { Inter } from 'next/font/google';
 import { GlobalAlert } from './components';
 
