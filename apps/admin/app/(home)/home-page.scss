@@ -5,16 +5,37 @@
   @extend %flex-center-column;
   gap: 5rem;
 
-  &__content {
+  &__main {
     @extend %flex-center;
     align-items: stretch;
     gap: 10rem;
+  }
 
-    @include respond-to(tablet-lg) {
-      transform: translateX(10rem);
+  &__section {
+    width: 49vw;
+    max-width: 45rem;
+    @extend %flex-center;
+
+    &--left {
+      @include respond-to(tablet-lg) {
+        justify-content: flex-end;
+      }
     }
 
-    &-left {
+    &--right {
+      display: none;
+      justify-content: flex-start;
+
+      @include respond-to(tablet-lg) {
+        display: flex;
+      }
+    }
+  }
+
+  &__content {
+    width: auto;
+
+    &--left {
       @extend %flex-center;
       gap: 2rem;
 
@@ -31,14 +52,9 @@
       }
     }
 
-    &-right {
+    &--right {
       @extend %flex-center-column;
-      display: none;
       gap: 5rem;
-
-      @include respond-to(tablet-lg) {
-        display: flex;
-      }
     }
   }
 

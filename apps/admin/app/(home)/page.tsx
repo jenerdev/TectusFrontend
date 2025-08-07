@@ -56,22 +56,30 @@ export default function Home() {
         subtitle="Connecting security professionals and <br/>companies on-demand."
       />
 
-      <div className={E('content')}>
-        <div className={E('content-left')}>
-          <p className={E('text')}>New to Tectus?</p>
-          {step === 'initial' && renderInitialButtons()}
-          {step === 'signupType' && renderSignupTypeButtons()}
+      <div className={E('main')}>
+        <div className={E('section', 'left')}>
+
+          <div className={E('content', 'left')}>
+            <p className={E('text')}>New to Tectus?</p>
+            {step === 'initial' && renderInitialButtons()}
+            {step === 'signupType' && renderSignupTypeButtons()}
+          </div>
+
         </div>
 
         {/* TODO: create reusable component for divider */}
         <div className={E('divider')}></div>
 
-        <div className={E('content-right')}>
-          <p className={E('text')}>Already have an account?</p>
-          <SignInForm onSubmit={handleSignIn} loading={loading} />
-          <AppLink href="/reset-password/request" className={E('link')}>
-            Forgot Password?
-          </AppLink>
+        <div className={E('section', 'right')}>
+
+          <div className={E('content', 'right')}>
+            <p className={E('text')}>Already have an account?</p>
+            <SignInForm onSubmit={handleSignIn} loading={loading} />
+            <AppLink href="/reset-password/request" className={E('link')}>
+              Forgot Password?
+            </AppLink>
+          </div>
+
         </div>
       </div>
     </div>

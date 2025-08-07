@@ -1,3 +1,128 @@
+// 'use client';
+// import { useState, useCallback, useEffect } from 'react';
+
+// type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
+// interface HttpOptions<TBody = any> {
+//   method?: HttpMethod;
+//   headers?: Record<string, string>;
+//   body?: TBody;
+//   auto?: boolean;
+//   token?: string;
+//   refreshToken?: string;
+//   getTokens?: () => { token?: string; refreshToken?: string };
+// }
+
+// type HttpError = { message: string; statusCode?: number };
+
+// export interface HttpState<TResponse> {
+//   data: TResponse | null;
+//   error: HttpError | null;
+//   loading: boolean;
+//   sendRequest: (
+//     overrideOptions?: Partial<HttpOptions>,
+//   ) => Promise<{ data: TResponse | null; error: HttpError | null }>;
+// }
+
+// export function useHttp<TResponse = any, TBody = any>(
+//   url: string,
+//   options: HttpOptions<TBody> = {},
+// ): HttpState<TResponse> {
+//   const [data, setData] = useState<TResponse | null>(null);
+//   const [error, setError] = useState<HttpError | null>(null);
+//   const [loading, setLoading] = useState(false);
+
+//   const sendRequest = useCallback(
+//     async (
+//       overrideOptions?: Partial<HttpOptions>,
+//     ): Promise<{ data: TResponse | null; error: HttpError | null }> => {
+//       setLoading(true);
+//       setError(null);
+
+//       let { token, refreshToken } = options?.getTokens?.() || {};
+//       if (overrideOptions?.token) token = overrideOptions.token;
+//       if (overrideOptions?.refreshToken) refreshToken = overrideOptions.refreshToken;
+
+//       const finalOptions: HttpOptions = {
+//         method: options.method || 'GET',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           ...(options.headers || {}),
+//           ...(token ? { Authorization: `Bearer ${token}` } : {}),
+//           ...(overrideOptions?.headers || {}),
+//         },
+//         ...options,
+//         ...overrideOptions,
+//       };
+
+//       const payload = finalOptions.body ? JSON.stringify(finalOptions.body) : undefined;
+
+//       console.log('🔼 Request:', {
+//         url,
+//         method: finalOptions.method,
+//         headers: finalOptions.headers,
+//         body: finalOptions.body,
+//       });
+
+//       try {
+//         const res = await fetch(url, {
+//           method: finalOptions.method,
+//           headers: finalOptions.headers,
+//           body: payload,
+//         });
+
+//         const contentType = res.headers.get('content-type') || '';
+
+//         if (!res.ok) {
+//           let message = 'Unknown error';
+//           try {
+//             if (contentType.includes('application/json')) {
+//               const json = await res.json();
+//               message = json.message || message;
+//             } else {
+//               message = await res.text();
+//             }
+//           } catch (e) {
+//             message = res.statusText;
+//           }
+
+//           const errObj: HttpError = {
+//             message,
+//             statusCode: res.status,
+//           };
+
+//           console.error('❌ Response Error:', errObj);
+//           setError(errObj);
+//           return { data: null, error: errObj };
+//         }
+
+//         const json = await res.json();
+//         console.log('✅ Response:', json);
+//         setData(json);
+//         return { data: json, error: null };
+//       } catch (err: any) {
+//         const fallbackError: HttpError = {
+//           message: err.message || 'Network error',
+//         };
+//         console.error('❌ Fetch Error:', fallbackError);
+//         setError(fallbackError);
+//         return { data: null, error: fallbackError };
+//       } finally {
+//         setLoading(false);
+//       }
+//     },
+//     [url, options],
+//   );
+
+//   useEffect(() => {
+//     if (options.auto) {
+//       sendRequest();
+//     }
+//   }, [sendRequest, options.auto]);
+
+//   return { data, error, loading, sendRequest };
+// }
+
 'use client';
 import { useState, useCallback, useEffect } from 'react';
 
@@ -8,11 +133,14 @@ interface HttpOptions<TBody = any> {
   headers?: Record<string, string>;
   body?: TBody;
   auto?: boolean;
+  token?: string;
+  refreshToken?: string;
+  getTokens?: () => { token?: string; refreshToken?: string };
 }
 
 type HttpError = { message: string; statusCode?: number };
 
-interface HttpState<TResponse> {
+export interface HttpState<TResponse> {
   data: TResponse | null;
   error: HttpError | null;
   loading: boolean;
@@ -23,7 +151,7 @@ interface HttpState<TResponse> {
 
 export function useHttp<TResponse = any, TBody = any>(
   url: string,
-  options: HttpOptions<TBody> = {},
+  baseOptions: HttpOptions<TBody> = {},
 ): HttpState<TResponse> {
   const [data, setData] = useState<TResponse | null>(null);
   const [error, setError] = useState<HttpError | null>(null);
@@ -31,56 +159,47 @@ export function useHttp<TResponse = any, TBody = any>(
 
   const sendRequest = useCallback(
     async (
-      overrideOptions?: Partial<HttpOptions>,
+      overrideOptions: Partial<HttpOptions<TBody>> = {},
     ): Promise<{ data: TResponse | null; error: HttpError | null }> => {
       setLoading(true);
       setError(null);
 
-      const finalOptions: HttpOptions = {
-        method: options.method || 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(options.headers || {}),
-          ...(overrideOptions?.headers || {}),
-        },
-        ...options,
-        ...overrideOptions,
+      // Get tokens from baseOptions or overrideOptions
+      const tokens = baseOptions.getTokens?.() || {};
+      const token = overrideOptions.token ?? baseOptions.token ?? tokens.token;
+      const refreshToken =
+        overrideOptions.refreshToken ?? baseOptions.refreshToken ?? tokens.refreshToken;
+
+      // Merge headers
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(baseOptions.headers ?? {}),
+        ...(overrideOptions.headers ?? {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       };
 
-      const payload = finalOptions.body ? JSON.stringify(finalOptions.body) : undefined;
+      const method = overrideOptions.method ?? baseOptions.method ?? 'GET';
+      const body = overrideOptions.body ?? baseOptions.body;
+      const payload = body ? JSON.stringify(body) : undefined;
 
-      console.log('🔼 Request:', {
-        url,
-        method: finalOptions.method,
-        headers: finalOptions.headers,
-        body: finalOptions.body,
-      });
+      const finalUrl = url;
+
+      console.log('🔼 Request:', { url: finalUrl, method, headers, body });
 
       try {
-        const res = await fetch(url, {
-          method: finalOptions.method,
-          headers: finalOptions.headers,
-          body: payload,
-        });
+        const response = await fetch(finalUrl, { method, headers, body: payload });
 
-        const contentType = res.headers.get('content-type') || '';
+        const contentType = response.headers.get('content-type') || '';
+        const isJSON = contentType.includes('application/json');
 
-        if (!res.ok) {
-          let message = 'Unknown error';
-          try {
-            if (contentType.includes('application/json')) {
-              const json = await res.json();
-              message = json.message || message;
-            } else {
-              message = await res.text();
-            }
-          } catch (e) {
-            message = res.statusText;
-          }
+        if (!response.ok) {
+          const errorMessage = isJSON
+            ? (await response.json())?.message || response.statusText
+            : await response.text();
 
           const errObj: HttpError = {
-            message,
-            statusCode: res.status,
+            message: errorMessage || 'Unknown error',
+            statusCode: response.status,
           };
 
           console.error('❌ Response Error:', errObj);
@@ -88,13 +207,14 @@ export function useHttp<TResponse = any, TBody = any>(
           return { data: null, error: errObj };
         }
 
-        const json = await res.json();
-        console.log('✅ Response:', json);
-        setData(json);
-        return { data: json, error: null };
+        const jsonData = await response.json();
+        console.log('✅ Response:', jsonData);
+
+        setData(jsonData);
+        return { data: jsonData, error: null };
       } catch (err: any) {
         const fallbackError: HttpError = {
-          message: err.message || 'Network error',
+          message: err?.message || 'Network error',
         };
         console.error('❌ Fetch Error:', fallbackError);
         setError(fallbackError);
@@ -103,14 +223,14 @@ export function useHttp<TResponse = any, TBody = any>(
         setLoading(false);
       }
     },
-    [url, options],
+    [url, baseOptions],
   );
 
   useEffect(() => {
-    if (options.auto) {
+    if (baseOptions.auto) {
       sendRequest();
     }
-  }, [sendRequest, options.auto]);
+  }, [sendRequest, baseOptions.auto]);
 
   return { data, error, loading, sendRequest };
 }

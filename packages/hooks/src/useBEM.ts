@@ -15,15 +15,15 @@ export const useBEM = (block: string, className?: string): BEM => {
 
     const mods = Array.isArray(modifiers) ? modifiers : [modifiers];
     const modifiedClasses = mods.filter(Boolean).map((mod) => `${baseClass}--${mod}`);
-    return [baseClass, ...modifiedClasses, className].filter(Boolean).join(' ');
+    return [baseClass, ...modifiedClasses].filter(Boolean).join(' ');
   };
 
   const getBlock = useCallback(
     (modifier?: Modifier, others?: string) => {
-      const otherClasses = others ? ` ${others}` : '';
-      return appendModifiers(block, modifier) + otherClasses;
+      const otherClasses = [others, className].filter(Boolean).join(' ');
+      return appendModifiers(block, modifier) + ` ${otherClasses}`;
     },
-    [block],
+    [block, className],
   );
 
   const getElement = useCallback(

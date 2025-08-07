@@ -1,34 +1,51 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-type User = {
-  id: string
-  name: string
-  email: string
+export interface User {
+  id: string;
+  email: string;
+  companyName: string;
 }
 
-type UserStore = {
-  user: User | null
-  setUser: (user: User) => void
-  logout: () => void
+interface UserState {
+  user?: User;
+  token?: string;
+  refreshToken?: string;
+  hasHydrated: boolean;
+  setUser: (user: User) => void;
+  login: (data: { token: string; refreshToken: string }) => void;
+  logout: () => void;
+  setHasHydrated: (hydrated: boolean) => void;
 }
 
-// export const useUserStore = create<UserStore>((set) => ({
-//   user: null,
-//   setUser: (user) => set({ user }),
-//   logout: () => set({ user: null }),
-// }))
-
-export const useUserStore = create<UserStore>()(
+export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
-      user: null,
+      user: undefined,
+      token: undefined,
+      refreshToken: undefined,
+      hasHydrated: false,
+
       setUser: (user) => set({ user }),
-      logout: () => set({ user: null }),
+      login: ({ token, refreshToken }) => set({ token, refreshToken }),
+      logout: () => {
+        document.cookie = 'token=; path=/; max-age=0';
+        set({ user: undefined, token: undefined, refreshToken: undefined });
+      },
+
+      setHasHydrated: (hydrated) => set({ hasHydrated: hydrated }),
     }),
     {
-      name: 'user-storage', // key in localStorage
-      partialize: (state) => ({ user: state.user }), // only persist the user
-    }
-  )
-)
+      name: 'user',
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        refreshToken: state.refreshToken,
+      }),
+      // ✅ this is the key: tells Zustand when it's finished restoring from storage
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+    },
+  ),
+);

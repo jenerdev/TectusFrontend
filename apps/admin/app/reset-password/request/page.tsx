@@ -1,10 +1,10 @@
 'use client';
 import { Button, Input, InputWrapper } from '@tectus/ui';
-import { useBEM, useForm, useHttp } from '@tectus/hooks';
+import { useBEM, useForm } from '@tectus/hooks';
 import './reset-password-page.scss';
 import { PageBanner, useGlobalAlert } from '@/app/components';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useApi } from '@/app/hooks';
 
 type ResetPasswordFormValues = {
   email: string;
@@ -16,9 +16,9 @@ export default function ResetPasswordPage() {
   const router = useRouter();
   const { showAlert } = useGlobalAlert();
 
-  // TODO: add based endpont on environment variables
-  const { loading, sendRequest } = useHttp<ResetPasswordPostResponse, ResetPasswordFormValues>(
-    'https://tectus-api-dev-ec5ef89bd7d4.herokuapp.com/api/go/user/sendPasswordResetEmail',
+
+  const { loading, sendRequest } = useApi<ResetPasswordPostResponse, ResetPasswordFormValues>(
+    `user/sendPasswordResetEmail`,
     {
       method: 'POST',
     },
@@ -39,7 +39,7 @@ export default function ResetPasswordPage() {
     });
 
     if(result.error) {
-      showAlert('Account with this email does not exist', 'danger', true);
+      showAlert('Account with this email does not exist', 'danger', false);
       return
     }
     router.push('/alert/reset-password');
@@ -63,7 +63,7 @@ export default function ResetPasswordPage() {
             })}
           />
         </InputWrapper>
-        <Button className={E('submit')} type="submit" disabled={loading}>
+        <Button className={E('submit')} type="submit" loading={loading}>
           Reset password
         </Button>
       </form>

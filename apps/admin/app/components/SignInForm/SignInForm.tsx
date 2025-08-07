@@ -48,7 +48,7 @@ export function SignInForm({ onSubmit, loading }: SigninFormProps) {
         />
       </InputWrapper>
 
-      <Button type="submit" className={E('submit')} disabled={loading}>
+      <Button type="submit" className={E('submit')} loading={loading}>
         Sign in
       </Button>
     </form>

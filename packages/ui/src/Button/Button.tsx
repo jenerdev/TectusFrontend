@@ -1,6 +1,7 @@
 import { useBEM } from '@tectus/hooks';
 import './Button.scss';
 import { useMemo } from 'react';
+import { Icon } from '../Icon';
 
 export interface ButtonProps {
   children: React.ReactNode;
@@ -9,6 +10,7 @@ export interface ButtonProps {
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
+  loading?: boolean;
 }
 
 export function Button({
@@ -18,19 +20,29 @@ export function Button({
   type = 'button',
   onClick,
   disabled = false,
+  loading = false,
 }: ButtonProps) {
-  const { B } = useBEM('button', className);
+  const { B, E } = useBEM('button', className);
 
   const modifiers = useMemo(() => {
     return [
-      variant,
-      ...(disabled ? ['disabled']: [])
+      variant, 
+      ...(disabled ? ['disabled'] : []), 
+      ...(loading ? ['loading'] : [])
     ];
-  }, [variant, disabled])
+  }, [variant, disabled, loading]);
 
   return (
     <button className={B(modifiers)} onClick={onClick} type={type} disabled={disabled}>
-      {children}
+      {loading && (
+        <div className={E('loading')}>
+          <Icon name="tsSpinnerFill" size="m" />
+        </div>
+      )}
+
+      <div className={E('content', modifiers)}>
+        {children}
+      </div>
     </button>
   );
 }

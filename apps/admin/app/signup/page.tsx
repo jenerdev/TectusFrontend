@@ -1,10 +1,11 @@
 'use client';
 import { Button, Input, InputWrapper } from '@tectus/ui';
 import { PageBanner, useGlobalAlert } from '../components';
-import { useBEM, useForm, useHttp } from '@tectus/hooks';
+import { useBEM, useForm } from '@tectus/hooks';
 import './signup-page.scss';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
+import { useApi } from '../hooks';
 
 type SignupFormValues = {
   email: string;
@@ -25,14 +26,16 @@ interface SignupPostResponse {
   role: string;
 }
 
+//TODO: create a global function/hook to handle all env variables
+const baseApiURL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function Signup() {
   const router = useRouter();
   const { B, E } = useBEM('signup-page');
   const { showAlert } = useGlobalAlert();
 
-  // TODO: add based endpont on environment variables
-  const { loading, sendRequest } = useHttp<SignupPostResponse, Omit<SignupFormValues, 'repeatPassword'>>(
-    'https://tectus-api-dev-ec5ef89bd7d4.herokuapp.com/api/go/user/register',
+  const { loading, sendRequest } = useApi<SignupPostResponse, Omit<SignupFormValues, 'repeatPassword'>>(
+    `user/register`,
     {
       method: 'POST',
     },
@@ -119,7 +122,7 @@ export default function Signup() {
             type="password"
           />
         </InputWrapper>
-        <Button type="submit" className={E('submit-button')} disabled={loading}>
+        <Button type="submit" className={E('submit-button')} loading={loading}>
           Sign up
         </Button>
       </form>
