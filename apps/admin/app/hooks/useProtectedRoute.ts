@@ -13,7 +13,7 @@ export function useProtectedRoute() {
     if (!hasHydrated) return;
 
     if (!token) {
-      router.replace('/login');
+      router.replace('/');
     }
   }, [hasHydrated, token]);
 }
