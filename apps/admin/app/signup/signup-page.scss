@@ -4,7 +4,7 @@
   min-height: 100vh;
 
   @extend %flex-center-column;
-  gap: 5rem;
+  gap: 2rem;
 
   &__form {
     @extend %flex-center-column;

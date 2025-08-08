@@ -19,7 +19,7 @@ export interface UIButtonProps {
 
 export function UiButton(props: UIButtonProps) {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const propsWithDefaults = {
     ...props,
