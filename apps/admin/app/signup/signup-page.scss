@@ -8,12 +8,8 @@
 
   &__form {
     @extend %flex-center-column;
-    gap: 1.5rem;
+    gap: 1rem;
     width: 100%;
-    max-width: 42rem;
-  }
-
-  &__submit-button {
-    margin-top: 5rem;
+    max-width: 22rem;
   }
 }

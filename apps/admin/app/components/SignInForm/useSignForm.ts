@@ -25,7 +25,7 @@ export function useSignInForm() {
     const { idToken: token, refreshToken, expiresIn } = loginResult.data || {};
 
     if (loginResult.error || !token || !refreshToken) {
-      showAlert('Login failed. Please check your credentials.', 'danger', true);
+      showAlert('Login failed. Please check your credentials.', 'error', true);
       return;
     }
 
@@ -35,7 +35,7 @@ export function useSignInForm() {
     });
 
     if (userResult.error || !userResult.data) {
-      showAlert('Error fetching user data, please contact support.', 'danger', true);
+      showAlert('Error fetching user data, please contact support.', 'error', true);
       return;
     }
 

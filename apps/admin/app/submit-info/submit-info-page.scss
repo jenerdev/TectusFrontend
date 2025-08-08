@@ -14,16 +14,13 @@
 
   &__form {
     @extend %flex-center-column;
-    gap: 1.5rem;
-    max-width: 42rem;
+    gap: 1rem;
+    max-width: 22rem;
     margin: auto;
   }
 
   // Override for PageBanner
   .page-banner {
     gap: 1rem;
-    &__title {
-      font-size: 3.5rem;
-    }
   }
 }

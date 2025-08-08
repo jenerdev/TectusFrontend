@@ -5,7 +5,7 @@ import { PageBanner } from '@/app/components';
 import { notFound } from 'next/navigation';
 import { ActionPageProps } from './types';
 import { actionPagesData } from './pages.data';
-import { AlertButton } from './components/AlertButton/AlertButton';
+import { AlertButton } from './components';
 
 export default async function ActionPage({ params }: ActionPageProps) {
   const { B } = useBEM('action-page');

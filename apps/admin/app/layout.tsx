@@ -4,6 +4,7 @@ import '@tectus/styles/globals.scss';
 import './main.scss';
 import { Inter } from 'next/font/google';
 import { GlobalAlert } from './components';
+import { ThemeProvider } from '@tectus/ui/ThemeProvider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -26,9 +27,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        {children}
-
-        <GlobalAlert />
+        <ThemeProvider>
+          {children}
+          <GlobalAlert />
+        </ThemeProvider>
       </body>
     </html>
   );

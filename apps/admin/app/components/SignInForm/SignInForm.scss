@@ -3,9 +3,9 @@
 .sign-in-form {
   @extend %flex-center-column;
   width: 100%;
-  max-width: 42rem;
+  max-width: 22rem;
 
-  gap: 1.5rem;
+  gap: 1rem;
 
   &__submit {
     margin-top: 5rem;

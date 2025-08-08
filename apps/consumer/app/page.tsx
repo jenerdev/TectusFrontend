@@ -1,5 +1,5 @@
 import Image, { type ImageProps } from "next/image";
-// import { Button } from "@tectus/ui/button";
+// import { UiButton } from "@tectus/ui/button";
 import styles from "./page.module.css";
 
 type Props = Omit<ImageProps, "src"> & {
@@ -63,9 +63,9 @@ export default function Home() {
             Read our consumer
           </a>
         </div>
-        {/* <Button appName="consumer" className={styles.secondary}>
+        {/* <UiButton appName="consumer" className={styles.secondary}>
           Open alert
-        </Button> */}
+        </UiButton> */}
       </main>
       <footer className={styles.footer}>
         <a

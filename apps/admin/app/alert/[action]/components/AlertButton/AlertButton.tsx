@@ -1,7 +1,8 @@
 'use client';
 
-import { Button } from '@tectus/ui';
+import { UiButton } from '@tectus/ui';
 import { useRouter } from 'next/navigation';
+import './AlertButton.scss';
 
 interface ActionButtonProps {
   label: string;
@@ -16,8 +17,8 @@ export function AlertButton({ label, navigateTo }: ActionButtonProps) {
   };
 
   return (
-    <Button onClick={handleClick}>
+    <UiButton onClick={handleClick} className='alert-button'>
       {label}
-    </Button>
+    </UiButton>
   );
 }

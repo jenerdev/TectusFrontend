@@ -8,13 +8,17 @@
   &__main {
     @extend %flex-center;
     align-items: stretch;
-    gap: 10rem;
+    gap: 3rem;
   }
 
   &__section {
-    width: 49vw;
-    max-width: 45rem;
+    width: 100%;
+    max-width: 22rem;
     @extend %flex-center;
+
+    @include respond-to(tablet-lg) {
+      width: 49vw;
+    }
 
     &--left {
       @include respond-to(tablet-lg) {
@@ -37,7 +41,7 @@
 
     &--left {
       @extend %flex-center;
-      gap: 2rem;
+      gap: 1rem;
 
       > p {
         display: none;
@@ -54,18 +58,17 @@
 
     &--right {
       @extend %flex-center-column;
-      gap: 5rem;
+      gap: 2rem;
     }
   }
 
   &__text {
     color: var(--text-secondary-color);
-    font-size: 2.1rem;
   }
 
   &__signin-button {
     @include respond-to(tablet-lg) {
-      display: none;
+      display: none !important;
     }
   }
 

@@ -1,5 +1,5 @@
 "use client";
-import { Button, Input } from '@tectus/ui';
+import { UiButton, UiTextField } from '@tectus/ui';
 import { PageBanner } from '../components';
 import { useBEM } from '@tectus/hooks';
 import './reset-password-page.scss';
@@ -21,11 +21,17 @@ export default function ResetPasswordPage() {
       />
 
       <form className={E('form')}>
-        <Input placeholder="Password" name="password" id="password" />
-        <Input placeholder="Repeat Password" name="repeat-password" id="repeat-password" />
+        <UiTextField
+          type='password'
+          placeholder="Password" 
+        />
+        <UiTextField
+          type='password'
+          placeholder="Repeat Password" 
+        />
       </form>
       
-      <Button onClick={handleSetPassword}>Set password</Button>
+      <UiButton onClick={handleSetPassword}>Set password</UiButton>
     </div>
   );
 }

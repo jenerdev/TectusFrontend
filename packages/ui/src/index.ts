@@ -1,6 +1,8 @@
-export * from './Button';
-export * from './Input';
-export * from './InputWrapper';
 export * from './AppLink';
-export * from './Alert';
 export * from './Icon';
+
+// MATERIAL UI COMPONENTS
+export * from './UiButton';
+export * from './UiTextField';
+export * from './UiTypography';
+export * from './UiAlert';

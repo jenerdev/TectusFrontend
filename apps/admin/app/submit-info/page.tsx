@@ -1,5 +1,5 @@
 "use client";
-import { Button, Input } from '@tectus/ui';
+import { UiButton, UiTextField } from '@tectus/ui';
 import { PageBanner } from '../components';
 import { useBEM } from '@tectus/hooks';
 import './submit-info-page.scss';
@@ -23,22 +23,47 @@ export default function SubmitInfo() {
       />
       <div className={E('form-scroll')}>
         <form className={E('form')}>
-          <Input placeholder="Company name" name="company-name" id="company-name" /> 
-          <Input placeholder="Company name" name="company-name" id="company-name" /> 
-          <Input placeholder="Company name" name="company-name" id="company-name" /> 
-          <Input placeholder="Company name" name="company-name" id="company-name" /> 
-          <Input placeholder="Company name" name="company-name" id="company-name" /> 
-          <Input placeholder="Company name" name="company-name" id="company-name" /> 
-          <Input placeholder="Company name" name="company-name" id="company-name" /> 
-          <Input placeholder="Company name" name="company-name" id="company-name" /> 
-          <Input placeholder="Company name" name="company-name" id="company-name" /> 
-          <Input placeholder="Company name" name="company-name" id="company-name" /> 
-          <Input placeholder="Company name" name="company-name" id="company-name" /> 
+          <UiTextField
+            placeholder="Company name"
+          />
+          <UiTextField
+            placeholder="Company name"
+          />
+          <UiTextField
+            placeholder="Company name"
+          />
+          <UiTextField
+            placeholder="Company name"
+          />
+          <UiTextField
+            placeholder="Company name"
+          />
+          <UiTextField
+            placeholder="Company name"
+          />
+          <UiTextField
+            placeholder="Company name"
+          />
+          <UiTextField
+            placeholder="Company name"
+          />
+          <UiTextField
+            placeholder="Company name"
+          />
+          <UiTextField
+            placeholder="Company name"
+          />
+          <UiTextField
+            placeholder="Company name"
+          />
+          <UiTextField
+            placeholder="Company name"
+          />
         </form>      
       </div>
 
       
-      <Button onClick={handleSubmit}>Submit Application</Button>
+      <UiButton onClick={handleSubmit}>Submit Application</UiButton>
     </div>
   );
 }

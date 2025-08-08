@@ -1,5 +1,5 @@
 'use client';
-import { Button, Input, InputWrapper } from '@tectus/ui';
+import { UiButton, UiTextField } from '@tectus/ui';
 import { PageBanner, useGlobalAlert } from '../components';
 import { useBEM, useForm } from '@tectus/hooks';
 import './signup-page.scss';
@@ -67,7 +67,7 @@ export default function Signup() {
       },
     });
     if(result.error){
-      showAlert(result.error.message, 'danger', false);
+      showAlert(result.error.message, 'error', false);
       return;
     }
     router.push('alert/verify-email')
@@ -90,41 +90,43 @@ export default function Signup() {
       />
 
       <form className={E('form')} onSubmit={handleSubmit(handleOnSubmit)}>
-        <InputWrapper helperText={errors.email} isError={!!errors.email}>
-          <Input
-            {...register('email', {
-              ...required('Email is required'),
-              ...email('Invalid email address'),
-            })}
-            type="email"
-            placeholder="Email"
-          />
-        </InputWrapper>
 
-        <InputWrapper helperText={errors.password} isError={!!errors.password}>
-          <Input
-            {...register('password', {
-              ...required('Password is required'),
-              ...minLength(8, 'Password must be at least 8 characters long'),
-            })}
-            placeholder="Password"
-            type="password"
-          />
-        </InputWrapper>
+        <UiTextField
+          placeholder="Email"
+          {...register('email', {
+            ...required('Email is required'),
+            ...email('Invalid email address'),
+          })}
+          type="email"
+          helperText={errors.email}
+          error={Boolean(errors.email)}
+        />
 
-        <InputWrapper helperText={passwordErrorMessage} isError={!!errors.repeatPassword || passwordNotMatch}>
-          <Input
-            {...register('repeatPassword', {
-              ...required('Password is required'),
-              ...minLength(8, 'Password must be at least 8 characters long'),
-            })}
-            placeholder="Repeat Password"
-            type="password"
-          />
-        </InputWrapper>
-        <Button type="submit" className={E('submit-button')} loading={loading}>
+        <UiTextField
+          placeholder="Password"
+          {...register('password', {
+            ...required('Password is required'),
+            ...minLength(8, 'Password must be at least 8 characters long'),
+          })}
+          type="password"
+          helperText={errors.password}
+          error={Boolean(errors.password)}
+        />
+
+        <UiTextField
+          placeholder="Repeat Password"
+          {...register('repeatPassword', {
+            ...required('Password is required'),
+            ...minLength(8, 'Password must be at least 8 characters long'),
+          })}
+          type="password"
+          helperText={passwordErrorMessage}
+          error={Boolean(errors.repeatPassword) || passwordNotMatch}
+        />
+
+        <UiButton type="submit" loading={loading} topSpacing={3}>
           Sign up
-        </Button>
+        </UiButton>
       </form>
     </div>
   );

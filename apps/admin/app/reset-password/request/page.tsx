@@ -1,5 +1,5 @@
 'use client';
-import { Button, Input, InputWrapper } from '@tectus/ui';
+import { UiButton, UiTextField } from '@tectus/ui';
 import { useBEM, useForm } from '@tectus/hooks';
 import './reset-password-page.scss';
 import { PageBanner, useGlobalAlert } from '@/app/components';
@@ -16,7 +16,6 @@ export default function ResetPasswordPage() {
   const router = useRouter();
   const { showAlert } = useGlobalAlert();
 
-
   const { loading, sendRequest } = useApi<ResetPasswordPostResponse, ResetPasswordFormValues>(
     `user/sendPasswordResetEmail`,
     {
@@ -24,7 +23,7 @@ export default function ResetPasswordPage() {
     },
   );
 
-  const { 
+  const {
     register,
     handleSubmit,
     validate: { required, email },
@@ -38,9 +37,9 @@ export default function ResetPasswordPage() {
       body: { email },
     });
 
-    if(result.error) {
-      showAlert('Account with this email does not exist', 'danger', false);
-      return
+    if (result.error) {
+      showAlert('Account with this email does not exist', 'error', false);
+      return;
     }
     router.push('/alert/reset-password');
   };
@@ -53,19 +52,18 @@ export default function ResetPasswordPage() {
       />
 
       <form className={E('form')} onSubmit={handleSubmit(handleOnSubmit)}>
-        <InputWrapper helperText={errors.email} isError={!!errors.email}>
-          <Input
-            placeholder="Email"
-            id="email"
-            {...register('email', {
-              ...required('Email is required'),
-              ...email('Invalid email address'),
-            })}
-          />
-        </InputWrapper>
-        <Button className={E('submit')} type="submit" loading={loading}>
+        <UiTextField
+          placeholder="Email"
+          {...register('email', {
+            ...required('Email is required'),
+            ...email('Invalid email address'),
+          })}
+          helperText={errors.email}
+          error={Boolean(errors.email)}
+        />
+        <UiButton className={E('submit')} type="submit" loading={loading}>
           Reset password
-        </Button>
+        </UiButton>
       </form>
     </div>
   );

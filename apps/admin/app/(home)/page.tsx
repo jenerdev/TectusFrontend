@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AppLink, Button } from '@tectus/ui';
+import { AppLink, UiButton, UiTypography } from '@tectus/ui';
 import { PageBanner, SignInForm, useSignInForm } from '../components';
 import { useBEM } from '@tectus/hooks';
 import { useRouter } from 'next/navigation';
@@ -23,7 +23,7 @@ export default function Home() {
       joinnow: () => setStep('signupType'),
       signin: () => router.push('/signin'),
       individual: () => router.push('/alert/individual-signup'),
-      company: () => router.push('/signup')
+      company: () => router.push('/signup'),
     };
 
     actions[action]?.();
@@ -31,21 +31,21 @@ export default function Home() {
 
   const renderInitialButtons = () => (
     <>
-      <Button onClick={() => handleButtonAction('signin')} className={E('signin-button')}>
+      <UiButton onClick={() => handleButtonAction('signin')} className={E('signin-button')}>
         Sign in
-      </Button>
-      <Button variant="outlined" onClick={() => handleButtonAction('joinnow')}>
+      </UiButton>
+      <UiButton variant="outlined" onClick={() => handleButtonAction('joinnow')}>
         Join now
-      </Button>
+      </UiButton>
     </>
   );
 
   const renderSignupTypeButtons = () => (
     <div className={E('buttons')}>
-      <Button onClick={() => handleButtonAction('individual')}>Individual</Button>
-      <Button variant="outlined" onClick={() => handleButtonAction('company')}>
+      <UiButton onClick={() => handleButtonAction('individual')}>Individual</UiButton>
+      <UiButton variant="outlined" onClick={() => handleButtonAction('company')}>
         Company
-      </Button>
+      </UiButton>
     </div>
   );
 
@@ -58,28 +58,29 @@ export default function Home() {
 
       <div className={E('main')}>
         <div className={E('section', 'left')}>
-
           <div className={E('content', 'left')}>
-            <p className={E('text')}>New to Tectus?</p>
+            <UiTypography variant="body1" className={E('text')}>
+              New to Tectus?
+            </UiTypography>
             {step === 'initial' && renderInitialButtons()}
             {step === 'signupType' && renderSignupTypeButtons()}
           </div>
-
         </div>
 
         {/* TODO: create reusable component for divider */}
         <div className={E('divider')}></div>
 
         <div className={E('section', 'right')}>
-
           <div className={E('content', 'right')}>
-            <p className={E('text')}>Already have an account?</p>
+            <UiTypography variant="body1" className={E('text')}>
+              Already have an account?
+            </UiTypography>
+
             <SignInForm onSubmit={handleSignIn} loading={loading} />
             <AppLink href="/reset-password/request" className={E('link')}>
               Forgot Password?
             </AppLink>
           </div>
-
         </div>
       </div>
     </div>

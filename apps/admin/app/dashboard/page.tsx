@@ -4,7 +4,7 @@ import { PageBanner } from '../components';
 import { useBEM } from '@tectus/hooks';
 import './dashboard-page.scss';
 import { useUserStore } from '@/store/userStore';
-import { Button } from '@tectus/ui';
+import { UiButton } from '@tectus/ui';
 import { useRouter } from 'next/navigation';
 import { useProtectedRoute } from '../hooks';
 
@@ -25,7 +25,7 @@ export default function Dashboard() {
         subtitle={`User: ${user?.email || ''}`}
       />
       <div className={E('content')}>
-        <Button onClick={handleLogout}>Logout</Button>
+        <UiButton onClick={handleLogout}>Logout</UiButton>
       </div>
     </div>
   );

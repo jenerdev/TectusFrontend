@@ -1,0 +1,16 @@
+@use '@tectus/styles/helpers' as *;
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.ui-button {
+  &__content--loading {
+    opacity: 0.025;
+  }
+}
