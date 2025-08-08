@@ -1,5 +1,7 @@
+"use client"
+
 import './UiButton.scss';
-import { Button, ButtonProps } from '@mui/material';
+import { Button, ButtonProps, useMediaQuery, useTheme } from '@mui/material';
 
 export interface UIButtonProps {
   variant?: ButtonProps['variant'];
@@ -16,12 +18,17 @@ export interface UIButtonProps {
 }
 
 export function UiButton(props: UIButtonProps) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const propsWithDefaults = {
     ...props,
     variant: props.variant || 'contained',
     type: props.type || 'button',
-    size: props.size || 'medium',
+    size: props.size || (isMobile ? "large" : "small"),
   }
+
+
 
   return (
      <Button {...propsWithDefaults} sx={{ mt: props.topSpacing }}>

@@ -1,6 +1,9 @@
+"use client";
+
 import * as React from 'react';
 import MuiTextField, { TextFieldProps } from '@mui/material/TextField';
-import { styled } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material';
 
 // export interface TextFieldProps extends Omit<MuiTextFieldProps, 'name'> {
 //   // Register function result from useForm
@@ -27,10 +30,13 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
   register,
   ...props
 }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const propsWithDefaults = {
     ...props,
     fullWidth: props.fullWidth || true,
-    size: props.size || 'small',
+    size: props.size || (isMobile ? "large" : "small"),
     type: props.type || 'text',
   };
   return (
