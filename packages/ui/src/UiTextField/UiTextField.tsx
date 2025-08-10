@@ -12,15 +12,15 @@ import { useMediaQuery } from '@mui/material';
 // }
 
 export interface UiTextFieldProps {
-  id?: TextFieldProps['id']; 
-  name?: TextFieldProps['name']; 
-  label?: TextFieldProps['label']; 
-  placeholder?: TextFieldProps['placeholder']; 
-  helperText?: TextFieldProps['helperText']; 
+  id?: string; 
+  name?: string; 
+  label?: string; 
+  placeholder?: string; 
+  helperText?: string; 
   type?: TextFieldProps['type'];
-  error?: TextFieldProps['error']; 
+  error?: boolean; 
   variant?: TextFieldProps['variant'];
-  fullWidth?: TextFieldProps['fullWidth'];
+  fullWidth?: boolean;
   size?: TextFieldProps['size'];
   // Register function result from useForm
   register?: ReturnType<any>; // generic fallback if you don't want to import your hook type

@@ -1,6 +1,6 @@
 'use client';
-import { UiButton, UiTextField } from '@tectus/ui';
-import { PageBanner, useGlobalAlert } from '../components';
+import { UiButton, UiTextField, useUiSnackbar } from '@tectus/ui';
+import { PageBanner, useSignInForm } from '../components';
 import { useBEM, useForm } from '@tectus/hooks';
 import './signup-page.scss';
 import { useRouter } from 'next/navigation';
@@ -32,24 +32,21 @@ const baseApiURL = process.env.NEXT_PUBLIC_API_URL;
 export default function Signup() {
   const router = useRouter();
   const { B, E } = useBEM('signup-page');
-  const { showAlert } = useGlobalAlert();
+  const { showSnackbar } = useUiSnackbar();
+  const { handleSignIn, loading: signInLoading } = useSignInForm();
 
-  const { loading, sendRequest } = useApi<SignupPostResponse, Omit<SignupFormValues, 'repeatPassword'>>(
-    `user/register`,
-    {
-      method: 'POST',
-    },
-  );
+  const { loading, sendRequest } = useApi<
+    SignupPostResponse,
+    Omit<SignupFormValues, 'repeatPassword'>
+  >(`user/register`, {
+    method: 'POST',
+  });
 
   const {
     values,
     register,
     handleSubmit,
-    validate: {
-      required,
-      email,
-      minLength,
-    },
+    validate: { required, email, minLength },
     errors,
   } = useForm<SignupFormValues>({
     email: '',
@@ -58,7 +55,7 @@ export default function Signup() {
   });
 
   const handleOnSubmit = async ({ email, password }: SignupFormValues) => {
-    if(passwordNotMatch) return;
+    if (passwordNotMatch) return;
     const result = await sendRequest({
       body: {
         countryCode: 'US',
@@ -66,11 +63,24 @@ export default function Signup() {
         email,
       },
     });
-    if(result.error){
-      showAlert(result.error.message, 'error', false);
+    if (result.error) {
+      showSnackbar(result.error.message, 'error', {
+        anchorOrigin: {
+          vertical: 'top',
+          horizontal: 'center',
+        },
+      });
+
       return;
     }
-    router.push('alert/verify-email')
+
+    await handleSignIn(
+      {
+        email,
+        password,
+      },
+      false,
+    );
   };
 
   const passwordNotMatch = useMemo(() => {
@@ -79,7 +89,7 @@ export default function Signup() {
 
   const passwordErrorMessage = useMemo(() => {
     if (errors.repeatPassword) return errors.repeatPassword;
-    return passwordNotMatch ? 'Passwords do not match': '';
+    return passwordNotMatch ? 'Passwords do not match' : '';
   }, [errors.repeatPassword, passwordNotMatch]);
 
   return (
@@ -90,12 +100,11 @@ export default function Signup() {
       />
 
       <form className={E('form')} onSubmit={handleSubmit(handleOnSubmit)}>
-
         <UiTextField
           placeholder="Email"
           {...register('email', {
-            ...required('Email is required'),
-            ...email('Invalid email address'),
+            ...required('Please enter your email.'),
+            ...email('Invalid email address.'),
           })}
           type="email"
           helperText={errors.email}
@@ -105,8 +114,8 @@ export default function Signup() {
         <UiTextField
           placeholder="Password"
           {...register('password', {
-            ...required('Password is required'),
-            ...minLength(8, 'Password must be at least 8 characters long'),
+            ...required('Please enter your password.'),
+            ...minLength(8, 'Password must be at least 8 characters long.'),
           })}
           type="password"
           helperText={errors.password}
@@ -116,15 +125,15 @@ export default function Signup() {
         <UiTextField
           placeholder="Repeat Password"
           {...register('repeatPassword', {
-            ...required('Password is required'),
-            ...minLength(8, 'Password must be at least 8 characters long'),
+            ...required('Please repeat your password.'),
+            ...minLength(8, 'Password must be at least 8 characters long.'),
           })}
           type="password"
           helperText={passwordErrorMessage}
           error={Boolean(errors.repeatPassword) || passwordNotMatch}
         />
 
-        <UiButton type="submit" loading={loading} topSpacing={3}>
+        <UiButton type="submit" loading={loading || signInLoading} topspacing={3}>
           Sign up
         </UiButton>
       </form>

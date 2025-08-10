@@ -1,13 +1,15 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { SigninFormValues, SigninPostResponse } from './SignInForm.types';
-import { useGlobalAlert } from '../GlobalAlert';
-import { User, useUserStore } from '@/store/userStore';
-import { useApi } from '@/app/hooks';
+import { User, useUserStore } from '@/store';
+import { useApi, useApiErrorMessage } from '@/app/hooks';
+import { useUiSnackbar } from '@tectus/ui';
+import { ApiErrorCode, apiErrorMessageMapping } from '@/app/constants';
 
 export function useSignInForm() {
   const router = useRouter();
-  const { showAlert } = useGlobalAlert();
+  const { showSnackbar } = useUiSnackbar();
+  const { getErrorMessage } = useApiErrorMessage();
 
   const { loading: loginLoading, sendRequest: loginRequest } = useApi<
     SigninPostResponse,
@@ -20,35 +22,71 @@ export function useSignInForm() {
     method: 'GET',
   });
 
-  const handleSignIn = async (values: SigninFormValues) => {
-    const loginResult = await loginRequest({ body: values });
-    const { idToken: token, refreshToken, expiresIn } = loginResult.data || {};
+  const { loading: verifyEmailLoading, sendRequest: verifyEmailRequest } = useApi<any>(
+    `user/sendVerificationEmail`,
+    {
+      method: 'POST',
+    },
+  );
 
+  const handleSignIn = async (values: SigninFormValues, verifyEmail = true) => {
+    const loginResult = await loginRequest({ body: values });
+    const {
+      idToken: token,
+      refreshToken,
+      expiresIn,
+      emailVerified = false,
+    } = loginResult.data || {};
     if (loginResult.error || !token || !refreshToken) {
-      showAlert('Login failed. Please check your credentials.', 'error', true);
+      const errorMessage = getErrorMessage(loginResult.error?.message as ApiErrorCode);
+
+      showSnackbar(errorMessage, 'error', {
+        anchorOrigin: {
+          vertical: 'top',
+          horizontal: 'center',
+        },
+      });
       return;
     }
-
     const userResult = await userRequest({
       token: token,
       refreshToken: refreshToken,
     });
-
     if (userResult.error || !userResult.data) {
-      showAlert('Error fetching user data, please contact support.', 'error', true);
+      const errorMessage = getErrorMessage(userResult.error?.message as ApiErrorCode);
+
+      showSnackbar(errorMessage, 'error', {
+        anchorOrigin: {
+          vertical: 'top',
+          horizontal: 'center',
+        },
+      });
+      return;
+    }
+    // Note: this cookie will be used for authentication in the middleware for route guarding
+    document.cookie = `token=${token}; path=/; max-age=${expiresIn}; secure; samesite=lax`;
+    useUserStore.getState().login({ token, refreshToken, emailVerified });
+    useUserStore.getState().setUser(userResult.data);
+
+    if (emailVerified) {
+      router.push('/dashboard');
       return;
     }
 
-    // Note: this cookie will be used for authentication in the middleware for route guarding
-    document.cookie = `token=${token}; path=/; max-age=${expiresIn}; secure; samesite=lax`;
+    // Note: send a request to verify email
+    if (verifyEmail) {
+      await verifyEmailRequest({
+        body: {
+          email: values.email,
+        },
+      });
+    }
 
-    useUserStore.getState().login({ token, refreshToken });
-    useUserStore.getState().setUser(userResult.data);
-    router.push('/dashboard');
+    router.push('alert/verify-email');
   };
 
   return {
     handleSignIn,
-    loading: loginLoading || userLoading,
+    loading: loginLoading || userLoading || verifyEmailLoading,
   };
 }

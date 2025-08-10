@@ -7,14 +7,14 @@ export interface UIButtonProps {
   variant?: ButtonProps['variant'];
   size?: ButtonProps['size'];
   children: ButtonProps['children'];
-  className?: ButtonProps['className'];
+  className?: string;
   onClick?: ButtonProps['onClick'];
   type?: ButtonProps['type'];
-  disabled?: ButtonProps['disabled'];
-  loading?: ButtonProps['loading'];
-  fullWidth?: ButtonProps['fullWidth'];
+  disabled?: boolean;
+  loading?: boolean;
+  fullWidth?: boolean;
 
-  topSpacing?: number;
+  topspacing?: number;
 }
 
 export function UiButton(props: UIButtonProps) {
@@ -27,11 +27,9 @@ export function UiButton(props: UIButtonProps) {
     type: props.type || 'button',
     size: props.size || (isMobile ? "large" : "small"),
   }
-
-
-
+  
   return (
-     <Button {...propsWithDefaults} sx={{ mt: props.topSpacing }}>
+     <Button {...propsWithDefaults} sx={{ mt: props.topspacing }}>
       {propsWithDefaults.children}
      </Button>
   );

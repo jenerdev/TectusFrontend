@@ -3,7 +3,7 @@ import { TypographyProps, Typography } from '@mui/material';
 export interface UiTypographyProps {
   variant?: TypographyProps['variant'];
   children: TypographyProps['children'];
-  className?: TypographyProps['className'];
+  className?: string;
 }
 
 export function UiTypography(props: UiTypographyProps) {

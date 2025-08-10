@@ -2,6 +2,7 @@
 
 .sign-in-form {
   @extend %flex-center-column;
+  align-items: flex-start;
   width: 100%;
   max-width: 22rem;
 

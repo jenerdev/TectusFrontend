@@ -3,9 +3,12 @@ import { useBEM, useForm } from '@tectus/hooks';
 import './SignInForm.scss';
 import { UiButton, UiTextField } from '@tectus/ui';
 import { SigninFormProps, SigninFormValues } from './SignInForm.types';
+import { UiSwitch } from '@tectus/ui/UiSwitch/UiSwitch';
+import { useState } from 'react';
 
 export function SignInForm({ onSubmit, loading }: SigninFormProps) {
   const { B, E } = useBEM('sign-in-form');
+  const [rememberMe, setRememberMe] = useState(false);
 
   const {
     register,
@@ -28,7 +31,7 @@ export function SignInForm({ onSubmit, loading }: SigninFormProps) {
       <UiTextField
         placeholder="Email"
         {...register('email', {
-          ...required('Email is required'),
+          ...required('Please enter your email.'),
           ...email('Invalid email address'),
         })}
         helperText={errors.email}
@@ -39,13 +42,15 @@ export function SignInForm({ onSubmit, loading }: SigninFormProps) {
         placeholder="Password"
         type="password"
         {...register('password', {
-          ...required('Password is required'),
+          ...required('Please enter your password.'),
         })}
         helperText={errors.password}
         error={Boolean(errors.password)}
       />
 
-      <UiButton type="submit" className={E('submit')} loading={loading} topSpacing={3} >
+      <UiSwitch checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} label='Remember me' />
+
+      <UiButton type="submit" className={E('submit')} loading={loading} topspacing={3} fullWidth>
         Sign in
       </UiButton>
     </form>

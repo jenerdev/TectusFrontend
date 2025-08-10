@@ -3,7 +3,7 @@
 import { PageBanner } from '../components';
 import { useBEM } from '@tectus/hooks';
 import './dashboard-page.scss';
-import { useUserStore } from '@/store/userStore';
+import { useUserStore } from '@/store';
 import { UiButton } from '@tectus/ui';
 import { useRouter } from 'next/navigation';
 import { useProtectedRoute } from '../hooks';

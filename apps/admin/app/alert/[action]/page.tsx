@@ -21,7 +21,7 @@ export default async function ActionPage({ params }: ActionPageProps) {
         subtitle={pageData.subtitle}
       />
 
-      <AlertButton label={pageData.button.text} navigateTo={pageData.button?.link} />
+      <AlertButton actionKey={action} label={pageData.button.text} navigateTo={pageData.button?.link} />
     </div>
   );
 }

@@ -14,7 +14,6 @@ export const actionPagesData: Record<PageKey, PageContent> = {
     subtitle: 'Please check your email for the verification link we sent you.',
     button: {
       text: 'Refresh',
-      link: '/submit-info',
     },
   },
   'reset-password': {

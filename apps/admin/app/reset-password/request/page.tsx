@@ -1,8 +1,8 @@
 'use client';
-import { UiButton, UiTextField } from '@tectus/ui';
+import { UiButton, UiTextField, useUiSnackbar } from '@tectus/ui';
 import { useBEM, useForm } from '@tectus/hooks';
 import './reset-password-page.scss';
-import { PageBanner, useGlobalAlert } from '@/app/components';
+import { PageBanner } from '@/app/components';
 import { useRouter } from 'next/navigation';
 import { useApi } from '@/app/hooks';
 
@@ -14,7 +14,7 @@ interface ResetPasswordPostResponse {}
 export default function ResetPasswordPage() {
   const { B, E } = useBEM('reset-password-page');
   const router = useRouter();
-  const { showAlert } = useGlobalAlert();
+  const { showSnackbar } = useUiSnackbar();
 
   const { loading, sendRequest } = useApi<ResetPasswordPostResponse, ResetPasswordFormValues>(
     `user/sendPasswordResetEmail`,
@@ -33,14 +33,21 @@ export default function ResetPasswordPage() {
   });
 
   const handleOnSubmit = async ({ email }: ResetPasswordFormValues) => {
-    const result = await sendRequest({
+    await sendRequest({
       body: { email },
     });
 
-    if (result.error) {
-      showAlert('Account with this email does not exist', 'error', false);
-      return;
-    }
+    // Note: for security reasons, we do not show specific error messages for email existence
+    // if (result.error) {
+    //   showSnackbar('Account with this email does not exist', 'error', {
+    //     anchorOrigin: {
+    //       vertical: 'top',
+    //       horizontal: 'center',
+    //     },
+    //   });
+    //   return;
+    // }
+
     router.push('/alert/reset-password');
   };
 
@@ -61,7 +68,7 @@ export default function ResetPasswordPage() {
           helperText={errors.email}
           error={Boolean(errors.email)}
         />
-        <UiButton className={E('submit')} type="submit" loading={loading} topSpacing={3}>
+        <UiButton className={E('submit')} type="submit" loading={loading} topspacing={3}>
           Reset password
         </UiButton>
       </form>

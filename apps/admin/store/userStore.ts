@@ -11,9 +11,10 @@ interface UserState {
   user?: User;
   token?: string;
   refreshToken?: string;
+  emailVerified: boolean;
   hasHydrated: boolean;
   setUser: (user: User) => void;
-  login: (data: { token: string; refreshToken: string }) => void;
+  login: (data: { token: string; refreshToken: string; emailVerified: boolean }) => void;
   logout: () => void;
   setHasHydrated: (hydrated: boolean) => void;
 }
@@ -25,9 +26,11 @@ export const useUserStore = create<UserState>()(
       token: undefined,
       refreshToken: undefined,
       hasHydrated: false,
+      emailVerified: false,
 
       setUser: (user) => set({ user }),
-      login: ({ token, refreshToken }) => set({ token, refreshToken }),
+      login: ({ token, refreshToken, emailVerified }) =>
+        set({ token, refreshToken, emailVerified }),
       logout: () => {
         document.cookie = 'token=; path=/; max-age=0';
         set({ user: undefined, token: undefined, refreshToken: undefined });
@@ -41,6 +44,7 @@ export const useUserStore = create<UserState>()(
         user: state.user,
         token: state.token,
         refreshToken: state.refreshToken,
+        emailVerified: state.emailVerified,
       }),
       // ✅ this is the key: tells Zustand when it's finished restoring from storage
       onRehydrateStorage: () => (state) => {

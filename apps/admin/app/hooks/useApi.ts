@@ -1,6 +1,6 @@
 'use client';
 
-import { useUserStore } from '@/store/userStore';
+import { useUserStore } from '@/store';
 import { HttpState, useHttp } from '@tectus/hooks';
 import { get } from 'http';
 import { useCallback } from 'react';

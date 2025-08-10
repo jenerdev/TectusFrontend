@@ -3,8 +3,9 @@ import type { Metadata } from "next";
 import '@tectus/styles/globals.scss';
 import './main.scss';
 import { Inter } from 'next/font/google';
-import { GlobalAlert } from './components';
 import { ThemeProvider } from '@tectus/ui/ThemeProvider';
+import { UiSnackbarProvider } from '@tectus/ui';
+
 
 const inter = Inter({
   subsets: ['latin'],
@@ -28,8 +29,9 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body>
         <ThemeProvider>
-          {children}
-          <GlobalAlert />
+          <UiSnackbarProvider>
+            {children}
+          </UiSnackbarProvider>
         </ThemeProvider>
       </body>
     </html>
