@@ -9,3 +9,4 @@ export * from './UiAlert';
 export * from './UiAlert';
 export * from './UiSnackbar';
 export * from './UiSwitch';
+export * from './UiStepper';

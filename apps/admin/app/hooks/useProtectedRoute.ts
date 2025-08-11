@@ -13,6 +13,6 @@ export function useProtectedRoute() {
   useEffect(() => {
     if (!hasHydrated) return;
     if (!token) router.replace('/');
-    if (token && !emailVerified) router.replace('/alert/verify-email');
+    if (token && !emailVerified) router.replace('/verify-email');
   }, [hasHydrated, token, emailVerified]);
 }

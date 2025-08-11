@@ -1,26 +1,40 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Define the routes that require authentication
-const protectedRoutes = ['/dashboard', '/settings', '/profile'];
+/**
+ * Routes that require authentication.
+ * Keep these in sync with `config.matcher` for performance.
+ */
+const protectedRoutes = ['/dashboard', '/verify-email'];
 
+/**
+ * Middleware to protect certain routes by requiring a valid auth token.
+ */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get('token')?.value;
+  const token = request.cookies.get('token')?.value ?? null;
 
-  const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
+  // Normalize trailing slash (e.g., "/dashboard/" → "/dashboard")
+  const normalizedPath =
+    pathname.endsWith('/') && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
 
-  // If trying to access a protected route and no token is present, redirect to login
-  if (isProtected && !token) {
+  const isProtectedRoute = protectedRoutes.some(
+    (route) => normalizedPath === route || normalizedPath.startsWith(`${route}/`),
+  );
+
+  // Redirect unauthenticated users
+  if (isProtectedRoute && !token) {
     const loginUrl = new URL('/', request.url);
-    loginUrl.searchParams.set('redirect', pathname); // Optional: add redirect back after login
+    loginUrl.searchParams.set('redirect', pathname); // Store intended destination
     return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
 }
 
-// Apply middleware to only specific paths
+/**
+ * Only apply middleware to protected paths for better performance.
+ */
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ['/dashboard/:path*', '/verify-email', '/profile/:path*'],
 };

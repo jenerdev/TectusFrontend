@@ -23,36 +23,11 @@ export function AlertButton({ actionKey, label, navigateTo }: ActionButtonProps)
       method: 'POST',
   });
 
-  // const actionMapper = (key: PageKey) => {
-  //   return {
-  //     'verify-email': () => {
-  //       alert('test');
-  //     },
-  //     'application-approved': () => {
-  //       alert('Application approved!');
-  //     },
-  //     'application-rejected': () => {
-  //       alert('Application rejected!');
-  //     },
-  //     'application-submitted': () => {
-  //       alert('Application submitted!');
-  //     },
-  //     'individual-signup': () => {
-  //       alert('Individual signup!');
-  //     },
-  //     'reset-password': () => {
-  //       alert('Reset password!');
-  //     }
-  //   }[key];
-  // }
-
   const handleClick = () => {
     if (navigateTo) {
       router.push(navigateTo);
       return;
     }
-    // actionMapper(actionKey)?.();
-
   };
 
   return (

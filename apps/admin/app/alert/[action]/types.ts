@@ -1,6 +1,5 @@
 export type PageKey =
   | 'individual-signup'
-  | 'verify-email'
   | 'reset-password'
   | 'application-submitted'
   | 'application-rejected'

@@ -1,19 +1,10 @@
 import React from 'react';
 import type { Metadata } from "next";
-import '@tectus/styles/globals.scss';
+// import '@tectus/styles/globals.scss';
 import './main.scss';
-import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@tectus/ui/ThemeProvider';
 import { UiSnackbarProvider } from '@tectus/ui';
 
-
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
-  style: ['normal', 'italic']
-});
 
 export const metadata: Metadata = {
   title: "Tectus GO",
@@ -26,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" >
       <body>
         <ThemeProvider>
           <UiSnackbarProvider>

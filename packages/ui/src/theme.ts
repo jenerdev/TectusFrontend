@@ -1,114 +1,57 @@
-// import { createTheme } from '@mui/material/styles';
-// import { background } from 'storybook/internal/theming';
-
-// const theme = createTheme({
-//   components: {
-//     MuiOutlinedInput: {
-//       styleOverrides: {
-//         root: {
-//           backgroundColor: '#fff', // white background
-//           '&.Mui-disabled': {
-//             backgroundColor: 'rgba(255,255,255,0.5)', // light gray for disabled
-//           },
-//         },
-//       },
-//     },
-//     MuiButton: {
-//       styleOverrides: {
-//         root: {
-//           '&.Mui-disabled': {
-//             backgroundColor: '#333333', // dark gray, still visible
-//             color: '#4d4d4d', // white text
-//             opacity: 1, // remove default faded look
-//           },
-//           '&.Mui-disabled .MuiButton-loadingIndicator': {
-//             color: '#fff', // still black when disabled
-//           },
-//         },
-//       },
-//     },
-//   },
-//   palette: {
-//     primary: {
-//       main: '#FED700', // gold/yellow
-//       contrastText: '#000000', // black text for readability
-//     },
-//   },
-// });
-
-// export default theme;
-
 import { createTheme } from '@mui/material/styles';
 
-const baseTheme = createTheme();
-
-const theme = createTheme(baseTheme, {
-  components: {
-    MuiOutlinedInput: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#fff',
-          '&.Mui-disabled': {
-            backgroundColor: 'rgba(255,255,255,0.5)',
-          },
-        },
-      },
+export const getDesignTokens = (mode: 'light' | 'dark') => ({
+  palette: {
+    mode,
+    primary: {
+      main: '#D4AF37', // Gold for both light and dark
+      contrastText: mode === 'light' ? '#000000' : '#ffffff',
     },
+    ...(mode === 'light'
+      ? {
+          secondary: {
+            main: '#9c27b0',
+          },
+          background: {
+            default: '#f5f5f5',
+            paper: '#ffffff',
+          },
+          text: {
+            primary: '#000000',
+            secondary: '#555555',
+          },
+        }
+      : {
+          secondary: {
+            main: '#ce93d8',
+          },
+          background: {
+            default: '#121212',
+            paper: '#1e1e1e',
+          },
+          text: {
+            primary: '#ffffff',
+            secondary: '#bbbbbb',
+          },
+        }),
+  },
+  components: {
     MuiButton: {
       styleOverrides: {
-        root: {
-          '&.Mui-disabled': {
-            backgroundColor: '#333333',
-            color: '#4d4d4d',
-            opacity: 1,
+        containedPrimary: {
+          backgroundColor: '#D4AF37',
+          color: mode === 'dark' ? '#333333' : '#000000',
+          '&:hover': {
+            backgroundColor: '#b48b2a', // Slightly darker gold on hover
           },
-          '&.Mui-disabled .MuiButton-loadingIndicator': {
-            color: '#fff',
-          },
-          '&.MuiButton-containedPrimary': {
-            backgroundColor: '#FED700',
-            color: '#000000',
-          },
-          '&.MuiButton-outlinedPrimary': {
-            borderColor: '#FED700',
-            color: '#FED700',
-          },
-          '&.MuiButton-textPrimary': {
-            color: '#FED700',
-          },
-        },
-      },
-    },
-    MuiSwitch: {
-      styleOverrides: {
-        switchBase: {
-          // This runs when switch is unchecked
-          '&:not(.Mui-checked) + .MuiSwitch-track': {
-            backgroundColor: '#9e9e9e',
-            opacity: 1,
-          },
-        },
-        track: {
-          // Ensure track shows the correct color when unchecked
-          opacity: 1,
-          backgroundColor: '#9e9e9e',
-        },
-      },
-    },
-    MuiFormControlLabel: {
-      styleOverrides: {
-        label: {
-          color: '#fff',
         },
       },
     },
   },
-  palette: {
-    primary: {
-      main: '#1976d2', // desktop default
-      contrastText: '#ffffff',
-    },
+  typography: {
+    fontFamily: `'Roboto', 'Helvetica', 'Arial', sans-serif`,
   },
 });
 
-export default theme;
+// Example usage: create a theme
+export const createAppTheme = (mode: 'light' | 'dark') => createTheme(getDesignTokens(mode));

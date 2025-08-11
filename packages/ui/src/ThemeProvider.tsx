@@ -1,12 +1,24 @@
 'use client';
 import * as React from 'react';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import { ThemeProvider as MuiThemeProvider, useColorScheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import theme from './theme';
+import { createAppTheme } from './theme';
+import { useEffect, useState } from 'react';
+import { useMediaQuery } from '@mui/material';
+
+
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const [mode, setMode] = useState<'light' | 'dark'>('light');
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const theme = createAppTheme(mode);
+
+  useEffect(() => {
+    setMode(prefersDarkMode ? 'dark' : 'light');
+  }, [prefersDarkMode]);
+
   return (
-    <MuiThemeProvider theme={theme}>
+    <MuiThemeProvider theme={theme} noSsr>
       <CssBaseline />
       {children}
     </MuiThemeProvider>

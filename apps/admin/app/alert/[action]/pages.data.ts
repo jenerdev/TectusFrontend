@@ -9,13 +9,6 @@ export const actionPagesData: Record<PageKey, PageContent> = {
       link: '/',
     },
   },
-  'verify-email': {
-    title: 'Verify your email',
-    subtitle: 'Please check your email for the verification link we sent you.',
-    button: {
-      text: 'Refresh',
-    },
-  },
   'reset-password': {
     title: 'Reset password',
     subtitle: 'Please check your email for the password reset link',

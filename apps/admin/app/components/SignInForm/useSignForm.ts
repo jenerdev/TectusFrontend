@@ -82,7 +82,7 @@ export function useSignInForm() {
       });
     }
 
-    router.push('alert/verify-email');
+    router.push('/verify-email');
   };
 
   return {
