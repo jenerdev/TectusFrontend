@@ -22,6 +22,9 @@ export interface UiTextFieldProps {
   variant?: TextFieldProps['variant'];
   fullWidth?: boolean;
   size?: TextFieldProps['size'];
+  value?: TextFieldProps['value'];
+  readonly?: boolean;
+  disabled?: boolean;
   // Register function result from useForm
   register?: ReturnType<any>; // generic fallback if you don't want to import your hook type
 }

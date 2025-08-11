@@ -65,7 +65,7 @@ export function useSignInForm() {
     }
     // Note: this cookie will be used for authentication in the middleware for route guarding
     document.cookie = `token=${token}; path=/; max-age=${expiresIn}; secure; samesite=lax`;
-    useUserStore.getState().login({ token, refreshToken, emailVerified });
+    useUserStore.getState().login({ token, refreshToken });
     useUserStore.getState().setUser(userResult.data);
 
     if (emailVerified) {
