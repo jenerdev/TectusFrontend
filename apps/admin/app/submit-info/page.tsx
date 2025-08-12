@@ -193,7 +193,7 @@ export default function SubmitInfo() {
               placeholder="Email"
               label="Email"
               value="jener.sigua31@gmail.com"
-              readonly
+              readOnly
             />
             <UiTextField placeholder="Full Name" label="Full Name" />
             <UiTextField placeholder="Phone Number" label="Phone Number" />
@@ -279,7 +279,7 @@ export default function SubmitInfo() {
               <UiTextField placeholder="Insurance Provider" label="Insurance Provider" />
               <UiSwitch label="If they have sub contractors are they covered by insurance?" />
 
-              <UiButton variant="outlined" startIcon="upload" fullWidth>
+              <UiButton variant="outlined" startIcon="UploadFile" fullWidth>
                 Upload Certificate of Insurance(s) (COI)
               </UiButton>
             </div>
@@ -289,7 +289,7 @@ export default function SubmitInfo() {
 
               <UiSwitch label="Is your company licensed?" />
 
-              <UiButton variant="outlined" startIcon="upload" fullWidth>
+              <UiButton variant="outlined" startIcon="UploadFileOutlined" fullWidth>
                 Upload License(s)
               </UiButton>
             </div>

@@ -16,7 +16,7 @@ export function PageBanner({ title, subtitle, hideLogo = false }: PageBannerProp
     <div className={B()}>
       {!hideLogo && (
         <div className={E('logo')}>
-          <Image src="/logo.png" alt="Logo" width={150} height={150} />
+          <Image src="/logo-tectus.png" alt="Logo" width={150} height={150} />
         </div>
       )}
       <UiTypography className={E('title')} variant="h4">

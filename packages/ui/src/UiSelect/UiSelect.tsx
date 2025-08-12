@@ -3,7 +3,7 @@
 import * as React from 'react'; 
 import './UiSelect.scss';
 import { useTheme } from '@mui/material/styles';
-import { FormControl, InputLabel, MenuItem, Select, useMediaQuery, SelectProps, MenuItemProps } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select, SelectProps, MenuItemProps } from '@mui/material';
 import { useBEM } from '@tectus/hooks';
 
 export interface UiSelectProps {
@@ -11,7 +11,7 @@ export interface UiSelectProps {
   label?: string;
   value?: SelectProps['value'];
   className?: string;
-  size: SelectProps['size'];
+  size?: SelectProps['size'];
   fullWidth?: boolean;
   options?: Array<MenuItemProps & { label: string }>;
   // Register function result from useForm
@@ -20,9 +20,7 @@ export interface UiSelectProps {
 
 export const UiSelect: React.FC<UiSelectProps> = ({ register, ...props }) => {
   const { B } = useBEM('ui-select');
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const size = props.size || (isMobile ? "medium" : "small");
+  const size = 'medium'; 
 
   return (
     <FormControl fullWidth={props.fullWidth} className={B(size)}>

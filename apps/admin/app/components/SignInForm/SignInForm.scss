@@ -5,6 +5,9 @@
   align-items: flex-start;
   width: 100%;
   max-width: 22rem;
-
   gap: 1rem;
+
+  @include respond-to(tablet-lg) {
+    min-width: 20rem;
+  }
 }
