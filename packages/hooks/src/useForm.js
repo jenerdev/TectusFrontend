@@ -5,7 +5,7 @@ exports.useForm = useForm;
 const react_1 = require("react");
 const validate = {
     required: (message) => ({
-        required: message || 'This field is required',
+        required: message || 'This field is required...',
     }),
     email: (message) => ({
         pattern: {
@@ -13,10 +13,28 @@ const validate = {
             message: message || 'Invalid email address',
         },
     }),
+    url: (url) => ({
+        pattern: {
+            value: /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/,
+            message: url || 'Invalid URL',
+        },
+    }),
     minLength: (length, message) => ({
         minLength: {
             value: 8,
             message: message || `Must be at least ${length} characters`,
+        },
+    }),
+    minValue: (value, message) => ({
+        minValue: {
+            value,
+            message: message || `Must be greater than or equal ${value}`,
+        },
+    }),
+    maxValue: (value, message) => ({
+        maxValue: {
+            value,
+            message: message || `Must be less than or equal ${value}`,
         },
     }),
 };
@@ -26,24 +44,36 @@ function useForm(initialValues) {
     const [touchedFields, setTouchedFields] = (0, react_1.useState)({});
     const [dirtyFields, setDirtyFields] = (0, react_1.useState)({});
     const [isSubmitting, setIsSubmitting] = (0, react_1.useState)(false);
+    const [isSubmitAttempted, setIsSubmitAttempted] = (0, react_1.useState)(false);
     const validations = (0, react_1.useRef)({});
     const initialRef = (0, react_1.useRef)(initialValues);
     const valuesRef = (0, react_1.useRef)(values);
     valuesRef.current = values;
     const validateField = (name, value) => {
         const rules = validations.current[name];
-        if (!rules)
+        if (!rules || rules.disabled)
             return null;
         if (rules.required) {
-            const message = typeof rules.required === 'string' ? rules.required : 'This field is required';
-            if (value === '' || value === undefined || value === false)
-                return message;
+            if (value === '' ||
+                value === undefined ||
+                value === false ||
+                value === null ||
+                (Array.isArray(value) && value.length === 0))
+                return rules.required;
         }
         if (rules.minLength) {
-            const { value: min, message } = typeof rules.minLength === 'object'
-                ? rules.minLength
-                : { value: rules.minLength, message: `Minimum length is ${rules.minLength}` };
+            const { value: min, message } = rules.minLength;
             if (typeof value === 'string' && value.length < min)
+                return message;
+        }
+        if (rules.minValue) {
+            const { value: min, message } = rules.minValue;
+            if (Number(value) < min)
+                return message;
+        }
+        if (rules.maxValue) {
+            const { value: max, message } = rules.maxValue;
+            if (Number(value) > max)
                 return message;
         }
         if (rules.pattern) {
@@ -68,12 +98,10 @@ function useForm(initialValues) {
         return {
             name,
             value: values[name],
-            onChange: (
-            // eslint-disable-next-line no-undef
-            e) => {
+            disabled: options?.disabled ?? false, // ✅ forward disabled prop
+            onChange: (e) => {
                 const target = e.target;
                 let val;
-                // eslint-disable-next-line no-undef
                 if (target instanceof HTMLInputElement && target.type === 'checkbox') {
                     val = target.checked;
                 }
@@ -96,6 +124,7 @@ function useForm(initialValues) {
     }, [values]);
     const handleSubmit = (callback) => async (e) => {
         e.preventDefault();
+        setIsSubmitAttempted(true);
         const newErrors = {};
         let hasError = false;
         for (const name in validations.current) {
@@ -126,12 +155,40 @@ function useForm(initialValues) {
             return { ...prev, [name]: value };
         });
     };
-    const reset = () => {
-        setValues(initialRef.current);
-        setErrors({});
-        setTouchedFields({});
-        setDirtyFields({});
-        setIsSubmitting(false);
+    const reset = (fieldName) => {
+        if (fieldName) {
+            const resetValue = initialRef.current[fieldName] ?? '';
+            setValues((prev) => ({
+                ...prev,
+                [fieldName]: resetValue,
+            }));
+            setErrors((prev) => {
+                const newErrors = { ...prev };
+                delete newErrors[fieldName];
+                return newErrors;
+            });
+            setTouchedFields((prev) => {
+                const newTouched = { ...prev };
+                delete newTouched[fieldName];
+                return newTouched;
+            });
+            setDirtyFields((prev) => {
+                const newDirty = { ...prev };
+                delete newDirty[fieldName];
+                return newDirty;
+            });
+        }
+        else {
+            setValues(Object.keys(initialRef.current).reduce((acc, key) => ({
+                ...acc,
+                [key]: initialRef.current[key] ?? '',
+            }), {}));
+            setErrors({});
+            setTouchedFields({});
+            setDirtyFields({});
+            setIsSubmitting(false);
+            setIsSubmitAttempted(false);
+        }
     };
     const setError = (name, message) => {
         setErrors((prev) => ({ ...prev, [name]: message }));
@@ -143,7 +200,17 @@ function useForm(initialValues) {
             return newErrors;
         });
     };
-    const isValid = Object.keys(errors).length === 0;
+    const isValid = (() => {
+        const regs = validations.current;
+        for (const key in regs) {
+            const k = key;
+            const value = values[k];
+            const error = validateField(k, value);
+            if (error)
+                return false;
+        }
+        return true;
+    })();
     const isDirty = Object.values(dirtyFields).some(Boolean);
     return {
         register,
@@ -160,5 +227,6 @@ function useForm(initialValues) {
         isDirty,
         isValid,
         validate,
+        isSubmitAttempted,
     };
 }

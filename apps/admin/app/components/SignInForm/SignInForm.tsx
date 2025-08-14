@@ -3,7 +3,7 @@ import { useBEM, useForm } from '@tectus/hooks';
 import './SignInForm.scss';
 import { UiButton, UiTextField } from '@tectus/ui';
 import { SigninFormProps, SigninFormValues } from './SignInForm.types';
-import { UiSwitch } from '@tectus/ui/UiSwitch/UiSwitch';
+import { UiSwitch } from '@tectus/ui';
 import { useState } from 'react';
 
 export function SignInForm({ onSubmit, loading }: SigninFormProps) {

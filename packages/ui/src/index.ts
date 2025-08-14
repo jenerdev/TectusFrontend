@@ -16,3 +16,4 @@ export * from './UiAutocomplete';
 export * from './UiIcon';
 export * from './UiModal';
 export * from './UiIconButton';
+export * from './UiCheckbox';

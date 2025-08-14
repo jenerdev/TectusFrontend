@@ -1,10 +1,8 @@
 'use client';
 import {
-  UiAutocomplete,
   UiButton,
   UiModal,
   UiSelect,
-  UiSwitch,
   UiTextField,
   UiTypography,
   useUiSnackbar,
@@ -13,7 +11,7 @@ import { PageBanner } from '../components';
 import { useBEM, useForm } from '@tectus/hooks';
 import './submit-info-page.scss';
 import { useRouter } from 'next/navigation';
-import { UiCheckbox } from '@tectus/ui/UiCheckbox/UiCheckbox';
+import { UiCheckbox } from '@tectus/ui';
 import { useUserStore } from '@/store';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { STATE_CITIES, VENDOR_SERVICES, VENDOR_VEHICLES } from '../constants';

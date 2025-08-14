@@ -1,6 +1,5 @@
 import { useBEM } from '@tectus/hooks';
 import './UiAlert.scss';
-
 import { Alert, AlertProps } from '@mui/material';
 
 export interface UiAlertProps {
