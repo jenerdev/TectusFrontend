@@ -14,7 +14,6 @@ export default function Signin() {
       <div className={E('main')}>
         <PageBanner
           title="Sign in to Tectus GO"
-          subtitle="Connecting security professionals and companies on-demand."
         />
         <SignInForm onSubmit={handleSignIn} loading={loading} />
       </div>

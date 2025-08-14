@@ -60,6 +60,7 @@ export default function ResetPasswordPage() {
 
       <form className={E('form')} onSubmit={handleSubmit(handleOnSubmit)}>
         <UiTextField
+          label='Email'
           placeholder="Email"
           {...register('email', {
             ...required('Email is required'),

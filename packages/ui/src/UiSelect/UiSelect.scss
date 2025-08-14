@@ -1,7 +1,6 @@
 .ui-select {
-  &--small {
-    > label:first-child {
-      //   transform: translate(14px, 9px) scale(1);
-    }
+  &__error-icon {
+    color: #c94343;
+    z-index: 1;
   }
 }

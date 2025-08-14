@@ -4,6 +4,7 @@ export interface UiTypographyProps {
   variant?: TypographyProps['variant'];
   children: TypographyProps['children'];
   className?: string;
+  fontWeight?: TypographyProps['fontWeight'];
 }
 
 export function UiTypography(props: UiTypographyProps) {

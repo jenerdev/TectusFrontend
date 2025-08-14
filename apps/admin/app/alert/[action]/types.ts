@@ -1,7 +1,6 @@
 export type PageKey =
   | 'individual-signup'
   | 'reset-password'
-  | 'application-submitted'
   | 'application-rejected'
   | 'application-approved';
 

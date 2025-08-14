@@ -96,11 +96,11 @@ export default function Signup() {
     <div className={B()}>
       <PageBanner
         title="Sign up for Tectus GO"
-        subtitle="Connecting security professionals and companies on-demand."
       />
 
       <form className={E('form')} onSubmit={handleSubmit(handleOnSubmit)}>
         <UiTextField
+          label="Email"
           placeholder="Email"
           {...register('email', {
             ...required('Please enter your email.'),
@@ -112,6 +112,7 @@ export default function Signup() {
         />
 
         <UiTextField
+          label="Password"
           placeholder="Password"
           {...register('password', {
             ...required('Please enter your password.'),
@@ -123,9 +124,10 @@ export default function Signup() {
         />
 
         <UiTextField
-          placeholder="Repeat Password"
+          label="Confirm Password"
+          placeholder="Confirm Password"
           {...register('repeatPassword', {
-            ...required('Please repeat your password.'),
+            ...required('Please confirm your password.'),
             ...minLength(8, 'Password must be at least 8 characters long.'),
           })}
           type="password"

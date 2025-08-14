@@ -12,6 +12,20 @@ type Step = 'initial' | 'signupType';
 
 type ButtonActionType = 'joinnow' | 'signin' | 'individual' | 'company';
 
+const bannerValuesMapping: Record<Step, {
+  title: string,
+  subTitle?: string
+}> = {
+  initial: {
+    title: 'Welcome to Tectus GO',
+    subTitle: 'Connecting security professionals and companies on-demand.'
+  },
+  signupType: {
+    title: 'Sign up for Tectus GO',
+    subTitle: 'Are you signing up as an individual or company?'
+  }
+};
+
 export default function Home() {
   const { B, E } = useBEM('home-page');
   const router = useRouter();
@@ -52,8 +66,8 @@ export default function Home() {
   return (
     <div className={B()}>
       <PageBanner
-        title="Welcome to Tectus GO"
-        subtitle="Connecting security professionals and <br/>companies on-demand."
+        title={bannerValuesMapping[step].title}
+        subtitle={bannerValuesMapping[step].subTitle}
       />
 
       <div className={E('main')}>

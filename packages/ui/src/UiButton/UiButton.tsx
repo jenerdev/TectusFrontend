@@ -2,10 +2,9 @@
 
 import './UiButton.scss';
 import { Button, ButtonProps } from '@mui/material';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { JSX } from 'react';
 import { UiIconProps } from '../UiIcon';
 import UiIcon from '../UiIcon/UiIcon';
+import { useBEM } from '@tectus/hooks';
 
 
 export interface UIButtonProps {
@@ -19,31 +18,44 @@ export interface UIButtonProps {
   loading?: boolean;
   fullWidth?: boolean;
   topspacing?: number;
-
-  // startIcon?: ButtonProps['startIcon'];
-  // temporary
   startIcon?: UiIconProps['name'];
 }
 
-export function UiButton(props: UIButtonProps) {
+export function UiButton({
+  variant = 'contained',
+  size = 'large',
+  children,
+  className,
+  onClick,
+  type = 'button',
+  disabled,
+  loading,
+  fullWidth,
+  topspacing = 0,
+  startIcon,
+}: UIButtonProps) {
 
-  const propsWithDefaults = {
-    ...props,
-    variant: props.variant || 'contained',
-    type: props.type || 'button',
-    size: props.size || 'large',
-  }
+  const { B } = useBEM('ui-button', className);
 
-  // TEMP
   const getStartIcon = (name?: UiIconProps['name']) => {
     if (!name) return null;
-
     return <UiIcon name={name} />;
   }
 
   return (
-     <Button {...propsWithDefaults} sx={{ mt: props.topspacing }} startIcon={getStartIcon(props.startIcon)}>
-      {propsWithDefaults.children}
+     <Button  
+        variant={variant}
+        size={size}
+        className={B()}
+        onClick={onClick}
+        type={type}
+        disabled={disabled}
+        loading={loading}
+        fullWidth={fullWidth}
+        sx={{ mt: topspacing }} 
+        startIcon={getStartIcon(startIcon)}
+    >
+      {children}
      </Button>
   );
 }

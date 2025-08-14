@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 
 type ValidationRule<T = unknown> = {
-  required?: boolean | string;
-  minLength?: number | { value: number; message: string };
+  required?: string;
+  minLength?: { value: number; message: string };
+  minValue?: { value: number; message: string };
+  maxValue?: { value: number; message: string };
   pattern?: RegExp | { value: RegExp; message: string };
   validate?: (value: T) => boolean | string;
+  disabled?: boolean;
 };
 
 type RegisterOptions<T = unknown> = ValidationRule<T>;
@@ -14,8 +17,8 @@ type FormErrors<T> = Partial<Record<keyof T, string>>;
 type FieldStates<T> = Partial<Record<keyof T, boolean>>;
 
 const validate = {
-  required: (message: string) => ({
-    required: message || 'This field is required',
+  required: (message?: string) => ({
+    required: message || 'This field is required...',
   }),
   email: (message: string) => ({
     pattern: {
@@ -23,10 +26,28 @@ const validate = {
       message: message || 'Invalid email address',
     },
   }),
+  url: (url: string) => ({
+    pattern: {
+      value: /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/,
+      message: url || 'Invalid URL',
+    },
+  }),
   minLength: (length: number, message: string) => ({
     minLength: {
       value: 8,
       message: message || `Must be at least ${length} characters`,
+    },
+  }),
+  minValue: (value: number, message: string) => ({
+    minValue: {
+      value,
+      message: message || `Must be greater than or equal ${value}`,
+    },
+  }),
+  maxValue: (value: number, message: string) => ({
+    maxValue: {
+      value,
+      message: message || `Must be less than or equal ${value}`,
     },
   }),
 };
@@ -37,6 +58,7 @@ export function useForm<T extends Record<string, unknown>>(initialValues: T) {
   const [touchedFields, setTouchedFields] = useState<FieldStates<T>>({});
   const [dirtyFields, setDirtyFields] = useState<FieldStates<T>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitAttempted, setIsSubmitAttempted] = useState(false);
 
   const validations = useRef<Partial<Record<keyof T, RegisterOptions<T[keyof T]>>>>({});
   const initialRef = useRef(initialValues);
@@ -45,21 +67,32 @@ export function useForm<T extends Record<string, unknown>>(initialValues: T) {
 
   const validateField = (name: keyof T, value: T[keyof T]): string | null => {
     const rules = validations.current[name];
-    if (!rules) return null;
+    if (!rules || rules.disabled) return null;
 
     if (rules.required) {
-      const message =
-        typeof rules.required === 'string' ? rules.required : 'This field is required';
-      if (value === '' || value === undefined || value === false) return message;
+      if (
+        value === '' ||
+        value === undefined ||
+        value === false ||
+        value === null ||
+        (Array.isArray(value) && value.length === 0)
+      )
+        return rules.required;
     }
 
     if (rules.minLength) {
-      const { value: min, message } =
-        typeof rules.minLength === 'object'
-          ? rules.minLength
-          : { value: rules.minLength, message: `Minimum length is ${rules.minLength}` };
-
+      const { value: min, message } = rules.minLength;
       if (typeof value === 'string' && value.length < min) return message;
+    }
+
+    if (rules.minValue) {
+      const { value: min, message } = rules.minValue;
+      if (Number(value) < min) return message;
+    }
+
+    if (rules.maxValue) {
+      const { value: max, message } = rules.maxValue;
+      if (Number(value) > max) return message;
     }
 
     if (rules.pattern) {
@@ -87,14 +120,13 @@ export function useForm<T extends Record<string, unknown>>(initialValues: T) {
       return {
         name,
         value: values[name],
+        disabled: options?.disabled ?? false, // ✅ forward disabled prop
         onChange: (
-          // eslint-disable-next-line no-undef
           e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
         ) => {
           const target = e.target;
           let val: unknown;
 
-          // eslint-disable-next-line no-undef
           if (target instanceof HTMLInputElement && target.type === 'checkbox') {
             val = target.checked;
           } else {
@@ -123,15 +155,16 @@ export function useForm<T extends Record<string, unknown>>(initialValues: T) {
   const handleSubmit =
     (callback: (data: T) => void | Promise<void>) => async (e: React.FormEvent) => {
       e.preventDefault();
+      setIsSubmitAttempted(true);
 
       const newErrors: FormErrors<T> = {};
       let hasError = false;
 
       for (const name in validations.current) {
         const val = valuesRef.current[name];
-        const error = validateField(name, val);
+        const error = validateField(name as keyof T, val);
         if (error) {
-          newErrors[name] = error;
+          newErrors[name as keyof T] = error;
           hasError = true;
         }
       }
@@ -160,12 +193,50 @@ export function useForm<T extends Record<string, unknown>>(initialValues: T) {
     });
   };
 
-  const reset = () => {
-    setValues(initialRef.current);
-    setErrors({});
-    setTouchedFields({});
-    setDirtyFields({});
-    setIsSubmitting(false);
+  const reset = (fieldName?: keyof T) => {
+    if (fieldName) {
+      const resetValue =
+        (initialRef.current[fieldName] as T[keyof T]) ?? ('' as unknown as T[keyof T]);
+
+      setValues((prev) => ({
+        ...prev,
+        [fieldName]: resetValue,
+      }));
+
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldName];
+        return newErrors;
+      });
+
+      setTouchedFields((prev) => {
+        const newTouched = { ...prev };
+        delete newTouched[fieldName];
+        return newTouched;
+      });
+
+      setDirtyFields((prev) => {
+        const newDirty = { ...prev };
+        delete newDirty[fieldName];
+        return newDirty;
+      });
+    } else {
+      setValues(
+        Object.keys(initialRef.current).reduce(
+          (acc, key) => ({
+            ...acc,
+            [key]:
+              (initialRef.current[key as keyof T] as T[keyof T]) ?? ('' as unknown as T[keyof T]),
+          }),
+          {} as T,
+        ),
+      );
+      setErrors({});
+      setTouchedFields({});
+      setDirtyFields({});
+      setIsSubmitting(false);
+      setIsSubmitAttempted(false);
+    }
   };
 
   const setError = (name: keyof T, message: string) => {
@@ -180,7 +251,17 @@ export function useForm<T extends Record<string, unknown>>(initialValues: T) {
     });
   };
 
-  const isValid = Object.keys(errors).length === 0;
+  const isValid = (() => {
+    const regs = validations.current as Partial<Record<string, RegisterOptions<T[keyof T]>>>;
+    for (const key in regs) {
+      const k = key as keyof T;
+      const value = values[k];
+      const error = validateField(k, value);
+      if (error) return false;
+    }
+    return true;
+  })();
+
   const isDirty = Object.values(dirtyFields).some(Boolean);
 
   return {
@@ -198,5 +279,6 @@ export function useForm<T extends Record<string, unknown>>(initialValues: T) {
     isDirty,
     isValid,
     validate,
+    isSubmitAttempted,
   };
 }

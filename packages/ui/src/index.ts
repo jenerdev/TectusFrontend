@@ -1,5 +1,6 @@
 export * from './AppLink';
-export * from './Icon';
+
+export * from './UiFileUpload';
 
 // MATERIAL UI COMPONENTS WRAPPER
 export * from './UiButton';
@@ -13,3 +14,5 @@ export * from './UiSwitch';
 export * from './UiStepper';
 export * from './UiAutocomplete';
 export * from './UiIcon';
+export * from './UiModal';
+export * from './UiIconButton';

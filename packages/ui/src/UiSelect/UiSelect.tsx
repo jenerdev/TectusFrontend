@@ -1,10 +1,22 @@
 'use client';
 
-import * as React from 'react'; 
+import * as React from 'react';
 import './UiSelect.scss';
-import { useTheme } from '@mui/material/styles';
-import { FormControl, InputLabel, MenuItem, Select, SelectProps, MenuItemProps } from '@mui/material';
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectProps,
+  MenuItemProps,
+  FormHelperText,
+  Checkbox,
+  ListItemText,
+  InputAdornment,
+  FilledInput,
+} from '@mui/material';
 import { useBEM } from '@tectus/hooks';
+import UiIcon from '../UiIcon/UiIcon';
 
 export interface UiSelectProps {
   id?: string;
@@ -13,33 +25,82 @@ export interface UiSelectProps {
   className?: string;
   size?: SelectProps['size'];
   fullWidth?: boolean;
+  helperText?: string;
+  error?: boolean;
+  disabled?: boolean;
+  multiple?: SelectProps['multiple'];
   options?: Array<MenuItemProps & { label: string }>;
-  // Register function result from useForm
-  register?: ReturnType<any>; // generic fallback if you don't want to import your hook type
+  register?: ReturnType<any>; // props from useForm's register
+  onSelect?: SelectProps['onSelect'];
+  showCheckboxOption?: boolean;
+  variant?: SelectProps['variant'];
 }
 
-export const UiSelect: React.FC<UiSelectProps> = ({ register, ...props }) => {
-  const { B } = useBEM('ui-select');
-  const size = 'medium'; 
+export const UiSelect: React.FC<UiSelectProps> = ({
+  id,
+  label,
+  value,
+  className,
+  size = 'medium',
+  fullWidth,
+  helperText,
+  error,
+  disabled,
+  multiple,
+  options,
+  register,
+  onSelect,
+  showCheckboxOption = false,
+  variant = 'filled',
+}) => {
+  const { B, E } = useBEM('ui-select');
+
+  const finalValue = register?.value ?? value ?? '';
 
   return (
-    <FormControl fullWidth={props.fullWidth} className={B(size)}>
-      {props.label && <InputLabel id={props.id}>{props.label}</InputLabel>}
+    <FormControl fullWidth={fullWidth} className={B(size)} error={error} variant={variant}>
+      {label && <InputLabel id={`${id}-label`}>{label}</InputLabel>}
+
       <Select
-        labelId={props.id}
-        id={props.id}
-        value={props.value}
-        label={props.label} 
-        className={props.className}
+        labelId={`${id}-label`}
+        id={id}
+        name={register?.name}
+        value={finalValue}
+        onChange={register?.onChange}
+        onBlur={register?.onBlur}
+        label={label}
+        className={className}
         size={size}
-        {...(register || {})}
+        error={error}
+        disabled={disabled}
+        onSelect={onSelect}
+        multiple={multiple}
+        renderValue={(selected) => {
+          if (Array.isArray(selected)) return selected.join(', ');
+          return selected;
+        }}
+        input={
+          <FilledInput
+            endAdornment={
+              error ? (
+                <InputAdornment position="end">
+                  <UiIcon name="Error" className={E('error-icon')}/>
+                </InputAdornment>
+              ) : null
+            }
+          />
+        }
       >
-        {props.options?.map((option) => (
+        {options?.map((option) => (
           <MenuItem key={option.value as string} value={option.value}>
-            {option.label}
+            {multiple && showCheckboxOption && (
+              <Checkbox checked={finalValue.includes(option.value)} />
+            )}
+            <ListItemText primary={option.label} />
           </MenuItem>
         ))}
       </Select>
+      {helperText && <FormHelperText>{helperText}</FormHelperText>}
     </FormControl>
   );
 };

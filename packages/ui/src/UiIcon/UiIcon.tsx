@@ -6,6 +6,7 @@ import { SvgIconProps } from '@mui/material';
 
 export interface UiIconProps extends SvgIconProps {
   name: keyof typeof MuiIcons; // Only valid icon names from MUI icons
+  className?: string;
 }
 
 const UiIcon: React.FC<UiIconProps> = ({ name, ...props }) => {
@@ -16,7 +17,7 @@ const UiIcon: React.FC<UiIconProps> = ({ name, ...props }) => {
     return null;
   }
 
-  return <IconComponent {...props} />;
+  return <IconComponent {...props} sx={{ color: props.color }} />;
 };
 
 export default UiIcon;

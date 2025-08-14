@@ -6,6 +6,8 @@ export interface User {
   email: string;
   companyName: string;
   emailVerified: boolean;
+
+  isApproved?: boolean;
 }
 
 interface UserState {

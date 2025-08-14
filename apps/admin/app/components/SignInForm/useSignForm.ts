@@ -4,7 +4,7 @@ import { SigninFormValues, SigninPostResponse } from './SignInForm.types';
 import { User, useUserStore } from '@/store';
 import { useApi, useApiErrorMessage } from '@/app/hooks';
 import { useUiSnackbar } from '@tectus/ui';
-import { ApiErrorCode, apiErrorMessageMapping } from '@/app/constants';
+import { ApiErrorCode } from '@/app/constants';
 
 export function useSignInForm() {
   const router = useRouter();
@@ -69,7 +69,19 @@ export function useSignInForm() {
     useUserStore.getState().setUser(userResult.data);
 
     if (emailVerified) {
-      router.push('/dashboard');
+      const { isApproved } = userResult.data ?? {};
+
+      if (isApproved === undefined) {
+        // Vendor hasn't submitted application yet
+        router.push('/submit-info');
+      } else if (isApproved === false) {
+        // Vendor is waiting for approval
+        router.push('/application-submitted');
+      } else {
+        // Vendor application approved
+        router.push('/dashboard');
+      }
+
       return;
     }
 

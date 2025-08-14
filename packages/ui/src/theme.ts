@@ -41,6 +41,64 @@ export const getDesignTokens = (mode: 'light' | 'dark') => ({
             backgroundColor: '#b48b2a',
           },
         },
+        outlined: {
+          backgroundColor: '#222222',
+          borderColor: '#D4AF37',
+          borderWidth: '2px',
+        },
+      },
+    },
+    MuiFormHelperText: {
+      styleOverrides: {
+        root: {
+          position: 'absolute' as const,
+          top: '100%',
+        },
+      },
+    },
+    MuiFilledInput: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#e0e0e0',
+          color: '#49454F',
+
+          '&.Mui-focused': {
+            backgroundColor: '#e0e0e0',
+            color: '#49454F',
+          },
+          '&:hover': {
+            backgroundColor: '#e0e0e0',
+            color: '#49454F',
+          },
+          '& input:-webkit-autofill': {
+            boxShadow: `0 0 0 100px #ffffff inset`,
+            WebkitTextFillColor: '#49454F',
+            transition: 'background-color 5000s ease-in-out 0s',
+            caretColor: '#49454F',
+          },
+
+          '&.Mui-disabled': {
+            backgroundColor: '#333',
+            color: '#fff',
+            WebkitTextFillColor: '#fff',
+            caretColor: '#fff',
+          },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: '#49454F',
+
+          '&.Mui-focused': {
+            color: '#49454F', // keep same color on focus
+          },
+
+          '&.Mui-disabled': {
+            color: '#49454F', // disabled label color
+          },
+        },
       },
     },
     MuiCssBaseline: {

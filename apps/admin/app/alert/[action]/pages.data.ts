@@ -17,14 +17,6 @@ export const actionPagesData: Record<PageKey, PageContent> = {
       link: '/reset-password',
     },
   },
-  'application-submitted': {
-    title: 'Application submitted',
-    subtitle: 'Thanks for submitting your application. You’ll be notified once reviewed.',
-    button: {
-      text: 'Refresh',
-      link: '/alert/application-approved',
-    },
-  },
   'application-rejected': {
     title: 'Application rejected',
     subtitle: 'We’re sorry to inform you that your application has been rejected.',

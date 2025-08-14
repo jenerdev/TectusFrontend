@@ -9,7 +9,7 @@ import { useMediaQuery } from '@mui/material';
 
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [mode, setMode] = useState<'light' | 'dark'>('light');
+  const [mode, setMode] = useState<'light' | 'dark'>('dark');
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const theme = createAppTheme(mode);
 

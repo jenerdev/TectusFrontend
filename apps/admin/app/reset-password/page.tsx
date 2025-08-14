@@ -218,16 +218,19 @@ function ResetPasswordForm() {
   return (
     <form className={E("form")} onSubmit={handleSubmit(handleOnSubmit)}>
       <UiTextField
+        label="Password"
+        placeholder="Password"
         {...register("password", {
           ...required("Password is required"),
           ...minLength(8, "Password must be at least 8 characters long"),
         })}
         helperText={errors.password}
         error={Boolean(errors.password)}
-        type="password"
-        placeholder="Password"
+        type="password" 
       />
       <UiTextField
+        label="Repeat Password"
+        placeholder="Repeat Password"
         {...register("repeatPassword", {
           ...required("Repeat Password is required"),
           ...minLength(
@@ -241,7 +244,6 @@ function ResetPasswordForm() {
           (bothFilled && !passwordsMatch)
         }
         type="password"
-        placeholder="Repeat Password"
       />
 
       <UiButton type="submit" topspacing={4} loading={loading}>
@@ -257,7 +259,7 @@ export default function ResetPasswordPage() {
   return (
     <div className={B()}>
       <PageBanner
-        title="Reset password"
+        title="Set new password"
         subtitle="Please enter your new password."
       />
 

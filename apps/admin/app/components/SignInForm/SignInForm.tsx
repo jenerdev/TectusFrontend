@@ -21,7 +21,6 @@ export function SignInForm({ onSubmit, loading }: SigninFormProps) {
   });
 
   const onSubmitInternal = async (values: SigninFormValues) => {
-    console.log('Form submitted with values:', values);
     onSubmit?.(values);
   };
 
@@ -29,7 +28,7 @@ export function SignInForm({ onSubmit, loading }: SigninFormProps) {
     <form className={B()} onSubmit={handleSubmit(onSubmitInternal)}>
 
       <UiTextField
-        placeholder="Email"
+        label="Email"
         {...register('email', {
           ...required('Please enter your email.'),
           ...email('Invalid email address'),
@@ -39,7 +38,7 @@ export function SignInForm({ onSubmit, loading }: SigninFormProps) {
       />
 
       <UiTextField
-        placeholder="Password"
+        label="Password"
         type="password"
         {...register('password', {
           ...required('Please enter your password.'),
@@ -50,7 +49,7 @@ export function SignInForm({ onSubmit, loading }: SigninFormProps) {
 
       <UiSwitch checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} label='Remember me' />
 
-      <UiButton type="submit" className={E('submit')} loading={loading} topspacing={3} fullWidth>
+      <UiButton type="submit" className={E('submit')} loading={loading}>
         Sign in
       </UiButton>
     </form>

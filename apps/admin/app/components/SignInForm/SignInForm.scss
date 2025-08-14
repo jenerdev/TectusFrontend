@@ -3,11 +3,10 @@
 .sign-in-form {
   @extend %flex-center-column;
   align-items: flex-start;
-  width: 100%;
-  max-width: 22rem;
-  gap: 1rem;
+  width: 17.5rem;
+  gap: 1.5rem;
 
-  @include respond-to(tablet-lg) {
-    min-width: 20rem;
+  &__submit {
+    align-self: center;
   }
 }

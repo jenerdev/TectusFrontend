@@ -2,314 +2,536 @@
 import {
   UiAutocomplete,
   UiButton,
+  UiModal,
   UiSelect,
   UiSwitch,
   UiTextField,
   UiTypography,
+  useUiSnackbar,
 } from '@tectus/ui';
 import { PageBanner } from '../components';
-import { useBEM } from '@tectus/hooks';
+import { useBEM, useForm } from '@tectus/hooks';
 import './submit-info-page.scss';
 import { useRouter } from 'next/navigation';
 import { UiCheckbox } from '@tectus/ui/UiCheckbox/UiCheckbox';
-// import { useCallback, useState } from 'react';
+import { useUserStore } from '@/store';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { STATE_CITIES, VENDOR_SERVICES, VENDOR_VEHICLES } from '../constants';
+import { FileAttachment, UiFileUpload } from '@tectus/ui';
 
-const states = {
-  AL: ['Birmingham', 'Montgomery', 'Mobile', 'Huntsville', 'Tuscaloosa'],
-  AK: ['Anchorage', 'Fairbanks', 'Juneau'],
-  AZ: ['Phoenix', 'Tucson', 'Mesa', 'Chandler', 'Scottsdale', 'Glendale', 'Gilbert', 'Tempe'],
-  AR: ['Little Rock', 'Fort Smith', 'Fayetteville', 'Springdale'],
-  CA: [
-    'Los Angeles',
-    'San Diego',
-    'San Jose',
-    'San Francisco',
-    'Fresno',
-    'Sacramento',
-    'Long Beach',
-    'Oakland',
-    'Bakersfield',
-    'Anaheim',
-    'Riverside',
-    'Stockton',
-    'Irvine',
-    'Chula Vista',
-  ],
-  CO: ['Denver', 'Colorado Springs', 'Aurora', 'Fort Collins', 'Lakewood', 'Aspen'],
-  CT: ['Bridgeport', 'New Haven', 'Stamford', 'Hartford', 'Waterbury'],
-  DE: ['Wilmington', 'Dover'],
-  FL: [
-    'Jacksonville',
-    'Miami',
-    'Tampa',
-    'Orlando',
-    'St. Petersburg',
-    'Hialeah',
-    'Tallahassee',
-    'Fort Lauderdale',
-  ],
-  GA: ['Atlanta', 'Augusta', 'Columbus', 'Macon', 'Savannah'],
-  HI: ['Honolulu', 'Hilo'],
-  ID: ['Boise', 'Meridian', 'Nampa', 'Idaho Falls'],
-  IL: ['Chicago', 'Aurora', 'Naperville', 'Joliet', 'Rockford'],
-  IN: ['Indianapolis', 'Fort Wayne', 'Evansville', 'South Bend'],
-  IA: ['Des Moines', 'Cedar Rapids', 'Davenport', 'Sioux City'],
-  KS: ['Wichita', 'Overland Park', 'Kansas City', 'Topeka', 'Olathe'],
-  KY: ['Louisville', 'Lexington', 'Bowling Green'],
-  LA: ['New Orleans', 'Baton Rouge', 'Shreveport', 'Lafayette'],
-  ME: ['Portland', 'Lewiston', 'Bangor'],
-  MD: ['Baltimore', 'Columbia', 'Germantown', 'Silver Spring'],
-  MA: ['Boston', 'Worcester', 'Springfield', 'Cambridge'],
-  MI: ['Detroit', 'Grand Rapids', 'Warren', 'Ann Arbor', 'Lansing'],
-  MN: ['Minneapolis', 'St. Paul', 'Rochester', 'Duluth'],
-  MS: ['Jackson', 'Gulfport', 'Southaven'],
-  MO: ['Kansas City', 'St. Louis', 'Springfield', 'Columbia', 'Independence'],
-  MT: ['Billings', 'Missoula', 'Great Falls', 'Bozeman'],
-  NE: ['Omaha', 'Lincoln', 'Bellevue', 'Grand Island'],
-  NV: ['Las Vegas', 'Henderson', 'Reno', 'North Las Vegas'],
-  NH: ['Manchester', 'Nashua', 'Concord'],
-  NJ: ['Newark', 'Jersey City', 'Paterson', 'Elizabeth'],
-  NM: ['Albuquerque', 'Las Cruces', 'Rio Rancho', 'Santa Fe'],
-  NY: ['New York City', 'Buffalo', 'Rochester', 'Yonkers', 'Syracuse', 'Albany'],
-  NC: ['Charlotte', 'Raleigh', 'Greensboro', 'Durham', 'Winston-Salem'],
-  ND: ['Fargo', 'Bismarck', 'Grand Forks'],
-  OH: ['Columbus', 'Cleveland', 'Cincinnati', 'Toledo', 'Akron', 'Dayton'],
-  OK: ['Oklahoma City', 'Tulsa', 'Norman', 'Broken Arrow'],
-  OR: ['Portland', 'Eugene', 'Salem', 'Gresham'],
-  PA: ['Philadelphia', 'Pittsburgh', 'Allentown', 'Erie'],
-  RI: ['Providence', 'Warwick', 'Cranston'],
-  SC: ['Charleston', 'Columbia', 'North Charleston', 'Greenville'],
-  SD: ['Sioux Falls', 'Rapid City'],
-  TN: ['Nashville', 'Memphis', 'Knoxville', 'Chattanooga'],
-  TX: [
-    'Houston',
-    'San Antonio',
-    'Dallas',
-    'Austin',
-    'Fort Worth',
-    'El Paso',
-    'Arlington',
-    'Corpus Christi',
-    'Plano',
-    'Lubbock',
-  ],
-  UT: ['Salt Lake City', 'West Valley City', 'Provo', 'West Jordan'],
-  VT: ['Burlington', 'South Burlington'],
-  VA: ['Virginia Beach', 'Norfolk', 'Chesapeake', 'Richmond'],
-  WA: ['Seattle', 'Spokane', 'Tacoma', 'Vancouver', 'Bellevue'],
-  WV: ['Charleston', 'Huntington', 'Morgantown'],
-  WI: ['Milwaukee', 'Madison', 'Green Bay', 'Kenosha'],
-  WY: ['Cheyenne', 'Casper', 'Laramie'],
+export type ApplicationFormValues = {
+  email: string;
+  fullName: string;
+  contactNumber: string;
+  companyName: string;
+  companyLegalEntity: string;
+  companyAddressLine1: string;
+  companyAddressLine2: string;
+  yearFounded?: string;
+  companyWebsite: string;
+  numberOfEmployees: string;
+  numberOfContractors: string;
+  statesCovered: string[];
+  citiesCovered: string[];
+  servicesOffered: string[];
+  vehiclesUsed?: string[];
+  isInsured: boolean;
+  insuranceProvider: string;
+  isCompanyLicensed: boolean;
+  companyBio: string;
 };
 
-const services = [
-  { value: 'executive_protection', label: 'Executive Protection' },
-  { value: 'event_security', label: 'Event Security' },
-  { value: 'facility_corporate_security', label: 'Facility & Corporate Security' },
-  { value: 'retail_security', label: 'Retail Security' },
-  { value: 'rapid_alarm_response', label: 'Rapid Alarm Response' },
-  { value: 'tectus_transit_secure_transport', label: 'Tectus Transit (Secure Transport)' },
-  { value: 'mobile_patrol', label: 'Mobile Patrol' },
-  { value: 'fixed_post_security', label: 'Fixed-Post Security' },
-  { value: 'foot_patrol', label: 'Foot Patrol' },
-  { value: 'armed', label: 'Armed' },
-  { value: 'unarmed', label: 'Unarmed' },
-  { value: 'plainclothes', label: 'Plainclothes' },
-  { value: 'uniformed', label: 'Uniformed' },
-  { value: 'overnight_coverage', label: 'Overnight Coverage' },
-  { value: 'vehicle_required', label: 'Vehicle Required' },
-  { value: 'crowd_management', label: 'Crowd Management' },
-  { value: 'bag_checks_metal_detection', label: 'Bag Checks / Metal Detection' },
-  { value: 'radios_comms_equipment', label: 'Radios / Comms Equipment' },
-  { value: 'walkthrough_metal_detectors', label: 'Walkthrough Metal Detectors' },
-  { value: 'body_cams', label: 'Body Cams' },
-  { value: 'hi_vis_gear_vests', label: 'Hi-Vis Gear / Vests' },
-  { value: 'first_aid_kits', label: 'First Aid Kits' },
-  { value: 'drone_surveillance', label: 'Drone Surveillance' },
-  { value: 'wands_handheld_detectors', label: 'Wands / Handheld Detectors' },
-  { value: 'k9_security_unit_available', label: 'K9 Security (K9 Unit Available)' },
-  { value: 'access_control_management', label: 'Access Control Management' },
-  { value: 'loss_prevention_undercover_ops', label: 'Loss Prevention / Undercover Ops' },
-  {
-    value: 'medical_training_cpr_certified_personnel',
-    label: 'Medical Training / CPR Certified Personnel',
-  },
-  { value: 'bilingual_personnel', label: 'Bilingual Personnel' },
-  { value: 'vip_escort', label: 'VIP Escort' },
-  { value: 'off_duty_officers', label: 'Off-Duty Officers' },
-];
-
-const vehicles = [
-  { value: 'mobile_patrol', label: 'Mobile Patrol' },
-  { value: 'unmarked_mobile_patrol', label: 'Unmarked Mobile Patrol' },
-  { value: 'sedan', label: 'Sedan' },
-  { value: 'suv', label: 'SUV' },
-  { value: 'luxury', label: 'Luxury' },
-  { value: 'armored', label: 'Armored' },
-  { value: 'no_vehicles', label: 'No Vehicles' },
-];
+type attachmentType = 'logo' | 'insurance' | 'license';
+type fileAttachments = Record<attachmentType, FileAttachment[]>;
 
 export default function SubmitInfo() {
   const { B, E } = useBEM('submit-info-page');
   const router = useRouter();
-  // const [step, setStep] = useState(0);
+  const user = useUserStore((state) => state.user);
+  const [agreedWithTermsAndConditions, setAgreedWithTermsAndConditions] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const { showSnackbar } = useUiSnackbar();
 
-  const handleSubmit = () => {
-    router.push('alert/application-submitted');
+  const [files, setFiles] = useState<fileAttachments>({
+    insurance: [],
+    logo: [],
+    license: [],
+  });
+
+  const handleFileUpload = (file: File, type: attachmentType) => {
+    setFiles((prev) => ({
+      ...prev,
+      [type]: [...(prev[type] || []), { file, expiry: '' }],
+    }));
   };
 
-  const steps = ['Contact Info', 'Company Info', 'Personnel'];
+  const handleFileRemove = (index: number, type: attachmentType) => {
+    setFiles((prev) => ({
+      ...prev,
+      [type]: prev[type].filter((_, i) => i !== index),
+    }));
+  };
 
-  // const changeStep = useCallback(
-  //   (action: 'next' | 'back') => {
-  //     if (action === 'next') {
-  //       if (step >= steps.length - 1) {
-  //         return;
-  //       }
-  //       setStep(step + 1);
-  //     } else {
-  //       if (step <= 0) {
-  //         return;
-  //       }
-  //       setStep(step - 1);
-  //     }
-  //   },
-  //   [step],
-  // );
+  const handleExpiryChange = (index: number, newExpiry: string, type: attachmentType) => {
+    setFiles((prev) => ({
+      ...prev,
+      [type]: prev[type].map((item, i) => (i === index ? { ...item, expiry: newExpiry } : item)),
+    }));
+  };
+
+  const onSubmitInternal = (values: ApplicationFormValues) => {
+
+    if(files.logo.length === 0) {
+      showSnackbar('Please upload a company logo.', 'error', {
+        anchorOrigin: {
+          vertical: 'top',
+          horizontal: 'center',
+        },
+      });
+      return;
+    }
+
+    if(values.isInsured || values.isCompanyLicensed) {
+      const filesDontHaveExpiry = [...files.insurance, ...files.license].some((item) => !item.expiry);
+      if(filesDontHaveExpiry){
+        showSnackbar('File expiration dates are required.', 'error', {
+          anchorOrigin: {
+            vertical: 'top',
+            horizontal: 'center',
+          },
+        });
+        return;
+      }
+    }
+
+    console.log(values);
+  };
+
+  const {
+    register,
+    handleSubmit,
+    validate: { required, url, minValue, maxValue },
+    errors,
+    setValue,
+    values,
+    reset,
+    isSubmitAttempted,
+    isValid
+  } = useForm<ApplicationFormValues>({
+    email: '',
+    fullName: '',
+    contactNumber: '',
+    companyName: '',
+    companyLegalEntity: '',
+    companyAddressLine1: '',
+    companyAddressLine2: '',
+    yearFounded: '',
+    companyWebsite: '',
+    numberOfEmployees: '',
+    numberOfContractors: '',
+    statesCovered: [],
+    citiesCovered: [],
+    servicesOffered: [],
+    vehiclesUsed: [],
+    isInsured: false,
+    insuranceProvider: '',
+    isCompanyLicensed: false,
+    companyBio: '',
+  });
+
+  useEffect(() => {
+    if (user?.email && !values.email) {
+      setValue('email', user.email);
+    }
+  }, [user?.email, setValue, values]);
+
+  const statesCoveredRef = useRef<string>('');
+  useEffect(() => {
+    const allStates = (values.statesCovered || []).join(',');
+    if (statesCoveredRef.current === allStates) return;
+    statesCoveredRef.current = allStates;
+    if (!values.citiesCovered) return;
+    reset('citiesCovered');
+  }, [values.statesCovered, reset]);
+
+  const citiesCoveredOptions = useMemo(() => {
+    if ((values.statesCovered || []).length === 0) return [];
+
+    let cities: string[] = [];
+    values.statesCovered.forEach((state) => {
+      cities = cities.concat(STATE_CITIES[state] || []);
+    });
+    return cities.map((city) => ({ value: city, label: city })) || [];
+  }, [values.statesCovered]);
 
   return (
     <div className={B()}>
-      <PageBanner
+      {/* <PageBanner
         hideLogo
         title="Submit your information"
         subtitle="Please provide your company details subject to verification by Tectus."
-      />
+      /> */}
 
       <div className={E('form-scroll')}>
-        <form className={E('form')}>
-          <div className={E('form-section')}>
-            <UiTypography variant="h6">Contact Info</UiTypography>
-            <UiTextField
-              placeholder="Email"
-              label="Email"
-              value="jener.sigua31@gmail.com"
-              readOnly
-            />
-            <UiTextField placeholder="Full Name" label="Full Name" />
-            <UiTextField placeholder="Phone Number" label="Phone Number" />
-          </div>
+        <form className={E('form')} onSubmit={handleSubmit(onSubmitInternal)}>
+          <div className={E('form-layout')}>
+            <div className={E('form-left')}>
+              <div className={E('form-section')}>
+                <UiTypography variant="h5" fontWeight={700} className={E('form-section-title')}>
+                  Contact Info
+                </UiTypography>
+                <div className={E('form-fields')}>
+                  <UiTextField label="Email" readOnly {...register('email')} />
+                  <UiTextField
+                    label="Full name*"
+                    {...register('fullName', {
+                      ...required('Full name is required.'),
+                    })}
+                    helperText={errors.fullName}
+                    error={Boolean(errors.fullName)}
+                  />
+                  <UiTextField
+                    label="Phone number*"
+                    {...register('contactNumber', {
+                      ...required('Phone number is required.'),
+                    })}
+                    helperText={errors.contactNumber}
+                    error={Boolean(errors.contactNumber)}
+                  />
+                </div>
+              </div>
 
-          <div className={E('form-section')}>
-            <UiTypography variant="h6">Company Information</UiTypography>
-            <UiTextField placeholder="Company Name" label="Company Name" />
-            <UiTextField placeholder="Company Name" label="Company Name" />
-            <UiTextField placeholder="Company Legal Entity" label="Company Legal Entity" />
-            <UiTextField
-              placeholder="Company Address (via Google Places Autocomplete)"
-              label="Company Address (via Google Places Autocomplete)"
-            />
+              <div className={E('form-section')}>
+                <UiTypography variant="h5" fontWeight={700} className={E('form-section-title')}>
+                  Company Information
+                </UiTypography>
+                <div className={E('form-fields')}>
+                  <UiTextField
+                    label="Company name (DBA or Trade Name)*"
+                    {...register('companyName', {
+                      ...required(),
+                    })}
+                    helperText={errors.companyName}
+                    error={Boolean(errors.companyName)}
+                  />
 
-            <div className={E('form-inline')}>
-              <UiTextField placeholder="label Founded" label="label Founded" type="number" />
-              <UiTextField placeholder="Website" label="Website" />
+                  <UiTextField
+                    label="Company legal entity*"
+                    {...register('companyLegalEntity', {
+                      ...required('Company Legal Entity is required.'),
+                    })}
+                    helperText={errors.companyLegalEntity}
+                    error={Boolean(errors.companyLegalEntity)}
+                  />
+                  <UiTextField
+                    label="Company address (Line 1)*"
+                    {...register('companyAddressLine1', {
+                      ...required('Company Address is required.'),
+                    })}
+                    helperText={errors.companyAddressLine1}
+                    error={Boolean(errors.companyAddressLine1)}
+                  />
+                  <UiTextField
+                    label="Company address (Line 2)"
+                    {...register('companyAddressLine2', {
+                      ...required('Company Address Line 2 is required.'),
+                    })}
+                    helperText={errors.companyAddressLine2}
+                    error={Boolean(errors.companyAddressLine2)}
+                  />
+                  <UiTextField
+                    label="Year Founded*"
+                    type="number"
+                    {...register('yearFounded', {
+                      ...required('Year Founded is required.'),
+                      ...minValue(1900, 'Please enter a valid year'),
+                      ...maxValue(new Date().getFullYear(), 'Please enter a valid year'),
+                    })}
+                    helperText={errors.yearFounded}
+                    error={Boolean(errors.yearFounded)}
+                  />
+                  <UiTextField
+                    label="Website"
+                    {...register('companyWebsite', {
+                      ...url('Invalid website address.'),
+                    })}
+                    helperText={errors.companyWebsite}
+                    error={Boolean(errors.companyWebsite)}
+                  />
+                  <UiTextField
+                    label="Company bio*"
+                    {...register('companyBio', {
+                      ...required('Company bio is required.'),
+                    })}
+                    helperText={errors.companyBio}
+                    error={Boolean(errors.companyBio)}
+                    multiline
+                    rows={3}
+                  />
+
+
+                  <UiFileUpload
+                    accept={['.jpg', '.jpeg', '.png', '.gif', '.webp']}
+                    files={files.logo}
+                    onFileUpload={(file) => handleFileUpload(file, 'logo')}
+                    onFileRemove={(index) => handleFileRemove(index, 'logo')}
+                    onExpiryChange={(index, expiry) =>
+                      handleExpiryChange(index, expiry, 'logo')
+                    }
+                    button={
+                      <UiButton size="small" className={E('upload-button')}>
+                        Upload company logo*
+                      </UiButton>
+                    }
+                    maxFiles={1}
+                  />
+                </div>
+              </div>
+
+              <div className={E('form-section')}>
+                <UiTypography variant="h5" fontWeight={700} className={E('form-section-title')}>
+                  Company Stats
+                </UiTypography>
+                <div className={E('form-fields')}>
+                  <UiSelect
+                    label="Number of employees*"
+                    options={[
+                      { value: '1-9', label: '1-9' },
+                      { value: '11-49', label: '11-49' },
+                      { value: '50-99', label: '50-99' },
+                      { value: '100-199', label: '100-199' },
+                      { value: '200-249', label: '200-249' },
+                      { value: '250-499', label: '250-499' },
+                      { value: '500-999', label: '500-999' },
+                      { value: '1,000+', label: '1,000+' },
+                    ]}
+                    fullWidth
+                    register={register('numberOfEmployees', {
+                      ...required('Number of employees is required.'),
+                    })}
+                    helperText={errors.numberOfEmployees}
+                    error={Boolean(errors.numberOfEmployees)}
+                  />
+                  <UiSelect
+                    label="Number of certified subcontractors*"
+                    options={[
+                      { value: '1-9', label: '1-9' },
+                      { value: '11-49', label: '11-49' },
+                      { value: '50-99', label: '50-99' },
+                      { value: '100-199', label: '100-199' },
+                      { value: '200-249', label: '200-249' },
+                      { value: '250-499', label: '250-499' },
+                      { value: '500-999', label: '500-999' },
+                      { value: '1,000+', label: '1,000+' },
+                    ]}
+                    fullWidth
+                    register={register('numberOfContractors', {
+                      ...required('Number of contractors is required.'),
+                    })}
+                    helperText={errors.numberOfContractors}
+                    error={Boolean(errors.numberOfContractors)}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className={E('form-right')}>
+              <div className={E('form-section')}>
+                <UiTypography variant="h5" fontWeight={700} className={E('form-section-title')}>
+                  Service Areas
+                </UiTypography>
+                <div className={E('form-fields')}>
+                  <UiSelect
+                    label="States Covered"
+                    options={Object.keys(STATE_CITIES).map((key) => ({ value: key, label: key }))}
+                    fullWidth
+                    register={register('statesCovered', {
+                      ...required('States covered is required.'),
+                    })}
+                    helperText={errors.statesCovered}
+                    error={Boolean(errors.statesCovered)}
+                    multiple
+                    showCheckboxOption
+                  />
+
+                  <UiSelect
+                    label="Cities Covered"
+                    options={citiesCoveredOptions}
+                    fullWidth
+                    register={register('citiesCovered', {
+                      ...required('Cities covered is required.'),
+                      disabled: (values.statesCovered || []).length === 0,
+                    })}
+                    helperText={errors.citiesCovered}
+                    error={Boolean(errors.citiesCovered)}
+                    disabled={(values.statesCovered || []).length === 0}
+                    multiple
+                    showCheckboxOption
+                  />
+                </div>
+              </div>
+
+              <div className={E('form-section')}>
+                <UiTypography variant="h5" fontWeight={700} className={E('form-section-title')}>
+                  Services
+                </UiTypography>
+                <div className={E('form-fields')}>
+                  <UiSelect
+                    label="Services provided*"
+                    options={VENDOR_SERVICES.map((opt) => ({ value: opt, label: opt }))}
+                    fullWidth
+                    register={register('servicesOffered', {
+                      ...required('Services provided is required.'),
+                    })}
+                    helperText={errors.servicesOffered}
+                    error={Boolean(errors.servicesOffered)}
+                    multiple
+                    showCheckboxOption
+                  />
+
+                  <UiSelect
+                    label="Vehicles used*"
+                    options={VENDOR_VEHICLES.map((opt) => ({ value: opt, label: opt }))}
+                    fullWidth
+                    register={register('vehiclesUsed', {
+                      ...required('Vehicles used is required.'),
+                    })}
+                    helperText={errors.vehiclesUsed}
+                    error={Boolean(errors.vehiclesUsed)}
+                    multiple
+                    showCheckboxOption
+                  />
+                </div>
+              </div>
+
+              <div className={E('form-section')}>
+                <UiTypography variant="h5" fontWeight={700} className={E('form-section-title')}>
+                  Insurance Information
+                </UiTypography>
+                <div className={E('form-fields')}>
+                  <UiCheckbox
+                    label="My company is insured"
+                    checked={values.isInsured}
+                    onChange={(e) => {
+                      reset('insuranceProvider');
+                      setValue('isInsured', e.target.checked);
+                    }}
+                    className={E('company-insured')}
+                  />
+
+                  <UiTextField
+                    label="Insurance provider*"
+                    register={register('insuranceProvider', {
+                      ...required('Insurance provider is required.'),
+                      disabled: !values.isInsured,
+                    })}
+                    helperText={errors.insuranceProvider}
+                    error={Boolean(errors.insuranceProvider)}
+                    disabled={!values.isInsured}
+                  />
+
+                  <UiFileUpload
+                    isSubmitted={isSubmitAttempted}
+                    files={files.insurance}
+                    onFileUpload={(file) => handleFileUpload(file, 'insurance')}
+                    onFileRemove={(index) => handleFileRemove(index, 'insurance')}
+                    onExpiryChange={(index, expiry) =>
+                      handleExpiryChange(index, expiry, 'insurance')
+                    }
+                    button={
+                      <UiButton
+                        size="small"
+                        disabled={!values.isInsured}
+                        className={E('upload-button')}
+                      >
+                        Add Certificate of Insurance
+                      </UiButton>
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className={E('form-section')}>
+                <UiTypography variant="h5" fontWeight={700} className={E('form-section-title')}>
+                  Licensing Information
+                </UiTypography>
+                <div className={E('form-fields')}>
+                  <UiCheckbox
+                    label="My company is licensed"
+                    checked={values.isCompanyLicensed}
+                    onChange={(e) => setValue('isCompanyLicensed', e.target.checked)}
+                    className={E('company-licensed')}
+                  />
+
+                  <UiFileUpload
+                    isSubmitted={isSubmitAttempted}
+                    files={files.license}
+                    onFileUpload={(file) => handleFileUpload(file, 'license')}
+                    onFileRemove={(index) => handleFileRemove(index, 'license')}
+                    onExpiryChange={(index, expiry) =>
+                      handleExpiryChange(index, expiry, 'license')
+                    }
+                    button={
+                      <UiButton
+                        size="small"
+                        disabled={!values.isCompanyLicensed}
+                        className={E('upload-button')}
+                      >
+                        Add License
+                      </UiButton>
+                    }
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className={E('form-section')}>
-            <UiTypography variant="h6">Personnel Stats</UiTypography>
-            <UiSelect
-              label="Number of Employees"
-              options={[
-                { value: '1-9', label: '1-9' },
-                { value: '11-49', label: '11-49' },
-                { value: '50-99', label: '50-99' },
-                { value: '100-199', label: '100-199' },
-                { value: '200-249', label: '200-249' },
-                { value: '250-499', label: '250-499' },
-                { value: '500-999', label: '500-999' },
-                { value: '1,000+', label: '1,000+' },
-              ]}
-              fullWidth
-            />
-            <UiSelect
-              label="Number of Certified Subcontractors"
-              options={[
-                { value: '1-9', label: '1-9' },
-                { value: '11-49', label: '11-49' },
-                { value: '50-99', label: '50-99' },
-                { value: '100-199', label: '100-199' },
-                { value: '200-249', label: '200-249' },
-                { value: '250-499', label: '250-499' },
-                { value: '500-999', label: '500-999' },
-                { value: '1,000+', label: '1,000+' },
-              ]}
-              fullWidth
-            />
-          </div>
+          <UiCheckbox
+            label={
+              <UiTypography className={E('terms')} variant="caption">
+                I accept the <span>Terms and Conditions</span>
+              </UiTypography>
+            }
+            checked={agreedWithTermsAndConditions}
+            onClick={() => setShowTerms(true)}
+          />
 
-          <div className={E('form-section')}>
-            <UiTypography variant="h6">Service Areas</UiTypography>
-            <div className={E('form-inline')}>
-              <UiSelect
-                label="States Covered"
-                options={Object.keys(states).map((key) => ({ value: key, label: key }))}
-                fullWidth
-              />
-              <UiSelect
-                label="Cities Covered"
-                options={states.AK.map((city) => ({ value: city, label: city }))}
-                fullWidth
-              />
-            </div>
-
-            <div className={E('form-section')}>
-              <UiTypography variant="h6">Service Provided</UiTypography>
-              <UiAutocomplete label="Services" options={services} fullWidth multiple />
-            </div>
-
-            <div className={E('form-section')}>
-              <UiTypography variant="h6">Vehicle Used</UiTypography>
-              <UiAutocomplete label="Vehicles" options={vehicles} fullWidth multiple />
-            </div>
-
-            <div className={E('form-section')}>
-              <UiTypography variant="h6">Insurance Information</UiTypography>
-
-              <UiSwitch label="Is your company currently insured?" />
-              <UiTextField placeholder="Insurance Provider" label="Insurance Provider" />
-              <UiSwitch label="If they have sub contractors are they covered by insurance?" />
-
-              <UiButton variant="outlined" startIcon="UploadFile" fullWidth>
-                Upload Certificate of Insurance(s) (COI)
-              </UiButton>
-            </div>
-
-            <div className={E('form-section')}>
-              <UiTypography variant="h6">Licensing Information</UiTypography>
-
-              <UiSwitch label="Is your company licensed?" />
-
-              <UiButton variant="outlined" startIcon="UploadFileOutlined" fullWidth>
-                Upload License(s)
-              </UiButton>
-            </div>
-            <div className={E('form-section')}>
-              <UiTypography variant="h6">Terms & Conditions</UiTypography>
-              <UiCheckbox label="Must accept terms before submission" />
-              {/* <UiSwitch label="Is your company licensed?" /> */}
-            </div>
-          </div>
+          <UiButton type="submit" disabled={!agreedWithTermsAndConditions || !isValid}>
+            Submit application
+          </UiButton>
         </form>
       </div>
 
-      <UiButton onClick={handleSubmit}>Submit Application</UiButton>
-
-      {/* <UiStepper
-        steps={steps.length}
-        activeStep={step}
-        backButton={<UiButton onClick={() => changeStep('back')}>back</UiButton>}
-        nextButton={<UiButton onClick={() => changeStep('next')}>next</UiButton>}
-      /> */}
+      <UiModal
+        open={showTerms}
+        handleClose={() => setShowTerms(false)}
+        handleActionButton={(action) => setAgreedWithTermsAndConditions(action === 'accept')}
+        title="Terms and Conditions"
+        actionButtons={[
+          {
+            label: 'Decline',
+            action: 'decline',
+            variant: 'outlined',
+            closeOnClick: true,
+          },
+          {
+            label: 'Accept',
+            action: 'accept',
+            variant: 'contained',
+            closeOnClick: true,
+          },
+        ]}
+      >
+        Welcome to Tectus! Lorem ipsum dolor sit amet, consectetur adipisicing elit. Reprehenderit a
+        maiores provident doloremque dolore ipsa fugiat at officiis, saepe unde libero architecto
+        perspiciatis quod fuga ullam iste blanditiis ea ut! Lorem ipsum dolor sit amet, consectetur
+        adipisicing elit. Reprehenderit a maiores provident doloremque dolore ipsa fugiat at
+        officiis, saepe unde libero architecto perspiciatis quod fuga ullam iste blanditiis ea ut!
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Reprehenderit a maiores provident
+        doloremque dolore ipsa fugiat at officiis, saepe unde libero architecto perspiciatis quod
+        fuga ullam iste blanditiis ea ut! Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+        Reprehenderit a maiores provident doloremque dolore ipsa fugiat at officiis, saepe unde
+        libero architecto perspiciatis quod fuga ullam iste blanditiis ea ut!
+      </UiModal>
     </div>
   );
 }
