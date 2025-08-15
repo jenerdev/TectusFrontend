@@ -27,6 +27,7 @@
     "@storybook/react": "^9.0.18",
     "@storybook/react-vite": "9.0.18",
     "@tectus/styles": "*",
+    "@types/google.maps": "^3.58.1",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
