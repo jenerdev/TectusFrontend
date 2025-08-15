@@ -35,7 +35,7 @@ export interface UiTextFieldProps {
   /** Restrict Google Places results by country code (e.g., "us") */
   googlePlacesCountry?: string;
   /** Callback when a place is selected */
-  onPlaceSelected?: (place: google.maps.places.PlaceResult) => void;
+  onPlaceSelected?: (place: any) => void;
 }
 
 export const UiTextField: React.FC<UiTextFieldProps> = ({
