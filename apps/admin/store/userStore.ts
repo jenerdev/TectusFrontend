@@ -57,14 +57,18 @@
 
 import { create, StoreApi, UseBoundStore } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { shallow } from 'zustand/shallow';
 
+export enum UserStatus {
+  PENDING = 'PENDING',
+  REJECTED = 'REJECTED',
+  APPROVED = 'APPROVED',
+}
 export interface User {
   id: string;
   email: string;
   companyName: string;
   emailVerified: boolean;
-  status?: 'Pending' | 'Rejected' | 'Approved';
+  status?: UserStatus;
 }
 
 export interface UserState {

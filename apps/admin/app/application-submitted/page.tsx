@@ -5,7 +5,7 @@ import './application-submitted.scss';
 import { PageBanner } from '../components';
 import { UiButton } from '../../../../packages/ui/src/UiButton';
 import { useApi, useApiErrorMessage, useProtectedRoute } from '../hooks';
-import { User, useUserStore } from '@/store';
+import { User, UserStatus, useUserStore } from '@/store';
 import { ApiErrorCode } from '../constants';
 import { useUiSnackbar } from '@tectus/ui';
 import { usePathname, useRouter } from 'next/navigation';
@@ -24,7 +24,6 @@ export default function ApplicationSubmittedPage() {
 
   const { hasHydrated } = useProtectedRoute();
   if(!hasHydrated)return;
-  
   const handleOnRefresh = async () => {
     const userResult = await sendRequest();
     if (userResult.error || !userResult.data) {
@@ -39,17 +38,17 @@ export default function ApplicationSubmittedPage() {
       return;
     }
 
-    const status = userResult.data.status;
-    if(status === 'Pending')return;
+    const status = (userResult.data.status || '').toUpperCase() as UserStatus;
+    if(status === UserStatus.PENDING)return;
 
-    const statusRoutes: Record<NonNullable<User['status']>, string> = {
-      Approved: '/application-approved',
-      Pending: '/application-submitted',
-      Rejected: '/application-rejected',
+    const statusRoutes: Record<UserStatus, string> = {
+      [UserStatus.APPROVED]: '/application-approved',
+      [UserStatus.PENDING]: '/application-submitted',
+      [UserStatus.REJECTED]: '/application-rejected',
     };
 
     
-    if (status === 'Approved' && pathname === '/application-approved') return;
+    if (status === UserStatus.APPROVED && pathname === '/application-approved') return;
     const targetRoute = status ? (statusRoutes[status] ?? '/submit-info') : '/submit-info';
     useUserStore.getState().setUser(userResult.data);
     router.push(targetRoute);

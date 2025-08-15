@@ -1,7 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { SigninFormValues, SigninPostResponse } from './SignInForm.types';
-import { User, useUserStore } from '@/store';
+import { User, UserStatus, useUserStore } from '@/store';
 import { useApi, useApiErrorMessage } from '@/app/hooks';
 import { useUiSnackbar } from '@tectus/ui';
 import { ApiErrorCode } from '@/app/constants';
@@ -69,12 +69,12 @@ export function useSignInForm() {
     useUserStore.getState().setUser(userResult.data);
 
     if (emailVerified) {
-      const { status } = userResult.data ?? {};
+      const status = (userResult.data.status || '').toUpperCase() as UserStatus;
 
-      const statusRoutes: Record<NonNullable<User['status']>, string> = {
-        Approved: '/dashboard',
-        Pending: '/application-submitted',
-        Rejected: '/application-rejected',
+      const statusRoutes: Record<UserStatus, string> = {
+        [UserStatus.APPROVED]: '/dashboard',
+        [UserStatus.PENDING]: '/application-submitted',
+        [UserStatus.REJECTED]: '/application-rejected',
       };
 
       const targetRoute = status ? (statusRoutes[status] ?? '/submit-info') : '/submit-info';
