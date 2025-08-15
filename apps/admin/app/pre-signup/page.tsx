@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 
 type routeUrl = 'individual' | 'company';
 const routeMapping: Record<routeUrl, string> = {
-  individual: '/alert/individual-signup',
+  individual: '/signup/individual',
   company: '/signup',
 };
 

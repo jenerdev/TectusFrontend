@@ -36,7 +36,7 @@ export default function Home() {
     const actions: Record<ButtonActionType, () => void> = {
       joinnow: () => setStep('signupType'),
       signin: () => router.push('/signin'),
-      individual: () => router.push('/alert/individual-signup'),
+      individual: () => router.push('/signup/individual'),
       company: () => router.push('/signup'),
     };
 
