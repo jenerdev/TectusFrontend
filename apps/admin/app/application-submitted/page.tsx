@@ -49,10 +49,7 @@ export default function ApplicationSubmittedPage() {
     };
     const targetRoute = status ? (statusRoutes[status] ?? '/submit-info') : '/submit-info';
 
-    if(status === 'Approved'){
-      useUserStore.getState().setUser(userResult.data);
-    }
-
+    useUserStore.getState().setUser(userResult.data);
     router.push(targetRoute);
   };
 

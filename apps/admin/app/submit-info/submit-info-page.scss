@@ -6,6 +6,7 @@
 
   &__title {
     color: #d4af37;
+    padding: 1rem;
   }
 
   &__form-scroll {
@@ -88,15 +89,15 @@
 // TODO: separate component
 .header {
   width: 100%;
-  max-width: 1060px;
   position: sticky;
   top: 0;
   left: 0;
-  background-color: #222222;
+  background: linear-gradient(to bottom, #222222, #242424);
   z-index: 2;
 
   &__container {
     width: 100%;
+    max-width: 1060px;
     max-width: 1060px;
     margin: auto;
 

@@ -15,7 +15,7 @@ export default function ApplicationApprovedPage() {
   if(!hasHydrated)return;
 
   const okHandler = async () => {
-    router.push('/');
+    router.push('/dashboard');
   };
 
   return (

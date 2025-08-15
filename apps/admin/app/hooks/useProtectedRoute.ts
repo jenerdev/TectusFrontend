@@ -31,6 +31,8 @@ export function useProtectedRoute() {
     } else {
       route = statusRedirects[status as string] || '';
     }
+
+    if (status === 'Approved' && pathname === '/application-approved') return;
     if (route && pathname !== route) {
       router.replace(route);
     }
