@@ -8,12 +8,13 @@ import { useApi, useApiErrorMessage, useProtectedRoute } from '../hooks';
 import { User, useUserStore } from '@/store';
 import { ApiErrorCode } from '../constants';
 import { useUiSnackbar } from '@tectus/ui';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function ApplicationSubmittedPage() {
 
 
   const router = useRouter();
+  const pathname = usePathname();
   const { B, E } = useBEM('application-submitted-page');
   const { getErrorMessage } = useApiErrorMessage();
   const { showSnackbar } = useUiSnackbar();
@@ -24,7 +25,6 @@ export default function ApplicationSubmittedPage() {
   const { hasHydrated } = useProtectedRoute();
   if(!hasHydrated)return;
   
-
   const handleOnRefresh = async () => {
     const userResult = await sendRequest();
     if (userResult.error || !userResult.data) {
@@ -47,8 +47,10 @@ export default function ApplicationSubmittedPage() {
       Pending: '/application-submitted',
       Rejected: '/application-rejected',
     };
-    const targetRoute = status ? (statusRoutes[status] ?? '/submit-info') : '/submit-info';
 
+    
+    if (status === 'Approved' && pathname === '/application-approved') return;
+    const targetRoute = status ? (statusRoutes[status] ?? '/submit-info') : '/submit-info';
     useUserStore.getState().setUser(userResult.data);
     router.push(targetRoute);
   };
