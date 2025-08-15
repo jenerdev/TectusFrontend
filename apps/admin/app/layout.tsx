@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import './main.scss';
 import { ThemeProvider } from '@tectus/ui/ThemeProvider';
 import { UiSnackbarProvider } from '@tectus/ui';
+import Script from 'next/script';
 
 
 export const metadata: Metadata = {
@@ -19,6 +20,10 @@ export default function RootLayout({
   return (
     <html lang="en" >
       <body>
+        <Script
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
+          strategy="beforeInteractive"
+        />
         <ThemeProvider>
           <UiSnackbarProvider>
             {children}
