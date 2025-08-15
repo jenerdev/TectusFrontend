@@ -2,7 +2,6 @@
 
 import { useUserStore } from '@/store';
 import { HttpState, useHttp } from '@tectus/hooks';
-import { get } from 'http';
 import { useCallback } from 'react';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';

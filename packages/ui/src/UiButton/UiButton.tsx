@@ -19,6 +19,7 @@ export interface UIButtonProps {
   fullWidth?: boolean;
   topspacing?: number;
   startIcon?: UiIconProps['name'];
+  defaultMinWidth?: boolean;
 }
 
 export function UiButton({
@@ -33,6 +34,7 @@ export function UiButton({
   fullWidth,
   topspacing = 0,
   startIcon,
+  defaultMinWidth
 }: UIButtonProps) {
 
   const { B } = useBEM('ui-button', className);
@@ -46,7 +48,7 @@ export function UiButton({
      <Button  
         variant={variant}
         size={size}
-        className={B()}
+        className={B( defaultMinWidth ? 'default-min-width' : '')}
         onClick={onClick}
         type={type}
         disabled={disabled}

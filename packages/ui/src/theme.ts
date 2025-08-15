@@ -32,6 +32,28 @@ export const getDesignTokens = (mode: 'light' | 'dark') => ({
         }),
   },
   components: {
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: '#ffffff',
+          color: '#333333',
+        },
+      },
+    },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: {
+          color: '#333333',
+        },
+      },
+    },
+    MuiDialogContent: {
+      styleOverrides: {
+        root: {
+          color: '#333333',
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         containedPrimary: {

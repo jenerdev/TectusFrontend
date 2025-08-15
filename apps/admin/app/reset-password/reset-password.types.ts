@@ -1,6 +1,6 @@
-export type RepeatPasswordValues = {
+export type ConfirmPasswordValues = {
   password: string;
-  repeatPassword: string;
+  confirmPassword: string;
 };
 
 export type ResetPasswordPayload = {

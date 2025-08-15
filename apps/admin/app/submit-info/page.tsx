@@ -1,21 +1,17 @@
 'use client';
-import {
-  UiButton,
-  UiModal,
-  UiSelect,
-  UiTextField,
-  UiTypography,
-  useUiSnackbar,
-} from '@tectus/ui';
+import { UiButton, UiModal, UiSelect, UiTextField, UiTypography, useUiSnackbar } from '@tectus/ui';
 import { PageBanner } from '../components';
 import { useBEM, useForm } from '@tectus/hooks';
 import './submit-info-page.scss';
 import { useRouter } from 'next/navigation';
 import { UiCheckbox } from '@tectus/ui';
 import { useUserStore } from '@/store';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { STATE_CITIES, VENDOR_SERVICES, VENDOR_VEHICLES } from '../constants';
 import { FileAttachment, UiFileUpload } from '@tectus/ui';
+// import { isValidUSPhone } from '@tectus/utils'; TODO: need fix
+import { useApi, useProtectedRoute } from '../hooks';
+import Image from 'next/image';
 
 export type ApplicationFormValues = {
   email: string;
@@ -26,7 +22,7 @@ export type ApplicationFormValues = {
   companyAddressLine1: string;
   companyAddressLine2: string;
   yearFounded?: string;
-  companyWebsite: string;
+  website: string;
   numberOfEmployees: string;
   numberOfContractors: string;
   statesCovered: string[];
@@ -42,7 +38,19 @@ export type ApplicationFormValues = {
 type attachmentType = 'logo' | 'insurance' | 'license';
 type fileAttachments = Record<attachmentType, FileAttachment[]>;
 
+const rangesOfNumberOptions = [
+  { value: '1-9', label: '1-9' },
+  { value: '11-49', label: '11-49' },
+  { value: '50-99', label: '50-99' },
+  { value: '100-199', label: '100-199' },
+  { value: '200-249', label: '200-249' },
+  { value: '250-499', label: '250-499' },
+  { value: '500-999', label: '500-999' },
+  { value: '1,000+', label: '1,000+' },
+];
+
 export default function SubmitInfo() {
+
   const { B, E } = useBEM('submit-info-page');
   const router = useRouter();
   const user = useUserStore((state) => state.user);
@@ -50,11 +58,48 @@ export default function SubmitInfo() {
   const [showTerms, setShowTerms] = useState(false);
   const { showSnackbar } = useUiSnackbar();
 
+  const { loading: uploadLoading, sendRequest: uploadRequest } = useApi(`files/images/upload`, {
+    method: 'POST',
+  });
+
+  const { loading: vendorLoading, sendRequest: vendorRequest } = useApi(`api/go/user/me`, {
+    method: 'PUT',
+  });
+
   const [files, setFiles] = useState<fileAttachments>({
     insurance: [],
     logo: [],
     license: [],
   });
+
+  const uploadPerAttachmentType = useCallback(
+    async (type: attachmentType) => {
+      const filesToUpload = files[type].map((file) => file.file);
+      if (filesToUpload.length === 0) return [];
+
+      const uploadPromises = filesToUpload.map((file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        return uploadRequest({
+          body: formData,
+          headers: {},
+        });
+      });
+      const results = await Promise.all(uploadPromises);
+
+      const parseResult = results.map((res, index) => {
+        return {
+          type: type.toUpperCase(),
+          file: res.data?.url || '',
+          expiry: files[type][index]?.expiry || null,
+          details: res.error ? `Failed ${res.error.message}` : 'Upload successful',
+        };
+      });
+      return parseResult;
+    },
+    [files],
+  );
 
   const handleFileUpload = (file: File, type: attachmentType) => {
     setFiles((prev) => ({
@@ -77,9 +122,8 @@ export default function SubmitInfo() {
     }));
   };
 
-  const onSubmitInternal = (values: ApplicationFormValues) => {
-
-    if(files.logo.length === 0) {
+  const onSubmitInternal = async (values: ApplicationFormValues) => {
+    if (files.logo.length === 0) {
       showSnackbar('Please upload a company logo.', 'error', {
         anchorOrigin: {
           vertical: 'top',
@@ -89,9 +133,11 @@ export default function SubmitInfo() {
       return;
     }
 
-    if(values.isInsured || values.isCompanyLicensed) {
-      const filesDontHaveExpiry = [...files.insurance, ...files.license].some((item) => !item.expiry);
-      if(filesDontHaveExpiry){
+    if (values.isInsured || values.isCompanyLicensed) {
+      const filesDontHaveExpiry = [...files.insurance, ...files.license].some(
+        (item) => !item.expiry,
+      );
+      if (filesDontHaveExpiry) {
         showSnackbar('File expiration dates are required.', 'error', {
           anchorOrigin: {
             vertical: 'top',
@@ -102,19 +148,67 @@ export default function SubmitInfo() {
       }
     }
 
-    console.log(values);
+    const insuranceDocuments = await uploadPerAttachmentType('insurance');
+    const licenseDocuments = await uploadPerAttachmentType('license');
+    const logoDocument = await uploadPerAttachmentType('logo');
+    console.log({
+      insuranceDocuments,
+      licenseDocuments,
+      logoDocument
+    })
+    const payload = {
+      countryCode: 'US',
+      fullName: values.fullName,
+      companyName: values.companyName,
+      legalEntity: values.companyLegalEntity,
+      address: [values.companyAddressLine1, values.companyAddressLine2].filter(Boolean).join(', '),
+      yearFounded: Number(values.yearFounded),
+      website: values.website,
+      statesCovered: values.statesCovered,
+      citiesCovered: values.citiesCovered,
+      vehiclesUsed: values.vehiclesUsed,
+      servicesOffered: values.servicesOffered,
+      contactNumber: values.contactNumber,
+      numberOfEmployees: values.numberOfEmployees,
+      numberOfContractors: values.numberOfContractors,
+      isInsured: values.isInsured,
+      isSubcontractorInsured: false, // request to remove on backend
+      isCompanyLicensed: values.isCompanyLicensed,
+      insuranceProvider: values.insuranceProvider,
+      supportingDocuments: [...insuranceDocuments, ...licenseDocuments],
+      imageUrl: logoDocument[0]?.file,
+      bio: values.companyBio,
+    };
+    const submitDetailsResult = await vendorRequest({
+      body: payload,
+    });
+
+    if(submitDetailsResult.error){
+      const message = submitDetailsResult.error.message[0] || 'An unknown error occurred. Please try again later'; // ask BE to standardize the response error
+      showSnackbar(message, 'error', {
+        anchorOrigin: {
+          vertical: 'top',
+          horizontal: 'center',
+        },
+      });
+      return;
+    }
+
+    // update user store
+    reset();
+    router.push('/application-submitted');
   };
 
   const {
     register,
     handleSubmit,
-    validate: { required, url, minValue, maxValue },
+    validate: { required, url, minValue, maxValue, custom, minLength },
     errors,
     setValue,
     values,
     reset,
     isSubmitAttempted,
-    isValid
+    // isValid, TODO: fix this
   } = useForm<ApplicationFormValues>({
     email: '',
     fullName: '',
@@ -124,7 +218,7 @@ export default function SubmitInfo() {
     companyAddressLine1: '',
     companyAddressLine2: '',
     yearFounded: '',
-    companyWebsite: '',
+    website: '',
     numberOfEmployees: '',
     numberOfContractors: '',
     statesCovered: [],
@@ -162,6 +256,9 @@ export default function SubmitInfo() {
     return cities.map((city) => ({ value: city, label: city })) || [];
   }, [values.statesCovered]);
 
+  const { hasHydrated } = useProtectedRoute();
+  if (!hasHydrated) return;
+
   return (
     <div className={B()}>
       {/* <PageBanner
@@ -169,7 +266,18 @@ export default function SubmitInfo() {
         title="Submit your information"
         subtitle="Please provide your company details subject to verification by Tectus."
       /> */}
+      
+      {/* TODO: Create separate component */}
+      <div className='header'>
+        <div className='header__container'>
+          <div className="header__logo">
+            <Image src="/logo-tectus.png" alt="Logo" width={60} height={60} />
+          </div>
+        </div>
+      </div>
 
+      <UiTypography variant='h5' fontWeight={700} className={E('title')}>Submit your application</UiTypography>
+      
       <div className={E('form-scroll')}>
         <form className={E('form')} onSubmit={handleSubmit(onSubmitInternal)}>
           <div className={E('form-layout')}>
@@ -192,6 +300,11 @@ export default function SubmitInfo() {
                     label="Phone number*"
                     {...register('contactNumber', {
                       ...required('Phone number is required.'),
+                      // ...custom(
+                      //   () => isValidUSPhone(values.contactNumber),
+                      //   'Invalid phone number.',
+                      // ),
+                      ...minLength(10, 'Invalid phone number'),
                     })}
                     helperText={errors.contactNumber}
                     error={Boolean(errors.contactNumber)}
@@ -250,11 +363,11 @@ export default function SubmitInfo() {
                   />
                   <UiTextField
                     label="Website"
-                    {...register('companyWebsite', {
+                    {...register('website', {
                       ...url('Invalid website address.'),
                     })}
-                    helperText={errors.companyWebsite}
-                    error={Boolean(errors.companyWebsite)}
+                    helperText={errors.website}
+                    error={Boolean(errors.website)}
                   />
                   <UiTextField
                     label="Company bio*"
@@ -267,15 +380,12 @@ export default function SubmitInfo() {
                     rows={3}
                   />
 
-
                   <UiFileUpload
                     accept={['.jpg', '.jpeg', '.png', '.gif', '.webp']}
                     files={files.logo}
                     onFileUpload={(file) => handleFileUpload(file, 'logo')}
                     onFileRemove={(index) => handleFileRemove(index, 'logo')}
-                    onExpiryChange={(index, expiry) =>
-                      handleExpiryChange(index, expiry, 'logo')
-                    }
+                    onExpiryChange={(index, expiry) => handleExpiryChange(index, expiry, 'logo')}
                     button={
                       <UiButton size="small" className={E('upload-button')}>
                         Upload company logo*
@@ -288,21 +398,12 @@ export default function SubmitInfo() {
 
               <div className={E('form-section')}>
                 <UiTypography variant="h5" fontWeight={700} className={E('form-section-title')}>
-                  Company Stats
+                  Personnel Stats
                 </UiTypography>
                 <div className={E('form-fields')}>
                   <UiSelect
                     label="Number of employees*"
-                    options={[
-                      { value: '1-9', label: '1-9' },
-                      { value: '11-49', label: '11-49' },
-                      { value: '50-99', label: '50-99' },
-                      { value: '100-199', label: '100-199' },
-                      { value: '200-249', label: '200-249' },
-                      { value: '250-499', label: '250-499' },
-                      { value: '500-999', label: '500-999' },
-                      { value: '1,000+', label: '1,000+' },
-                    ]}
+                    options={rangesOfNumberOptions}
                     fullWidth
                     register={register('numberOfEmployees', {
                       ...required('Number of employees is required.'),
@@ -312,16 +413,7 @@ export default function SubmitInfo() {
                   />
                   <UiSelect
                     label="Number of certified subcontractors*"
-                    options={[
-                      { value: '1-9', label: '1-9' },
-                      { value: '11-49', label: '11-49' },
-                      { value: '50-99', label: '50-99' },
-                      { value: '100-199', label: '100-199' },
-                      { value: '200-249', label: '200-249' },
-                      { value: '250-499', label: '250-499' },
-                      { value: '500-999', label: '500-999' },
-                      { value: '1,000+', label: '1,000+' },
-                    ]}
+                    options={rangesOfNumberOptions}
                     fullWidth
                     register={register('numberOfContractors', {
                       ...required('Number of contractors is required.'),
@@ -435,6 +527,7 @@ export default function SubmitInfo() {
                     onExpiryChange={(index, expiry) =>
                       handleExpiryChange(index, expiry, 'insurance')
                     }
+                    disabled={!values.isInsured}
                     button={
                       <UiButton
                         size="small"
@@ -465,9 +558,8 @@ export default function SubmitInfo() {
                     files={files.license}
                     onFileUpload={(file) => handleFileUpload(file, 'license')}
                     onFileRemove={(index) => handleFileRemove(index, 'license')}
-                    onExpiryChange={(index, expiry) =>
-                      handleExpiryChange(index, expiry, 'license')
-                    }
+                    onExpiryChange={(index, expiry) => handleExpiryChange(index, expiry, 'license')}
+                    disabled={!values.isCompanyLicensed}
                     button={
                       <UiButton
                         size="small"
@@ -493,7 +585,11 @@ export default function SubmitInfo() {
             onClick={() => setShowTerms(true)}
           />
 
-          <UiButton type="submit" disabled={!agreedWithTermsAndConditions || !isValid}>
+          <UiButton
+            type="submit"
+            disabled={!agreedWithTermsAndConditions || Object.values(errors).filter(Boolean).length > 0} //TODO: fix isValid, 
+            loading={uploadLoading || vendorLoading}
+          >
             Submit application
           </UiButton>
         </form>
@@ -524,6 +620,7 @@ export default function SubmitInfo() {
         perspiciatis quod fuga ullam iste blanditiis ea ut! Lorem ipsum dolor sit amet, consectetur
         adipisicing elit. Reprehenderit a maiores provident doloremque dolore ipsa fugiat at
         officiis, saepe unde libero architecto perspiciatis quod fuga ullam iste blanditiis ea ut!
+        <br/><br/>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Reprehenderit a maiores provident
         doloremque dolore ipsa fugiat at officiis, saepe unde libero architecto perspiciatis quod
         fuga ullam iste blanditiis ea ut! Lorem ipsum dolor sit amet, consectetur adipisicing elit.

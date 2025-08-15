@@ -59,6 +59,7 @@ export function UiModal({
         <DialogActions className="ui-modal__actions">
           {actionButtons.map((button, index) => (
             <UiButton
+              defaultMinWidth
               key={index}
               variant={button.variant || 'contained'}
               onClick={() => {

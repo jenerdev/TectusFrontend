@@ -8,7 +8,8 @@ type ValidationRule<T = unknown> = {
   minValue?: { value: number; message: string };
   maxValue?: { value: number; message: string };
   pattern?: RegExp | { value: RegExp; message: string };
-  validate?: (value: T) => boolean | string;
+  password?: RegExp | { value: RegExp; message: string };
+  custom?: { fn: () => boolean; message?: string };
   disabled?: boolean;
 };
 
@@ -26,6 +27,13 @@ const validate = {
       message: message || 'Invalid email address',
     },
   }),
+  password: (message?: string) => ({
+    pattern: {
+      value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S+$/,
+      message:
+        message || 'Password must contain at least one lowercase, uppercase, number, and symbol',
+    },
+  }),
   url: (url: string) => ({
     pattern: {
       value: /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/,
@@ -34,7 +42,7 @@ const validate = {
   }),
   minLength: (length: number, message: string) => ({
     minLength: {
-      value: 8,
+      value: length,
       message: message || `Must be at least ${length} characters`,
     },
   }),
@@ -48,6 +56,12 @@ const validate = {
     maxValue: {
       value,
       message: message || `Must be less than or equal ${value}`,
+    },
+  }),
+  custom: (validateFn: () => boolean, message?: string) => ({
+    custom: {
+      fn: validateFn,
+      message,
     },
   }),
 };
@@ -104,10 +118,20 @@ export function useForm<T extends Record<string, unknown>>(initialValues: T) {
       if (typeof value === 'string' && !pattern.test(value)) return message;
     }
 
-    if (rules.validate) {
-      const result = rules.validate(value);
-      if (typeof result === 'string') return result;
-      if (result === false) return 'Invalid field';
+    if (rules.password) {
+      const { value: pattern, message } =
+        rules.password instanceof RegExp
+          ? { value: rules.password, message: 'Invalid format' }
+          : rules.password;
+
+      if (typeof value === 'string' && !pattern.test(value)) return message;
+    }
+
+    if (rules.custom) {
+      const { fn, message } = rules.custom;
+
+      const result = fn();
+      if (!result) return message || 'Invalid field';
     }
 
     return null;

@@ -38,7 +38,7 @@ export default function Signup() {
   const { loading, sendRequest } = useApi<
     SignupPostResponse,
     Omit<SignupFormValues, 'repeatPassword'>
-  >(`user/register`, {
+  >(`api/go/user/register`, {
     method: 'POST',
   });
 
@@ -46,7 +46,7 @@ export default function Signup() {
     values,
     register,
     handleSubmit,
-    validate: { required, email, minLength },
+    validate: { required, email, minLength, password },
     errors,
   } = useForm<SignupFormValues>({
     email: '',
@@ -116,7 +116,8 @@ export default function Signup() {
           placeholder="Password"
           {...register('password', {
             ...required('Please enter your password.'),
-            ...minLength(8, 'Password must be at least 8 characters long.'),
+            ...minLength(12, 'Password must be at least 12 characters.'),
+            ...password(),
           })}
           type="password"
           helperText={errors.password}
@@ -128,7 +129,8 @@ export default function Signup() {
           placeholder="Confirm Password"
           {...register('repeatPassword', {
             ...required('Please confirm your password.'),
-            ...minLength(8, 'Password must be at least 8 characters long.'),
+            ...minLength(12, 'Password must be at least 12 characters'),
+            ...password(),
           })}
           type="password"
           helperText={passwordErrorMessage}

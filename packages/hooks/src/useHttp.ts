@@ -45,17 +45,19 @@ export function useHttp<TResponse = any, TBody = any>(
       const refreshToken =
         overrideOptions.refreshToken ?? baseOptions.refreshToken ?? tokens.refreshToken;
 
+      const body = overrideOptions.body ?? baseOptions.body;
+      const isFormData = body instanceof FormData;
       // Merge headers
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         ...(baseOptions.headers ?? {}),
         ...(overrideOptions.headers ?? {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       };
 
       const method = overrideOptions.method ?? baseOptions.method ?? 'GET';
-      const body = overrideOptions.body ?? baseOptions.body;
-      const payload = body ? JSON.stringify(body) : undefined;
+      // const payload = body ? JSON.stringify(body) : undefined;
+      const payload = isFormData ? body : body ? JSON.stringify(body) : undefined;
 
       const finalUrl = url;
 
@@ -75,7 +77,6 @@ export function useHttp<TResponse = any, TBody = any>(
             statusCode: response.status,
           };
 
-          console.error('❌ Response Error:', errObj);
           setError(errObj);
           return { data: null, error: errObj };
         }
@@ -88,7 +89,6 @@ export function useHttp<TResponse = any, TBody = any>(
         const fallbackError: HttpError = {
           message: err?.message || 'Network error',
         };
-        console.error('❌ Fetch Error:', fallbackError);
         setError(fallbackError);
         return { data: null, error: fallbackError };
       } finally {

@@ -11,13 +11,13 @@ type ResetPasswordFormValues = {
 };
 interface ResetPasswordPostResponse {}
 
-export default function ResetPasswordPage() {
+export default function ResetPasswordRequestPage() {
   const { B, E } = useBEM('reset-password-page');
   const router = useRouter();
   const { showSnackbar } = useUiSnackbar();
 
   const { loading, sendRequest } = useApi<ResetPasswordPostResponse, ResetPasswordFormValues>(
-    `user/sendPasswordResetEmail`,
+    `api/go/user/sendPasswordResetEmail`,
     {
       method: 'POST',
     },
@@ -37,18 +37,7 @@ export default function ResetPasswordPage() {
       body: { email },
     });
 
-    // Note: for security reasons, we do not show specific error messages for email existence
-    // if (result.error) {
-    //   showSnackbar('Account with this email does not exist', 'error', {
-    //     anchorOrigin: {
-    //       vertical: 'top',
-    //       horizontal: 'center',
-    //     },
-    //   });
-    //   return;
-    // }
-
-    router.push('/alert/reset-password');
+    router.push('/reset-password/requested');
   };
 
   return (

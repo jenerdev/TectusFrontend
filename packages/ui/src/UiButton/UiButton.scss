@@ -5,4 +5,8 @@ button.ui-button {
   text-transform: initial;
   border-radius: 2em;
   min-width: 11.25rem;
+
+  &--default-min-width {
+    min-width: auto;
+  }
 }

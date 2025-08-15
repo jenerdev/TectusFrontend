@@ -1,8 +1,12 @@
 @use '@tectus/styles/helpers' as *;
 
-.action-page {
+.application-rejected-page {
   min-height: 100vh;
 
   @extend %flex-center-column;
   justify-content: space-around;
+
+  .page-banner__title {
+    color: #c94343; // TODO: centralize color
+  }
 }

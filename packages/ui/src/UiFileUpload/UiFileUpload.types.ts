@@ -12,6 +12,7 @@ export interface FileUploaderProps {
   maxFiles?: number;
   accept?: AcceptType | AcceptType[];
   isSubmitted?: boolean;
+  disabled?: boolean;
 }
 
 export type CommonFileExtension =

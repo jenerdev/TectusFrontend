@@ -1,0 +1,18 @@
+@use '@tectus/styles/helpers' as *;
+
+.pre-signup-page {
+  min-height: 100vh;
+  @extend %flex-center-column;
+  gap: 5rem;
+
+  &__main {
+    @extend %flex-center;
+    align-items: stretch;
+    gap: 3rem;
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 1rem;
+  }
+}

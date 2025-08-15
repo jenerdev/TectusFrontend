@@ -5,7 +5,14 @@ import type { NextRequest } from 'next/server';
  * Routes that require authentication.
  * Keep these in sync with `config.matcher` for performance.
  */
-const protectedRoutes = ['/dashboard', '/verify-email'];
+const protectedRoutes = [
+  '/dashboard',
+  '/submit-info',
+  '/verify-email',
+  '/application-submitted',
+  '/application-rejected',
+  '/application-approved',
+];
 
 /**
  * Middleware to protect certain routes by requiring a valid auth token.
@@ -36,5 +43,12 @@ export function middleware(request: NextRequest) {
  * Only apply middleware to protected paths for better performance.
  */
 export const config = {
-  matcher: ['/dashboard/:path*', '/verify-email', '/profile/:path*'],
+  matcher: [
+    '/dashboard',
+    '/submit-info',
+    '/verify-email',
+    '/application-submitted',
+    '/application-rejected',
+    '/application-approved',
+  ],
 };

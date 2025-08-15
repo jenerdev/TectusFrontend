@@ -15,14 +15,15 @@ export function UiFileUpload({
   button,
   maxFiles = 3,
 	accept,
-  isSubmitted
+  isSubmitted,
+  disabled
 }: FileUploaderProps) {
   const { B, E } = useBEM('ui-file-upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const reachedMaxFiles = files.length >= maxFiles;
 
   const handleButtonClick = () => {
-    if (reachedMaxFiles) return;
+    if (reachedMaxFiles || disabled) return;
     fileInputRef.current?.click();
   };
 
