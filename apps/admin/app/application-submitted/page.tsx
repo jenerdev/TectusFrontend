@@ -50,7 +50,7 @@ export default function ApplicationSubmittedPage() {
 
     
     if (status === UserStatus.APPROVED && pathname === '/application-approved') return;
-    const targetRoute = status ? (statusRoutes[status] ?? '/submit-info') : '/submit-info';
+    const targetRoute = statusRoutes[status] ?? '/submit-info'
     useUserStore.getState().setUser({
       ...userResult.data,
       // ...( !!TEST_STATUS ? { status: TEST_STATUS } : {} ),

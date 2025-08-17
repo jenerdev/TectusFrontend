@@ -275,16 +275,27 @@ export function useForm<T extends object>(initialValues: T) {
     });
   };
 
-  const isValid = (() => {
-    const regs = validations.current as Partial<Record<string, RegisterOptions<T[keyof T]>>>;
+  // const isValid = (() => {
+  //   const regs = validations.current as Partial<Record<string, RegisterOptions<T[keyof T]>>>;
+  //   for (const key in regs) {
+  //     const k = key as keyof T;
+  //     const value = values[k];
+  //     const error = validateField(k, value);
+  //     if (error) return false;
+  //   }
+  //   return true;
+  // })();
+  const isValid = useMemo(() => {
+    const regs = validations.current as Partial<Record<keyof T, RegisterOptions>>;
+    if (Object.keys(regs).length === 0) return false;
+
     for (const key in regs) {
       const k = key as keyof T;
-      const value = values[k];
-      const error = validateField(k, value);
-      if (error) return false;
+      const err = validateField(k, values[k]);
+      if (err) return false;
     }
     return true;
-  })();
+  }, [values]);
 
   const isDirty = Object.values(dirtyFields).some(Boolean);
 

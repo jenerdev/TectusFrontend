@@ -13,7 +13,12 @@ interface HttpOptions<TBody = any> {
   getTokens?: () => { token?: string; refreshToken?: string };
 }
 
-type HttpError = { message: string; statusCode?: number };
+type HttpError = {
+  statusCode: number;
+  error: string;
+  code: string;
+  message: string;
+};
 
 export interface HttpState<TResponse> {
   data: TResponse | null;
@@ -64,17 +69,13 @@ export function useHttp<TResponse = any, TBody = any>(
       try {
         const response = await fetch(finalUrl, { method, headers, body: payload });
 
-        const contentType = response.headers.get('content-type') || '';
-        const isJSON = contentType.includes('application/json');
+        // const contentType = response.headers.get('content-type') || '';
+        // const isJSON = contentType.includes('application/json');
 
         if (!response.ok) {
-          const errorMessage = isJSON
-            ? (await response.json())?.message || response.statusText
-            : await response.text();
-
+          const errorResponse = await response.json();
           const errObj: HttpError = {
-            message: errorMessage || 'Unknown error',
-            statusCode: response.status,
+            ...errorResponse,
           };
 
           setError(errObj);
@@ -86,8 +87,13 @@ export function useHttp<TResponse = any, TBody = any>(
         setData(jsonData);
         return { data: jsonData, error: null };
       } catch (err: any) {
+        let message = 'Unknown error';
+        if (err instanceof Error) message = err.message;
         const fallbackError: HttpError = {
-          message: err?.message || 'Network error',
+          statusCode: 500,
+          error: 'FetchError',
+          code: 'NETWORK_ERROR',
+          message,
         };
         setError(fallbackError);
         return { data: null, error: fallbackError };

@@ -8,7 +8,7 @@ import { useBEM } from '@tectus/hooks';
 import './UiTextField.scss';
 
 const enableGooglePlaces = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_PLACES === 'true';
-type AutocompleteOptions = google.maps.places.AutocompleteOptions;
+
 export interface UiTextFieldProps {
   id?: string;
   name?: string;

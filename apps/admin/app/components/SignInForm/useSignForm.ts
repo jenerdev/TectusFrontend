@@ -38,7 +38,7 @@ export function useSignInForm() {
       emailVerified = false,
     } = loginResult.data || {};
     if (loginResult.error || !token || !refreshToken) {
-      const errorMessage = getErrorMessage(loginResult.error?.message as ApiErrorCode);
+      const errorMessage = getErrorMessage(loginResult.error?.code as ApiErrorCode);
 
       showSnackbar(errorMessage, 'error', {
         anchorOrigin: {
@@ -77,7 +77,7 @@ export function useSignInForm() {
         [UserStatus.REJECTED]: '/application-rejected',
       };
 
-      const targetRoute = status ? (statusRoutes[status] ?? '/submit-info') : '/submit-info';
+      const targetRoute = statusRoutes[status] ?? '/submit-info';
 
       router.push(targetRoute);
       return;

@@ -107,6 +107,13 @@ export default function SubmitInfo() {
     }));
   };
 
+  const clearFiles = (type: attachmentType) => {
+    setFiles((prev) => ({
+      ...prev,
+      [type]: [],
+    }));
+  };
+
   const onSubmitInternal = async (values: ApplicationFormValues) => {
     if (files.logo.length === 0) {
       showSnackbar('Please upload a company logo.', 'error', {
@@ -190,7 +197,7 @@ export default function SubmitInfo() {
     values,
     reset,
     isSubmitAttempted,
-    // isValid, TODO: fix this
+    isValid,
   } = useForm<ApplicationFormValues>({
     email: '',
     fullName: '',
@@ -484,8 +491,14 @@ export default function SubmitInfo() {
                     label="My company is insured"
                     checked={values.isInsured}
                     onChange={(e) => {
-                      reset('insuranceProvider');
-                      setValue('isInsured', e.target.checked);
+
+                      const isChecked = e.target.checked;
+                      if(!isChecked) clearFiles('insurance');
+                      setValue('isInsured', isChecked);
+
+                      setTimeout(() => {
+                        reset('insuranceProvider');
+                      }, 250);
                     }}
                     className={E('company-insured')}
                   />
@@ -531,7 +544,11 @@ export default function SubmitInfo() {
                   <UiCheckbox
                     label="My company is licensed"
                     checked={values.isCompanyLicensed}
-                    onChange={(e) => setValue('isCompanyLicensed', e.target.checked)}
+                    onChange={(e) => {
+                      const isChecked = e.target.checked;
+                      if(!isChecked) clearFiles('license');
+                      setValue('isCompanyLicensed', isChecked);
+                    }}
                     className={E('company-licensed')}
                   />
 
@@ -569,7 +586,7 @@ export default function SubmitInfo() {
 
           <UiButton
             type="submit"
-            disabled={!agreedWithTermsAndConditions || Object.values(errors).filter(Boolean).length > 0} //TODO: fix isValid, 
+            disabled={!agreedWithTermsAndConditions || !isValid}
             loading={uploadLoading || vendorLoading}
           >
             Submit application
