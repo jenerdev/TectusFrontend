@@ -341,11 +341,11 @@ export default function SubmitInfo() {
                     })}
                     helperText={errors.companyAddressLine1}
                     error={Boolean(errors.companyAddressLine1)}
-                    // googlePlaces
-                    // googlePlacesCountry='US'
-                    // onPlaceSelected={(place) => {
-                    //   setValue('companyAddressLine1', place.formatted_address);
-                    // }}
+                    googlePlaces
+                    googlePlacesCountry='US'
+                    onPlaceSelected={(place) => {
+                      setValue('companyAddressLine1', place.formatted_address);
+                    }}
                   />
                   <UiTextField
                     label="Company address (Line 2)"

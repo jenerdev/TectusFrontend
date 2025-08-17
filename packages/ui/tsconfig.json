@@ -5,6 +5,6 @@
     "types": ["vitest/globals", "google.maps"],
     "lib": ["DOM", "ESNext"]
   },
-  "include": ["src", "global.d.ts"],
+  "include": ["src", "types"],
   "exclude": ["node_modules", "dist"]
 }
