@@ -126,15 +126,22 @@ export default function SubmitInfo() {
     }
 
     if (values.isInsured || values.isCompanyLicensed) {
-      const filesDontHaveExpiry = [...files.insurance, ...files.license].some(
-        (item) => !item.expiry,
-      );
-      if (filesDontHaveExpiry) {
-        showSnackbar('File expiration dates are required.', 'error', {
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'center',
-          },
+      const allFiles = [...files.insurance, ...files.license];
+      const hasMissingExpiry = allFiles.some(file => !file.expiry);
+
+      // Check if no files uploaded
+      if (allFiles.length === 0) {
+        const docType = values.isInsured ? "Certificate of Insurance" : "License";
+        showSnackbar(`Please upload at least one ${docType}.`, "error", {
+          anchorOrigin: { vertical: "top", horizontal: "center" },
+        });
+        return;
+      }
+
+      // Check if some files don't have expiry
+      if (hasMissingExpiry) {
+        showSnackbar("File expiration dates are required.", "error", {
+          anchorOrigin: { vertical: "top", horizontal: "center" },
         });
         return;
       }
@@ -165,6 +172,7 @@ export default function SubmitInfo() {
       imageUrl: logoDocument[0]?.file,
       bio: values.bio,
     };
+
     const submitDetailsResult = await vendorRequest({
       body: payload,
     });
