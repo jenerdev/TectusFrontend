@@ -80,8 +80,9 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
       return;
     }
 
-    const options: google.maps.places.AutocompleteOptions = {
-      types: ['geocode'], // You can change this to 'address' or 'establishment'
+    // const options: google.maps.places.AutocompleteOptions = {
+    const options:any = {
+      types: ['geocode']
     };
 
     if (googlePlacesCountry) {
