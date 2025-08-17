@@ -75,10 +75,8 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
   React.useEffect(() => {
      if (typeof window === 'undefined') return;
     if (!enableGooglePlaces || !googlePlaces || !inputRef.current) return;
-    if (!window.google || !window.google.maps?.places) {
-      console.warn(
-        'Google Maps JavaScript API with Places library is not loaded.'
-      );
+    if (!(window as any).google || !(window as any).google.maps?.places) {
+      console.warn("Google Maps API not loaded");
       return;
     }
 

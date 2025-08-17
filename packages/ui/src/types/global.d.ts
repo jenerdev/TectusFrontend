@@ -2,6 +2,6 @@ export {};
 
 declare global {
   interface Window {
-    google: typeof google | undefined;
+    google: any; // 👈 simplest fix
   }
 }
