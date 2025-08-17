@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { UserStatus, useUserStore } from '@/store';
 
@@ -12,12 +12,13 @@ export function useProtectedRoute() {
 
   const router = useRouter();
   const pathname = usePathname();
+  const [decided, setDecided] = useState(false);
 
   // Track if the effect has already run
   const hasRunOnce = useRef(false);
 
   useEffect(() => {
-    if (hasRunOnce.current) return; // Prevent running again
+    if (hasRunOnce.current) return;
     if (!hasHydrated) return;
 
     hasRunOnce.current = true; // Mark as executed
@@ -36,16 +37,21 @@ export function useProtectedRoute() {
     if (token && !emailVerified) {
       route = '/verify-email';
     } else {
-      route = status ? statusRedirects[status] || '' : '';
+      route = statusRedirects[status] ?? '/submit-info';
     }
 
-    if (status === UserStatus.APPROVED && pathname === '/application-approved') return;
+    if (status === UserStatus.APPROVED && pathname === '/application-approved') {
+      setDecided(true);
+      return;
+    }
     if (route && pathname !== route) {
       router.replace(route);
+    } else {
+      setDecided(true);
     }
-  }, [hasHydrated, token, status, emailVerified, pathname, router]);
+  }, [hasHydrated, token, status, emailVerified, pathname, router, setDecided]);
 
   return {
-    hasHydrated,
+    isChecking: !hasHydrated || !decided,
   };
 }

@@ -22,8 +22,8 @@ export default function ApplicationSubmittedPage() {
     method: 'GET',
   });
 
-  const { hasHydrated } = useProtectedRoute();
-  if(!hasHydrated)return;
+  const { isChecking } = useProtectedRoute();
+  if(isChecking)return;
   const handleOnRefresh = async () => {
     const userResult = await sendRequest();
     if (userResult.error || !userResult.data) {
@@ -38,6 +38,7 @@ export default function ApplicationSubmittedPage() {
       return;
     }
 
+    // const TEST_STATUS = UserStatus.APPROVED;
     const status = (userResult.data.status || '').toUpperCase() as UserStatus;
     if(status === UserStatus.PENDING)return;
 
@@ -50,7 +51,10 @@ export default function ApplicationSubmittedPage() {
     
     if (status === UserStatus.APPROVED && pathname === '/application-approved') return;
     const targetRoute = status ? (statusRoutes[status] ?? '/submit-info') : '/submit-info';
-    useUserStore.getState().setUser(userResult.data);
+    useUserStore.getState().setUser({
+      ...userResult.data,
+      // ...( !!TEST_STATUS ? { status: TEST_STATUS } : {} ),
+    });
     router.push(targetRoute);
   };
 

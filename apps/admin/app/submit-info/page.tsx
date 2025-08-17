@@ -5,35 +5,19 @@ import { useBEM, useForm } from '@tectus/hooks';
 import './submit-info-page.scss';
 import { useRouter } from 'next/navigation';
 import { UiCheckbox } from '@tectus/ui';
-import { useUserStore } from '@/store';
+import { User, UserStatus, UserSupportingDocument, useUserStore } from '@/store';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { STATE_CITIES, VENDOR_SERVICES, VENDOR_VEHICLES } from '../constants';
+import { ApiErrorCode, STATE_CITIES, VENDOR_SERVICES, VENDOR_VEHICLES } from '../constants';
 import { FileAttachment, UiFileUpload } from '@tectus/ui';
 // import { isValidUSPhone } from '@tectus/utils'; TODO: need fix
-import { useApi, useProtectedRoute } from '../hooks';
+import { useApi, useApiErrorMessage, useProtectedRoute } from '../hooks';
 import Image from 'next/image';
 
-export type ApplicationFormValues = {
-  email: string;
-  fullName: string;
-  contactNumber: string;
-  companyName: string;
-  companyLegalEntity: string;
+export interface ApplicationFormValues extends Omit<User, 'address' | 'yearFounded'> {
   companyAddressLine1: string;
   companyAddressLine2: string;
   yearFounded?: string;
-  website: string;
-  numberOfEmployees: string;
-  numberOfContractors: string;
-  statesCovered: string[];
-  citiesCovered: string[];
-  servicesOffered: string[];
-  vehiclesUsed?: string[];
-  isInsured: boolean;
-  insuranceProvider: string;
-  isCompanyLicensed: boolean;
-  companyBio: string;
-};
+}
 
 type attachmentType = 'logo' | 'insurance' | 'license';
 type fileAttachments = Record<attachmentType, FileAttachment[]>;
@@ -52,6 +36,7 @@ const rangesOfNumberOptions = [
 export default function SubmitInfo() {
 
   const { B, E } = useBEM('submit-info-page');
+  const { getErrorMessage } = useApiErrorMessage();
   const router = useRouter();
   const user = useUserStore((state) => state.user);
   const [agreedWithTermsAndConditions, setAgreedWithTermsAndConditions] = useState(false);
@@ -73,7 +58,7 @@ export default function SubmitInfo() {
   });
 
   const uploadPerAttachmentType = useCallback(
-    async (type: attachmentType) => {
+    async (type: attachmentType): Promise<UserSupportingDocument[]> => {
       const filesToUpload = files[type].map((file) => file.file);
       if (filesToUpload.length === 0) return [];
 
@@ -151,16 +136,11 @@ export default function SubmitInfo() {
     const insuranceDocuments = await uploadPerAttachmentType('insurance');
     const licenseDocuments = await uploadPerAttachmentType('license');
     const logoDocument = await uploadPerAttachmentType('logo');
-    console.log({
-      insuranceDocuments,
-      licenseDocuments,
-      logoDocument
-    })
-    const payload = {
+    const payload: User = {
       countryCode: 'US',
       fullName: values.fullName,
       companyName: values.companyName,
-      legalEntity: values.companyLegalEntity,
+      legalEntity: values.legalEntity,
       address: [values.companyAddressLine1, values.companyAddressLine2].filter(Boolean).join(', '),
       yearFounded: Number(values.yearFounded),
       website: values.website,
@@ -172,20 +152,19 @@ export default function SubmitInfo() {
       numberOfEmployees: values.numberOfEmployees,
       numberOfContractors: values.numberOfContractors,
       isInsured: values.isInsured,
-      isSubcontractorInsured: false, // request to remove on backend
       isCompanyLicensed: values.isCompanyLicensed,
       insuranceProvider: values.insuranceProvider,
       supportingDocuments: [...insuranceDocuments, ...licenseDocuments],
       imageUrl: logoDocument[0]?.file,
-      bio: values.companyBio,
+      bio: values.bio,
     };
     const submitDetailsResult = await vendorRequest({
       body: payload,
     });
 
     if(submitDetailsResult.error){
-      const message = submitDetailsResult.error.message[0] || 'An unknown error occurred. Please try again later'; // ask BE to standardize the response error
-      showSnackbar(message, 'error', {
+      const errorMessage = getErrorMessage(submitDetailsResult.error?.message as ApiErrorCode);
+      showSnackbar(errorMessage, 'error', {
         anchorOrigin: {
           vertical: 'top',
           horizontal: 'center',
@@ -193,9 +172,12 @@ export default function SubmitInfo() {
       });
       return;
     }
-
-    // update user store
-    reset();
+    useUserStore.getState().setUser({
+      ...user,
+      ...payload,
+      status: UserStatus.PENDING
+    });
+    
     router.push('/application-submitted');
   };
 
@@ -214,7 +196,7 @@ export default function SubmitInfo() {
     fullName: '',
     contactNumber: '',
     companyName: '',
-    companyLegalEntity: '',
+    legalEntity: '',
     companyAddressLine1: '',
     companyAddressLine2: '',
     yearFounded: '',
@@ -228,7 +210,7 @@ export default function SubmitInfo() {
     isInsured: false,
     insuranceProvider: '',
     isCompanyLicensed: false,
-    companyBio: '',
+    bio: '',
   });
 
   useEffect(() => {
@@ -250,22 +232,17 @@ export default function SubmitInfo() {
     if ((values.statesCovered || []).length === 0) return [];
 
     let cities: string[] = [];
-    values.statesCovered.forEach((state) => {
+    (values.statesCovered || []).forEach((state) => {
       cities = cities.concat(STATE_CITIES[state] || []);
     });
     return cities.map((city) => ({ value: city, label: city })) || [];
   }, [values.statesCovered]);
 
-  const { hasHydrated } = useProtectedRoute();
-  if (!hasHydrated) return;
+  const { isChecking } = useProtectedRoute();
+  if (isChecking) return;
 
   return (
     <div className={B()}>
-      {/* <PageBanner
-        hideLogo
-        title="Submit your information"
-        subtitle="Please provide your company details subject to verification by Tectus."
-      /> */}
       
       {/* TODO: Create separate component */}
       <div className='header'>
@@ -328,11 +305,11 @@ export default function SubmitInfo() {
 
                   <UiTextField
                     label="Company legal entity*"
-                    {...register('companyLegalEntity', {
+                    {...register('legalEntity', {
                       ...required('Company Legal Entity is required.'),
                     })}
-                    helperText={errors.companyLegalEntity}
-                    error={Boolean(errors.companyLegalEntity)}
+                    helperText={errors.legalEntity}
+                    error={Boolean(errors.legalEntity)}
                   />
                   <UiTextField
                     label="Company address (Line 1)*"
@@ -341,7 +318,7 @@ export default function SubmitInfo() {
                     })}
                     helperText={errors.companyAddressLine1}
                     error={Boolean(errors.companyAddressLine1)}
-                    googlePlaces
+                    googlePlaces={false}
                     googlePlacesCountry='US'
                     onPlaceSelected={(place) => {
                       setValue('companyAddressLine1', place.formatted_address);
@@ -376,11 +353,11 @@ export default function SubmitInfo() {
                   />
                   <UiTextField
                     label="Company bio*"
-                    {...register('companyBio', {
+                    {...register('bio', {
                       ...required('Company bio is required.'),
                     })}
-                    helperText={errors.companyBio}
-                    error={Boolean(errors.companyBio)}
+                    helperText={errors.bio}
+                    error={Boolean(errors.bio)}
                     multiline
                     rows={3}
                   />

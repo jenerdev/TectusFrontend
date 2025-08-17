@@ -11,8 +11,8 @@ export default function ApplicationApprovedPage() {
 
   const router = useRouter();
   const { B, E } = useBEM('application-approved-page');
-  const { hasHydrated } = useProtectedRoute();
-  if(!hasHydrated)return;
+  const { isChecking } = useProtectedRoute();
+  if(isChecking)return;
 
   const okHandler = async () => {
     router.push('/dashboard');

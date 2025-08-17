@@ -63,12 +63,38 @@ export enum UserStatus {
   REJECTED = 'REJECTED',
   APPROVED = 'APPROVED',
 }
+
+export interface UserSupportingDocument {
+  type: string;
+  file: string;
+  expiry: string | null;
+  details: string;
+}
 export interface User {
-  id: string;
-  email: string;
-  companyName: string;
-  emailVerified: boolean;
+  id?: string;
+  email?: string;
+  companyName?: string;
+  emailVerified?: boolean;
   status?: UserStatus;
+  countryCode?: string;
+  legalEntity?: string;
+  address?: string;
+  yearFounded?: number;
+  website?: string;
+  statesCovered?: string[];
+  citiesCovered?: string[];
+  vehiclesUsed?: string[];
+  servicesOffered?: string[];
+  numberOfEmployees?: string;
+  numberOfContractors?: string;
+  isInsured?: boolean;
+  isCompanyLicensed?: boolean;
+  insuranceProvider?: string;
+  supportingDocuments?: UserSupportingDocument[];
+  contactNumber?: string;
+  fullName?: string;
+  imageUrl?: string;
+  bio?: string;
 }
 
 export interface UserState {

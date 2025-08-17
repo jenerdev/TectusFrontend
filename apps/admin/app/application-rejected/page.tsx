@@ -11,8 +11,8 @@ import { useProtectedRoute } from '../hooks';
 export default function ApplicationRejectedPage() {
   const router = useRouter();
   const { B, E } = useBEM('application-rejected-page');
-  const { hasHydrated } = useProtectedRoute();
-  if(!hasHydrated)return;
+  const { isChecking } = useProtectedRoute();
+  if(isChecking)return;
 
   const goHome = async () => {
     useUserStore.getState().logout();

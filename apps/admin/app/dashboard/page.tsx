@@ -12,8 +12,8 @@ export default function Dashboard() {
   const { B, E } = useBEM('dashboard-page');
   const user = useUserStore((state) => state.user);
   const router = useRouter();
-  const { hasHydrated } = useProtectedRoute();
-  if(!hasHydrated)return;
+  const { isChecking } = useProtectedRoute();
+  if(isChecking)return;
 
 
   const handleLogout = () => {

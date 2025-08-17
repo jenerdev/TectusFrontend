@@ -19,8 +19,8 @@ export default function VerifyEmailPage() {
     method: 'GET',
   });
 
-  const { hasHydrated } = useProtectedRoute();
-  if(!hasHydrated)return;
+  const { isChecking } = useProtectedRoute();
+  if(isChecking)return;
 
   const handleOnRefresh = async () => {
     const userResult = await sendRequest();

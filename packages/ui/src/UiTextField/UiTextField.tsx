@@ -8,7 +8,7 @@ import { useBEM } from '@tectus/hooks';
 import './UiTextField.scss';
 
 const enableGooglePlaces = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_PLACES === 'true';
-
+type AutocompleteOptions = google.maps.places.AutocompleteOptions;
 export interface UiTextFieldProps {
   id?: string;
   name?: string;
@@ -75,14 +75,13 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
   React.useEffect(() => {
      if (typeof window === 'undefined') return;
     if (!enableGooglePlaces || !googlePlaces || !inputRef.current) return;
-
-    const google = (window as any).google;
-    if (!google || !google.maps?.places) {
+    if (!(window as any).google || !(window as any).google.maps?.places) {
       console.warn("Google Maps API not loaded");
       return;
     }
 
     // const options: google.maps.places.AutocompleteOptions = {
+    // NOTE: use type 'any' for now to fixed vercel build error
     const options:any = {
       types: ['geocode']
     };
