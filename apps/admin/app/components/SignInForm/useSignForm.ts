@@ -42,8 +42,8 @@ export function useSignInForm() {
 
       showSnackbar(errorMessage, 'error', {
         anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'center',
+          vertical: 'bottom',
+          horizontal: 'left',
         },
       });
       return;
@@ -57,8 +57,8 @@ export function useSignInForm() {
 
       showSnackbar(errorMessage, 'error', {
         anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'center',
+          vertical: 'bottom',
+          horizontal: 'left',
         },
       });
       return;

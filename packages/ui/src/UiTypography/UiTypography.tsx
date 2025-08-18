@@ -6,6 +6,7 @@ export interface UiTypographyProps {
   className?: string;
   fontWeight?: TypographyProps['fontWeight'];
   color?: TypographyProps['color'];
+  onClick?: TypographyProps['onClick'];
 }
 
 export function UiTypography(props: UiTypographyProps) {

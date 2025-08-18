@@ -1,5 +1,13 @@
 'use client';
-import { UiButton, UiModal, UiSelect, UiTextField, UiTypography, useUiSnackbar } from '@tectus/ui';
+import {
+  UiButton,
+  UiModal,
+  UiSelect,
+  UiTextField,
+  UiTypography,
+  useUiSnackbar,
+  UiSelectProps,
+} from '@tectus/ui';
 import { PageBanner } from '../components';
 import { useBEM, useForm } from '@tectus/hooks';
 import './submit-info-page.scss';
@@ -33,8 +41,8 @@ const rangesOfNumberOptions = [
   { value: '1,000+', label: '1,000+' },
 ];
 
+type GroupedOptions = NonNullable<UiSelectProps['groupedOptions']>;
 export default function SubmitInfo() {
-
   const { B, E } = useBEM('submit-info-page');
   const { getErrorMessage } = useApiErrorMessage();
   const router = useRouter();
@@ -116,33 +124,26 @@ export default function SubmitInfo() {
 
   const onSubmitInternal = async (values: ApplicationFormValues) => {
     if (files.logo.length === 0) {
-      showSnackbar('Please upload a company logo.', 'error', {
-        anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'center',
-        },
-      });
+      showSnackbar('Please upload a company logo.', 'error');
       return;
     }
 
     if (values.isInsured || values.isCompanyLicensed) {
       const allFiles = [...files.insurance, ...files.license];
-      const hasMissingExpiry = allFiles.some(file => !file.expiry);
+      const hasMissingExpiry = allFiles.some((file) => !file.expiry);
 
       // Check if no files uploaded
       if (allFiles.length === 0) {
-        const docType = values.isInsured ? "Certificate of Insurance" : "License";
-        showSnackbar(`Please upload at least one ${docType}.`, "error", {
-          anchorOrigin: { vertical: "top", horizontal: "center" },
+        const docType = values.isInsured ? 'Certificate of Insurance' : 'License';
+        showSnackbar(`Please upload at least one ${docType}.`, 'error', {
+          anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
         });
         return;
       }
 
       // Check if some files don't have expiry
       if (hasMissingExpiry) {
-        showSnackbar("File expiration dates are required.", "error", {
-          anchorOrigin: { vertical: "top", horizontal: "center" },
-        });
+        showSnackbar('File expiration dates are required.', 'error');
         return;
       }
     }
@@ -167,7 +168,7 @@ export default function SubmitInfo() {
       numberOfContractors: values.numberOfContractors,
       isInsured: values.isInsured,
       isCompanyLicensed: values.isCompanyLicensed,
-      insuranceProvider: values.insuranceProvider,
+      // insuranceProvider: values.insuranceProvider,
       supportingDocuments: [...insuranceDocuments, ...licenseDocuments],
       imageUrl: logoDocument[0]?.file,
       bio: values.bio,
@@ -177,22 +178,18 @@ export default function SubmitInfo() {
       body: payload,
     });
 
-    if(submitDetailsResult.error){
+    if (submitDetailsResult.error) {
       const errorMessage = getErrorMessage(submitDetailsResult.error?.message as ApiErrorCode);
-      showSnackbar(errorMessage, 'error', {
-        anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'center',
-        },
-      });
+      showSnackbar(errorMessage, 'error');
       return;
     }
+
     useUserStore.getState().setUser({
       ...user,
       ...payload,
-      status: UserStatus.PENDING
+      status: UserStatus.PENDING,
     });
-    
+
     router.push('/application-submitted');
   };
 
@@ -223,7 +220,7 @@ export default function SubmitInfo() {
     servicesOffered: [],
     vehiclesUsed: [],
     isInsured: false,
-    insuranceProvider: '',
+    // insuranceProvider: '',
     isCompanyLicensed: false,
     bio: '',
   });
@@ -246,11 +243,19 @@ export default function SubmitInfo() {
   const citiesCoveredOptions = useMemo(() => {
     if ((values.statesCovered || []).length === 0) return [];
 
-    let cities: string[] = [];
+    let citiesGroupedByState: GroupedOptions = [];
     (values.statesCovered || []).forEach((state) => {
-      cities = cities.concat(STATE_CITIES[state] || []);
+      const stateCities = (STATE_CITIES[state] || []).map((city) => ({ value: city, label: city }));
+
+      citiesGroupedByState = [
+        ...citiesGroupedByState,
+        {
+          label: state,
+          options: stateCities,
+        },
+      ];
     });
-    return cities.map((city) => ({ value: city, label: city })) || [];
+    return citiesGroupedByState;
   }, [values.statesCovered]);
 
   const { isChecking } = useProtectedRoute();
@@ -258,18 +263,19 @@ export default function SubmitInfo() {
 
   return (
     <div className={B()}>
-      
       {/* TODO: Create separate component */}
-      <div className='header'>
-        <div className='header__container'>
+      <div className="header">
+        <div className="header__container">
           <div className="header__logo">
             <Image src="/logo-tectus.png" alt="Logo" width={60} height={60} />
           </div>
         </div>
       </div>
 
-      <UiTypography variant='h5' fontWeight={700} className={E('title')}>Submit your application</UiTypography>
-      
+      <UiTypography variant="h5" fontWeight={700} className={E('title')}>
+        Submit your application
+      </UiTypography>
+
       <div className={E('form-scroll')}>
         <form className={E('form')} onSubmit={handleSubmit(onSubmitInternal)}>
           <div className={E('form-layout')}>
@@ -334,7 +340,7 @@ export default function SubmitInfo() {
                     helperText={errors.companyAddressLine1}
                     error={Boolean(errors.companyAddressLine1)}
                     googlePlaces
-                    googlePlacesCountry='US'
+                    googlePlacesCountry="US"
                     onPlaceSelected={(place) => {
                       setValue('companyAddressLine1', place.formatted_address);
                     }}
@@ -442,7 +448,7 @@ export default function SubmitInfo() {
 
                   <UiSelect
                     label="Cities Covered"
-                    options={citiesCoveredOptions}
+                    groupedOptions={citiesCoveredOptions}
                     fullWidth
                     register={register('citiesCovered', {
                       ...required('Cities covered is required.'),
@@ -499,19 +505,19 @@ export default function SubmitInfo() {
                     label="My company is insured"
                     checked={values.isInsured}
                     onChange={(e) => {
+                      // const isChecked = e.target.checked;
+                      // if (!isChecked) clearFiles('insurance');
+                      // setValue('isInsured', isChecked);
 
-                      const isChecked = e.target.checked;
-                      if(!isChecked) clearFiles('insurance');
-                      setValue('isInsured', isChecked);
-
-                      setTimeout(() => {
-                        reset('insuranceProvider');
-                      }, 250);
+                      // setTimeout(() => {
+                      //   reset('insuranceProvider');
+                      // }, 250);
+                      setValue('isInsured', e.target.checked);
                     }}
                     className={E('company-insured')}
                   />
 
-                  <UiTextField
+                  {/* <UiTextField
                     label="Insurance provider*"
                     register={register('insuranceProvider', {
                       ...required('Insurance provider is required.'),
@@ -520,9 +526,13 @@ export default function SubmitInfo() {
                     helperText={errors.insuranceProvider}
                     error={Boolean(errors.insuranceProvider)}
                     disabled={!values.isInsured}
-                  />
+                  /> */}
 
                   <UiFileUpload
+                    validTypes={['.pdf']}
+                    onInvalidFile={() =>
+                      showSnackbar('Invalid file type. Please upload a PDF file.', 'error')
+                    }
                     isSubmitted={isSubmitAttempted}
                     files={files.insurance}
                     onFileUpload={(file) => handleFileUpload(file, 'insurance')}
@@ -554,13 +564,17 @@ export default function SubmitInfo() {
                     checked={values.isCompanyLicensed}
                     onChange={(e) => {
                       const isChecked = e.target.checked;
-                      if(!isChecked) clearFiles('license');
+                      if (!isChecked) clearFiles('license');
                       setValue('isCompanyLicensed', isChecked);
                     }}
                     className={E('company-licensed')}
                   />
 
                   <UiFileUpload
+                    validTypes={['.pdf']}
+                    onInvalidFile={() =>
+                      showSnackbar('Invalid file type. Please upload a PDF file.', 'error')
+                    }
                     isSubmitted={isSubmitAttempted}
                     files={files.license}
                     onFileUpload={(file) => handleFileUpload(file, 'license')}
@@ -584,12 +598,16 @@ export default function SubmitInfo() {
 
           <UiCheckbox
             label={
-              <UiTypography className={E('terms')} variant="caption">
+              <UiTypography
+                className={E('terms')}
+                variant="caption"
+                onClick={() => setShowTerms(true)}
+              >
                 I accept the <span>Terms and Conditions</span>
               </UiTypography>
             }
             checked={agreedWithTermsAndConditions}
-            onClick={() => setShowTerms(true)}
+            onChange={(e) => setAgreedWithTermsAndConditions(e.target.checked)}
           />
 
           <UiButton
@@ -627,7 +645,8 @@ export default function SubmitInfo() {
         perspiciatis quod fuga ullam iste blanditiis ea ut! Lorem ipsum dolor sit amet, consectetur
         adipisicing elit. Reprehenderit a maiores provident doloremque dolore ipsa fugiat at
         officiis, saepe unde libero architecto perspiciatis quod fuga ullam iste blanditiis ea ut!
-        <br/><br/>
+        <br />
+        <br />
         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Reprehenderit a maiores provident
         doloremque dolore ipsa fugiat at officiis, saepe unde libero architecto perspiciatis quod
         fuga ullam iste blanditiis ea ut! Lorem ipsum dolor sit amet, consectetur adipisicing elit.

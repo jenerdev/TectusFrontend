@@ -66,8 +66,8 @@ export default function Signup() {
     if (result.error) {
       showSnackbar(result.error.message, 'error', {
         anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'center',
+          vertical: 'bottom',
+          horizontal: 'left',
         },
       });
 

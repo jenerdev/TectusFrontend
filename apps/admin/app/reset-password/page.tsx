@@ -71,8 +71,8 @@ function ResetPasswordForm() {
           apiErrorMessageMapping.GENERIC;
         showSnackbar(message, "error", {
           anchorOrigin: {
-            vertical: "top",
-            horizontal: "center",
+            vertical: "bottom",
+            horizontal: "left",
           },
         });
         return;
@@ -80,8 +80,8 @@ function ResetPasswordForm() {
 
       showSnackbar("Password successfully updated.", "success", {
         anchorOrigin: {
-          vertical: "top",
-          horizontal: "center",
+          vertical: "bottom",
+          horizontal: "left",
         },
         onClose: () => router.push("/signin"),
       });

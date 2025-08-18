@@ -31,8 +31,8 @@ export default function ApplicationSubmittedPage() {
 
       showSnackbar(errorMessage, 'error', {
         anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'center',
+          vertical: 'bottom',
+          horizontal: 'left',
         },
       });
       return;

@@ -14,6 +14,7 @@ import {
   ListItemText,
   InputAdornment,
   FilledInput,
+  ListSubheader,
 } from '@mui/material';
 import { useBEM } from '@tectus/hooks';
 import UiIcon from '../UiIcon/UiIcon';
@@ -30,6 +31,10 @@ export interface UiSelectProps {
   disabled?: boolean;
   multiple?: SelectProps['multiple'];
   options?: Array<MenuItemProps & { label: string }>;
+  groupedOptions?: {
+    label: string;
+    options: Array<MenuItemProps & { label: string }>;
+  }[];
   register?: ReturnType<any>; // props from useForm's register
   onSelect?: SelectProps['onSelect'];
   showCheckboxOption?: boolean;
@@ -48,6 +53,7 @@ export const UiSelect: React.FC<UiSelectProps> = ({
   disabled,
   multiple,
   options,
+  groupedOptions = [],
   register,
   onSelect,
   showCheckboxOption = false,
@@ -91,6 +97,19 @@ export const UiSelect: React.FC<UiSelectProps> = ({
           />
         }
       >
+        
+        {groupedOptions?.flatMap((group) => [
+          <ListSubheader key={group.label}>{group.label}</ListSubheader>,
+          ...group.options.map((option) => (
+            <MenuItem key={option.value as string} value={option.value}>
+              {multiple && showCheckboxOption && (
+                <Checkbox checked={finalValue.includes(option.value)} />
+              )}
+              <ListItemText primary={option.label} />
+            </MenuItem>
+          )),
+        ])}
+
         {options?.map((option) => (
           <MenuItem key={option.value as string} value={option.value}>
             {multiple && showCheckboxOption && (

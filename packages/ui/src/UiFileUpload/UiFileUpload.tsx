@@ -15,8 +15,10 @@ export function UiFileUpload({
   button,
   maxFiles = 3,
 	accept,
+  validTypes,
   isSubmitted,
-  disabled
+  disabled,
+  onInvalidFile
 }: FileUploaderProps) {
   const { B, E } = useBEM('ui-file-upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,7 +32,29 @@ export function UiFileUpload({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
-      onFileUpload(selectedFile);
+      if(!validTypes) {
+        onFileUpload(selectedFile);
+        return;
+      }
+
+      const acceptList = Array.isArray(validTypes) ? validTypes : validTypes.split(',');
+      const isValid = acceptList.some((type) => {
+        type = type.trim();
+        if (type.startsWith('.')) {
+          return selectedFile.name.toLowerCase().endsWith(type.toLowerCase());
+        }
+        if (type.endsWith('/*')) {
+          const baseType = type.replace('/*', '');
+          return selectedFile.type.startsWith(baseType);
+        }
+        return selectedFile.type === type;
+      });
+
+      if (!isValid) {
+        onInvalidFile?.(selectedFile); // 👈 call invalid file handler
+      } else {
+        onFileUpload(selectedFile); // 👈 still call valid file handler
+      }
     }
     // Reset so the same file can be uploaded again
     event.target.value = '';
@@ -73,7 +97,7 @@ export function UiFileUpload({
               error={isSubmitted && !item.expiry}
             />
             <UiIconButton
-              icon="Delete"
+              icon="Clear"
               className={E('file-remove')}
               onClick={() => onFileRemove(index)}
             />
