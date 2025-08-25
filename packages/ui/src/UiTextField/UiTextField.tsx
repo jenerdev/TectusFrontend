@@ -3,9 +3,10 @@
 import * as React from 'react';
 import MuiTextField, { TextFieldProps } from '@mui/material/TextField';
 import { InputAdornment } from '@mui/material';
-import UiIcon from '../UiIcon/UiIcon';
+import UiIcon, { UiIconProps } from '../UiIcon/UiIcon';
 import { useBEM } from '@tectus/hooks';
 import './UiTextField.scss';
+import { JSX, useMemo } from 'react';
 
 const enableGooglePlaces = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_PLACES === 'true';
 
@@ -36,6 +37,8 @@ export interface UiTextFieldProps {
   googlePlacesCountry?: string;
   /** Callback when a place is selected */
   onPlaceSelected?: (place: any) => void;
+
+  endIcon?: UiIconProps['name'];
 }
 
 export const UiTextField: React.FC<UiTextFieldProps> = ({
@@ -65,6 +68,7 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
     register,
     onChange,
     disablePastDates,
+    endIcon,
   } = props;
 
   const { B, E } = useBEM('ui-text-field', className);
@@ -73,29 +77,26 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
 
   // Attach Google Places Autocomplete when googlePlaces is true
   React.useEffect(() => {
-     if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return;
     if (!enableGooglePlaces || !googlePlaces || !inputRef.current) return;
 
     const google = (window as any).google;
     if (!google || !google.maps?.places) {
-      console.warn("Google Maps API not loaded");
+      console.warn('Google Maps API not loaded');
       return;
     }
 
     // const options: google.maps.places.AutocompleteOptions = {
     // NOTE: use type 'any' for now to fixed vercel build error
-    const options:any = {
-      types: ['geocode']
+    const options: any = {
+      types: ['geocode'],
     };
 
     if (googlePlacesCountry) {
       options.componentRestrictions = { country: googlePlacesCountry };
     }
 
-    const autocomplete = new google.maps.places.Autocomplete(
-      inputRef.current,
-      options
-    );
+    const autocomplete = new google.maps.places.Autocomplete(inputRef.current, options);
 
     autocomplete.addListener('place_changed', () => {
       const place = autocomplete.getPlace();
@@ -106,6 +107,21 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
       // No direct destroy method for Autocomplete, GC handles it
     };
   }, [googlePlaces, googlePlacesCountry, onPlaceSelected]);
+
+  const renderEndAdornment = useMemo(() => {
+    if (error) {
+      return (
+        <InputAdornment position="end">
+          <UiIcon name="Error" className={E('error-icon')} />
+        </InputAdornment>
+      );
+    }
+    if (endIcon) return (
+      <InputAdornment position="end" className={E('end-icon')}>
+        <UiIcon name={endIcon} />
+      </InputAdornment>
+    );
+  }, [error, endIcon]);
 
   return (
     <MuiTextField
@@ -137,11 +153,7 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
           : {}),
         input: {
           readOnly: readOnly,
-          endAdornment: error ? (
-            <InputAdornment position="end">
-              <UiIcon name="Error" className={E('error-icon')} />
-            </InputAdornment>
-          ) : null,
+          endAdornment: renderEndAdornment,
           ...(disablePastDates && isDateField
             ? {
                 inputProps: {
@@ -156,7 +168,6 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
 };
 
 export default UiTextField;
-
 
 // 'use client';
 
@@ -184,8 +195,8 @@ export default UiTextField;
 //   disabled?: boolean;
 //   maxRows?: number;
 //   rows?: number;
-//   multiline?: boolean; 
-//   register?: ReturnType<any>;  
+//   multiline?: boolean;
+//   register?: ReturnType<any>;
 //   onChange?: TextFieldProps['onChange'];
 //   disablePastDates?: boolean
 // }
@@ -215,8 +226,6 @@ export default UiTextField;
 //   } = props;
 
 //   const { B, E } = useBEM('ui-text-field', className);
-
-
 
 //   const isDateField = type === 'date';
 
@@ -257,11 +266,11 @@ export default UiTextField;
 //           ) : null,
 
 //           ...( disablePastDates && isDateField ? {
-//             inputProps: { 
-//               min: new Date().toISOString().split('T')[0] 
+//             inputProps: {
+//               min: new Date().toISOString().split('T')[0]
 //             },
 //           } : {})
-          
+
 //         },
 //       }}
 //     />

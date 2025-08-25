@@ -1,13 +1,13 @@
 export interface FileAttachment {
   file: File;
-  expiry: string;
+  expiry?: string;
 }
 
 export interface FileUploaderProps {
   files: FileAttachment[];
   onFileUpload: (file: File) => void;
   onFileRemove: (index: number) => void;
-  onExpiryChange: (index: number, newExpiry: string) => void;
+  onExpiryChange?: (index: number, newExpiry: string) => void;
   button: React.ReactNode;
   maxFiles?: number;
   // Block right away

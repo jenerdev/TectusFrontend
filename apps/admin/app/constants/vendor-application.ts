@@ -129,3 +129,14 @@ export const VENDOR_VEHICLES = [
   'Armored',
   'No Vehicles',
 ];
+
+export const RANGES_OF_NUMBER_OPTIONS = [
+  { value: '1-9', label: '1-9' },
+  { value: '11-49', label: '11-49' },
+  { value: '50-99', label: '50-99' },
+  { value: '100-199', label: '100-199' },
+  { value: '200-249', label: '200-249' },
+  { value: '250-499', label: '250-499' },
+  { value: '500-999', label: '500-999' },
+  { value: '1,000+', label: '1,000+' },
+];

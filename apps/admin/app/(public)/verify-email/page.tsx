@@ -1,0 +1,56 @@
+'use client';
+
+import { useBEM } from '@tectus/hooks';
+import './verify-email-page.scss'; 
+import { User, useUserStore } from '@/store'; 
+import { UiButton, useUiSnackbar } from '@tectus/ui';
+import { useRouter } from 'next/navigation';
+import { useApi, useApiErrorMessage, useProtectedRoute } from '@/app/hooks';
+import { ApiErrorCode } from '@/app/constants';
+import { PageBanner } from '@/app/components';
+
+export default function VerifyEmailPage() {
+  const router = useRouter();
+  const { B, E } = useBEM('verify-email-page');
+  const { getErrorMessage } = useApiErrorMessage();
+  const { showSnackbar } = useUiSnackbar();
+  const { loading, sendRequest } = useApi<User>(`api/go/user/me`, {
+    method: 'GET',
+  });
+
+  const { isChecking } = useProtectedRoute();
+  if(isChecking)return;
+
+  const handleOnRefresh = async () => {
+    const userResult = await sendRequest();
+    if (userResult.error || !userResult.data) {
+      const errorMessage = getErrorMessage(userResult.error?.message as ApiErrorCode);
+
+      showSnackbar(errorMessage, 'error', {
+        anchorOrigin: {
+          vertical: 'bottom',
+          horizontal: 'left',
+        },
+      });
+      return;
+    }
+    if(userResult.data.emailVerified){
+      useUserStore.getState().setUser(userResult.data);
+      router.push('/submit-info');
+    }
+    
+  };
+
+  return (
+    <div className={B()}>
+      <PageBanner
+        title="Verify your email"
+        subtitle="Please check your email for the verification link we sent you."
+      />
+
+      <UiButton onClick={handleOnRefresh} className={E('button')} loading={loading}>
+        Refresh
+      </UiButton>
+    </div>
+  );
+}

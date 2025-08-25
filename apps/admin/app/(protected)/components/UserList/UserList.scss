@@ -1,0 +1,36 @@
+.user-list {
+  &__status {
+    font-weight: bold;
+    &--available {
+      color: #00ff66;
+    }
+
+    &--clocked_in {
+      color: #00cccc;
+    }
+
+    &--busy {
+      color: #ff9900;
+    }
+
+    &--pending_profile_approval {
+      color: #ff9900;
+    }
+
+    &--invited {
+      color: gray;
+    }
+
+    &--pending_documents {
+      color: #ff9900;
+    }
+
+    &--archived {
+      color: gray;
+    }
+
+    &--removed {
+      color: red;
+    }
+  }
+}

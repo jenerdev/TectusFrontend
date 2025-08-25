@@ -1,0 +1,11 @@
+.employees-overview {
+  &__banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    > h5 {
+      color: #d4af37;
+    }
+  }
+}

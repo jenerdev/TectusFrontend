@@ -1,0 +1,37 @@
+@use '@tectus/styles/helpers' as *;
+
+.invite-users-modal {
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  &__field-email-wrapper {
+    @extend %flex-center;
+  }
+
+  &__field {
+    @include respond-to(tablet-lg) {
+      width: 22rem !important;
+    }
+  }
+
+  &__upload-btn {
+    display: none !important;
+
+    @include respond-to(tablet-lg) {
+      display: block !important;
+    }
+
+    > span {
+      color: #fff;
+      display: inline-block;
+      margin-right: 0.5rem;
+    }
+  }
+
+  .ui-modal__content {
+    overflow: hidden;
+  }
+}

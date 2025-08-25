@@ -35,22 +35,33 @@ export const getDesignTokens = (mode: 'light' | 'dark') => ({
     MuiDialog: {
       styleOverrides: {
         paper: {
-          backgroundColor: '#ffffff',
-          color: '#333333',
+          backgroundColor: '#222222',
+          backgroundImage: 'none',
+          color: '#CCCCCC',
+          borderRadius: '32px',
         },
       },
     },
     MuiDialogTitle: {
       styleOverrides: {
         root: {
-          color: '#333333',
+          padding: '1.5rem 2rem',
         },
       },
     },
     MuiDialogContent: {
       styleOverrides: {
         root: {
-          color: '#333333',
+          paddingLeft: '2rem',
+          paddingRight: '2rem',
+        },
+      },
+    },
+    MuiDialogActions: {
+      styleOverrides: {
+        root: {
+          paddingLeft: '2rem',
+          paddingRight: '2rem',
         },
       },
     },

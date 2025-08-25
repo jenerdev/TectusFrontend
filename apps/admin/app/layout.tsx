@@ -5,7 +5,6 @@ import './main.scss';
 import { ThemeProvider } from '@tectus/ui/ThemeProvider';
 import { UiSnackbarProvider } from '@tectus/ui';
 import Script from 'next/script';
-import { TempLogout } from './components';
 
 
 export const metadata: Metadata = {
@@ -27,7 +26,6 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
         <ThemeProvider>
-          <TempLogout/>
           <UiSnackbarProvider>
             {children}
           </UiSnackbarProvider>

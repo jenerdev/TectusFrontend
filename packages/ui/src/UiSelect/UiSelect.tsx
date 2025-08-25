@@ -39,6 +39,7 @@ export interface UiSelectProps {
   onSelect?: SelectProps['onSelect'];
   showCheckboxOption?: boolean;
   variant?: SelectProps['variant'];
+  readOnly?: boolean;
 }
 
 export const UiSelect: React.FC<UiSelectProps> = ({
@@ -58,6 +59,7 @@ export const UiSelect: React.FC<UiSelectProps> = ({
   onSelect,
   showCheckboxOption = false,
   variant = 'filled',
+  readOnly=false
 }) => {
   const { B, E } = useBEM('ui-select');
 
@@ -67,7 +69,7 @@ export const UiSelect: React.FC<UiSelectProps> = ({
     <FormControl fullWidth={fullWidth} className={B(size)} error={error} variant={variant}>
       {label && <InputLabel id={`${id}-label`}>{label}</InputLabel>}
 
-      <Select
+      <Select 
         labelId={`${id}-label`}
         id={id}
         name={register?.name}
@@ -81,6 +83,7 @@ export const UiSelect: React.FC<UiSelectProps> = ({
         disabled={disabled}
         onSelect={onSelect}
         multiple={multiple}
+        readOnly={readOnly}
         renderValue={(selected) => {
           if (Array.isArray(selected)) return selected.join(', ');
           return selected;

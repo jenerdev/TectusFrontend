@@ -4,7 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { UserStatus, useUserStore } from '@/store';
 
-export function useProtectedRoute() {
+interface useProtectedRouteProps {
+  bypassApproved?: boolean; // Note as long as the user is approved, they will be stay on current route
+}
+
+export function useProtectedRoute(props?: useProtectedRouteProps) {
+  const { bypassApproved = false } = props || {};
+
   const token = useUserStore((state) => state.token);
   const emailVerified = useUserStore((state) => state.user?.emailVerified);
   const status = useUserStore((state) => (state.user?.status || '').toUpperCase() as UserStatus);
@@ -40,7 +46,10 @@ export function useProtectedRoute() {
       route = statusRedirects[status] ?? '/submit-info';
     }
 
-    if (status === UserStatus.APPROVED && pathname === '/application-approved') {
+    if (
+      status === UserStatus.APPROVED &&
+      (pathname === '/application-approved' || bypassApproved)
+    ) {
       setDecided(true);
       return;
     }

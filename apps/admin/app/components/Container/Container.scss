@@ -1,0 +1,13 @@
+.container {
+  width: calc(100% - 2rem);
+  max-width: 1440px;
+  margin: auto;
+
+  &--no-padding {
+    width: 100%;
+  }
+
+  &--inner {
+    max-width: 1280px;
+  }
+}

@@ -20,6 +20,8 @@ export interface UIButtonProps {
   topspacing?: number;
   startIcon?: UiIconProps['name'];
   defaultMinWidth?: boolean;
+  color?: ButtonProps['color'];
+  fontWeight?: number;
 }
 
 export function UiButton({
@@ -34,7 +36,9 @@ export function UiButton({
   fullWidth,
   topspacing = 0,
   startIcon,
-  defaultMinWidth
+  defaultMinWidth,
+  color,
+  fontWeight
 }: UIButtonProps) {
 
   const { B } = useBEM('ui-button', className);
@@ -54,8 +58,10 @@ export function UiButton({
         disabled={disabled}
         loading={loading}
         fullWidth={fullWidth}
-        sx={{ mt: topspacing }} 
+        sx={{ mt: topspacing}} 
         startIcon={getStartIcon(startIcon)}
+        color={color}
+        style={{ fontWeight } }
     >
       {children}
      </Button>

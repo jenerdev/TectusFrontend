@@ -1,0 +1,29 @@
+@use '@tectus/styles/helpers' as *;
+
+.user-list-filter {
+  display: flex;
+
+  &__form {
+    flex: 1;
+    display: flex;
+    gap: 1rem;
+    margin-right: auto;
+
+    > div:not(:first-child) {
+      width: 15rem;
+      display: none;
+
+      @include respond-to(tablet-lg) {
+        display: inline-flex;
+      }
+    }
+
+    > div:first-child {
+      width: 100%;
+
+      @include respond-to(tablet-lg) {
+        width: 22.5rem;
+      }
+    }
+  }
+}

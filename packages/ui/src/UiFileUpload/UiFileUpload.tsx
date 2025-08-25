@@ -92,7 +92,7 @@ export function UiFileUpload({
               placeholder="Expiry*"
               type="date"
               value={item.expiry}
-              onChange={(e) => onExpiryChange(index, e.target.value)}
+              onChange={(e) => onExpiryChange ? onExpiryChange(index, e.target.value) : null}
               disablePastDates
               error={isSubmitted && !item.expiry}
             />

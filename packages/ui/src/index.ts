@@ -17,3 +17,7 @@ export * from './UiIcon';
 export * from './UiModal';
 export * from './UiIconButton';
 export * from './UiCheckbox';
+export * from './UiMenu';
+export * from './UiTabs';
+export * from './UiCard';
+export * from './UiTable';

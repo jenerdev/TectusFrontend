@@ -7,17 +7,28 @@ export interface UiTypographyProps {
   fontWeight?: TypographyProps['fontWeight'];
   color?: TypographyProps['color'];
   onClick?: TypographyProps['onClick'];
+  bold?: boolean;
 }
 
-export function UiTypography(props: UiTypographyProps) {
-  const propsWithDefaults = {
-    ...props,
-    variant: props.variant || 'body2',
-  }
-
+export function UiTypography({
+  variant = 'body2',
+  children,
+  className,
+  fontWeight,
+  color,
+  onClick,
+  bold,
+}: UiTypographyProps) {
   return (
-    <Typography {...propsWithDefaults}>
-      {props.children}
+    <Typography
+      variant={variant}
+      className={className}
+      fontWeight={fontWeight}
+      color={color}
+      onClick={onClick}
+      {...(bold && { fontWeight: 700 })}
+    >
+      {children}
     </Typography>
   );
 }

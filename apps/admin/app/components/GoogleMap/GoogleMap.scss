@@ -1,0 +1,11 @@
+@use '@tectus/styles/helpers' as *;
+
+.google-map {
+  width: 100%;
+  height: 440px;
+  border-radius: 10px;
+
+  @include respond-to(tablet-lg) {
+    height: 600px;
+  }
+}

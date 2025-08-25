@@ -1,0 +1,13 @@
+@use '@tectus/styles/helpers' as *;
+
+.header {
+  @extend %flex-center;
+  height: 120px;
+  width: 100%;
+  background-color: #111111;
+
+  &__container {
+    @extend %flex-center;
+    justify-content: space-between;
+  }
+}

@@ -1,0 +1,90 @@
+@use '@tectus/styles/helpers' as *;
+
+.dashboard-page {
+  &__container {
+    padding: 3rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  &__card-container {
+    display: flex;
+    gap: 2rem;
+  }
+
+  &__card-section {
+    flex: 1;
+    display: flex;
+    flex-flow: column;
+    gap: 1rem;
+
+    &-title,
+    &-action {
+      color: #d4af37;
+    }
+
+    &-action {
+      text-align: right;
+      cursor: pointer;
+    }
+  }
+
+  &__card-section-title {
+    display: none;
+    @include respond-to(tablet-lg) {
+      display: block;
+    }
+  }
+
+  &__tabs {
+    @include respond-to(tablet-lg) {
+      display: none !important;
+    }
+  }
+
+  // &__employee-overview-banner {
+  //   display: flex;
+  //   justify-content: space-between;
+  //   align-items: center;
+
+  //   > h5 {
+  //     color: #d4af37;
+  //   }
+  // }
+
+  // &__status {
+  //   font-weight: bold;
+  //   &--available {
+  //     color: #00ff66;
+  //   }
+
+  //   &--clocked_in {
+  //     color: #00cccc;
+  //   }
+
+  //   &--busy {
+  //     color: #ff9900;
+  //   }
+
+  //   &--pending_profile_approval {
+  //     color: #ff9900;
+  //   }
+
+  //   &--invited {
+  //     color: gray;
+  //   }
+
+  //   &--pending_documents {
+  //     color: #ff9900;
+  //   }
+
+  //   &--archived {
+  //     color: gray;
+  //   }
+
+  //   &--removed {
+  //     color: red;
+  //   }
+  // }
+}
