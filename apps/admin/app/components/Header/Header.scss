@@ -2,12 +2,17 @@
 
 .header {
   @extend %flex-center;
-  height: 120px;
+  height: 7.5rem;
   width: 100%;
   background-color: #111111;
 
   &__container {
     @extend %flex-center;
     justify-content: space-between;
+  }
+
+  &__logo {
+    width: 5rem;
+    height: 5rem;
   }
 }

@@ -1,6 +1,6 @@
 .container {
   width: calc(100% - 2rem);
-  max-width: 1440px;
+  max-width: 90rem;
   margin: auto;
 
   &--no-padding {
@@ -8,6 +8,6 @@
   }
 
   &--inner {
-    max-width: 1280px;
+    max-width: 80rem;
   }
 }

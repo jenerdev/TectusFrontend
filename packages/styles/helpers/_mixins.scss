@@ -1,19 +1,25 @@
 @use 'sass:map';
 
 $breakpoints: (
-  mobile: 480px,
+  mobile: 30rem,
+  //480px,
   // mobile phones
-  tablet-sm: 600px,
+  tablet-sm: 37.5rem,
+  //600px,
   // small tablets (7" portrait)
-  tablet-md: 768px,
+  tablet-md: 48rem,
+  //768px,
   // medium tablets (8"–10" portrait)
-  tablet-lg: 900px,
+  tablet-lg: 56.25rem,
+  //900px,
   // large tablets (landscape)
-  laptop: 1024px,
+  laptop: 64rem,
+  //1024px,
   // small laptops
-  desktop: 1280px,
+  desktop: 80rem,
+  //1280px,
   // standard desktops
-  desktop-lg: 1536px, // large desktops / wide screens
+  desktop-lg: 96rem, //1536px, // large desktops / wide screens
 );
 
 @mixin respond-to($breakpoint) {

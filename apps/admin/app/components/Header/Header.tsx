@@ -30,7 +30,7 @@ export function Header({}: HeaderProps) {
       <Container className={E('container')}>
 
         <AppLink href='/dashboard'>
-          <Image src="/logo-tectus.png" alt="Logo" width={80} height={80} />
+          <Image src="/logo-tectus.png" alt="Logo" width={80} height={80} className={E('logo')}/>
         </AppLink>
 
         <UiMenu
