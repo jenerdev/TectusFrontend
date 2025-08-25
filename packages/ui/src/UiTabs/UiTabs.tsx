@@ -9,7 +9,8 @@ export interface UiTabsProps {
   variant?: TabsProps['variant'];
   scrollButtons?: TabsProps['scrollButtons'];
   allowScrollButtonsMobile?: TabsProps['allowScrollButtonsMobile'];
-  className?: string
+  className?: string;
+  color?: TabsProps['color'];
 }
 
 export function UiTabs({
@@ -19,7 +20,8 @@ export function UiTabs({
   items,
   scrollButtons,
   allowScrollButtonsMobile,
-  className
+  className,
+  color
 }: UiTabsProps) {
   return (
     <Tabs
@@ -28,7 +30,18 @@ export function UiTabs({
       variant={variant}
       scrollButtons={scrollButtons}
       allowScrollButtonsMobile={allowScrollButtonsMobile}
-      className={className}
+      className={className} 
+      sx={color ? {
+        "& .MuiTabs-indicator": {
+          backgroundColor: `${color}`, 
+        },
+        "& .MuiTab-root": {
+          color: `${color}`, 
+        },
+        "& .Mui-selected": {
+          color: `${color}`, 
+        },
+      } : {}}
     >
       {items.map(({ label, path }, index) => (
         <Tab

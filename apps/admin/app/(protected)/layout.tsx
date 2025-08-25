@@ -28,7 +28,6 @@ export default function RootLayout({
   const { isChecking } = useProtectedRoute({ bypassApproved: true });
   if (isChecking) return;
 
-  console.log('TEST');
   const currentTab = tabs.findIndex((t) => pathname.startsWith(t.path));
 
   return (

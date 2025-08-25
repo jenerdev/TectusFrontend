@@ -16,13 +16,16 @@ export interface UiTableProps {
   mobileColumns?: Column[];
   data: Record<string, any>[];
   className?: string;
+
+  //TEMP
+  variant?: 'default' | 'highlighted';
 }
 
-export function UiTable({ columns, mobileColumns, data, className }: UiTableProps) {
+export function UiTable({ columns, mobileColumns, data, className, variant = 'default' }: UiTableProps) {
   const { B, E } = useBEM('ui-table');
   const { isLessThan } = useBreakpoint();
 
-  const displayedColumns = isLessThan('tablet-md') ? (mobileColumns || []): columns;
+  const displayedColumns = isLessThan('tablet-md') ? (mobileColumns || columns): columns;
 
   return (
     <div className={B(className)}>
@@ -30,7 +33,7 @@ export function UiTable({ columns, mobileColumns, data, className }: UiTableProp
         <thead className={E('head')}>
           <tr>
             {displayedColumns.map((col) => (
-              <th key={col.key} className={E('th')}>
+              <th key={col.key} className={E('th', variant)}>
                 {col.label}
               </th>
             ))}

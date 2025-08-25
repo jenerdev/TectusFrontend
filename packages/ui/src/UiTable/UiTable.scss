@@ -16,6 +16,10 @@
   &__th {
     background-color: #d4af37;
     color: #333333;
+
+    &--highlighted {
+      background-color: #00cccc;
+    }
   }
 
   &__td {

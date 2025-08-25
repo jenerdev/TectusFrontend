@@ -2,7 +2,7 @@
 
 import { useBEM } from '@tectus/hooks';
 import './InviteUsersBulkModal.scss';
-import { AppLink, FileAttachment, UiButton, UiFileUpload, UiModal, UiModalProps, UiSelect, UiTextField, UiTypography } from '@tectus/ui';
+import { AppLink, FileAttachment, UiButton, UiFileUpload, UiModal, UiModalProps, UiSelect, UiTextField, UiTypography, useUiSnackbar } from '@tectus/ui';
 import { useState } from 'react';
 
 export interface InviteUsersBulkModalProps {
@@ -12,7 +12,7 @@ export interface InviteUsersBulkModalProps {
 
 export function InviteUsersBulkModal({ open, onClose }: InviteUsersBulkModalProps) {
   const { B, E } = useBEM('invite-users-bulk-modal');
-
+  const { showSnackbar } = useUiSnackbar();
   const [csv, setCsv] = useState<FileAttachment>();
 
   return (
@@ -56,7 +56,10 @@ export function InviteUsersBulkModal({ open, onClose }: InviteUsersBulkModalProp
       </ul>
 
       <UiFileUpload
-        accept={['.jpg', '.jpeg', '.png', '.gif', '.webp']}
+        validTypes={['.csv']}
+        onInvalidFile={() =>
+          showSnackbar('Invalid file type. Please upload a CSV file.', 'error')
+        }
         files={[csv].filter(Boolean) as FileAttachment[]}
         onFileUpload={(file: File) => setCsv({file})}
         onFileRemove={() => setCsv(undefined)}
