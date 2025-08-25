@@ -1,8 +1,8 @@
 'use client';
 
-import { Page,  } from '../../components';
+import { Container, Page,  } from '../../components';
 import { useBEM } from '@tectus/hooks';
-// import './earnings-page.scss';
+import './earnings-page.scss';
 
 export default function EarningsPage() {
   const { B, E } = useBEM('earnings-page');
@@ -11,10 +11,9 @@ export default function EarningsPage() {
 
   return (
     <Page id="earnings-page" className={B()}>
-      
-      <div className={E('content')}>
-        Earnings
-      </div>
+      <Container inner className={E('container')}>
+        Earnings Page
+      </Container>
     </Page>
   );
 }

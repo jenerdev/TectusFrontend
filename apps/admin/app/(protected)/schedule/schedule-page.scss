@@ -1,0 +1,10 @@
+@use '@tectus/styles/helpers' as *;
+
+.schedule-page {
+  &__container {
+    padding: 3rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+}

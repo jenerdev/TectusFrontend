@@ -1,8 +1,8 @@
 'use client';
 
-import { Page,  } from '../../components';
+import { Container, Page,  } from '../../components';
 import { useBEM } from '@tectus/hooks';
-// import './schedule-page.scss';
+import './schedule-page.scss';
 
 export default function SchedulePage() {
   const { B, E } = useBEM('schedule-page');
@@ -10,11 +10,10 @@ export default function SchedulePage() {
 
 
   return (
-    <Page id="schedule-page" className={B()}>
-      
-      <div className={E('content')}>
+    <Page id="schedule-page" className={B()}>      
+      <Container inner className={E('container')}>
         Schedule Page
-      </div>
+      </Container>
     </Page>
   );
 }
