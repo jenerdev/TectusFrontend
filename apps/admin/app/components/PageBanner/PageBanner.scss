@@ -17,4 +17,11 @@
     max-width: 20rem;
     line-height: 1.25rem !important;
   }
+
+  &__logo {
+    img {
+      height: 9.375rem;
+      width: 9.375rem;
+    }
+  }
 }
