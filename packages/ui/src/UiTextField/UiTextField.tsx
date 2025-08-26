@@ -111,8 +111,8 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
   const renderEndAdornment = useMemo(() => {
     if (error) {
       return (
-        <InputAdornment position="end">
-          <UiIcon name="Error" className={E('error-icon')} />
+        <InputAdornment position="end" className={E('error-icon')}>
+          <UiIcon name="Error" />
         </InputAdornment>
       );
     }
