@@ -9,6 +9,10 @@
   &__container {
     @extend %flex-center;
     justify-content: space-between;
+
+    &--center {
+      justify-content: center;
+    }
   }
 
   &__logo {

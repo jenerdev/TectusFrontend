@@ -7,6 +7,7 @@ import {
   UiTypography,
   useUiSnackbar,
   UiSelectProps,
+  AppLink,
 } from '@tectus/ui';
 import { useBEM, useForm } from '@tectus/hooks';
 import './submit-info-page.scss';
@@ -256,7 +257,7 @@ export default function SubmitInfo() {
       <div className="header">
         <div className="header__container">
           <div className="header__logo">
-            <Image src="/logo-tectus.png" alt="Logo" width={60} height={60} />
+            <Image src="/logo-tectus-go.png" alt="Logo" width={60} height={60} />
           </div>
         </div>
       </div>
@@ -588,9 +589,9 @@ export default function SubmitInfo() {
               <UiTypography
                 className={E('terms')}
                 variant="caption"
-                onClick={() => setShowTerms(true)}
+                // onClick={() => setShowTerms(true)}
               >
-                I accept the <span>Terms and Conditions</span>
+                I accept the <AppLink href="/terms-and-conditions" target='_blank'>Terms and Conditions</AppLink>
               </UiTypography>
             }
             checked={agreedWithTermsAndConditions}

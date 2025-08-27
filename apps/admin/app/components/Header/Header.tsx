@@ -9,9 +9,12 @@ import { useUserStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { AppLink } from '@tectus/ui';
 
-interface HeaderProps {}
+interface HeaderProps {
+  center?: boolean;
+  noMenu?: boolean;
+}
 
-export function Header({}: HeaderProps) {
+export function Header({ center=false, noMenu=false }: HeaderProps) {
   const { B, E } = useBEM('header');
   const user = useUserStore((state) => state.user);
   const router = useRouter();
@@ -23,37 +26,42 @@ export function Header({}: HeaderProps) {
 
   const gotoProfile = () => {
     router.push(`/profile`);
-  }
+  };
 
   return (
     <div className={B()}>
-      <Container className={E('container')}>
-
-        <AppLink href='/dashboard'>
-          <Image src="/logo-tectus.png" alt="Logo" width={80} height={80} className={E('logo')}/>
+      <Container className={E('container', center ? 'center' : '')}>
+        <AppLink href="/dashboard">
+          <Image src="/logo-tectus-go.png" alt="Logo" width={80} height={80} className={E('logo')} />
         </AppLink>
 
-        <UiMenu
-          items={[
-            {
-              icon: <UiIcon name="AccountCircle" size='large' />,
-              type: 'icon',
-              subMenuItems: [
-                { 
-                  label: user?.email || '',
-                  icon: <UiIcon name="Email" size='small' />,
-                },
-                {
-                  label: 'Profile',
-                  icon: <UiIcon name="AccountBox" size='small' />,
-                  onClick: gotoProfile
-                },
-                { divider: true, label: '' },
-                { label: 'Logout', icon: <UiIcon name="Logout" size='small' />, onClick: onLogout },
-              ],
-            },
-          ]}
-        />
+        {!noMenu && user && (
+          <UiMenu
+            items={[
+              {
+                icon: <UiIcon name="AccountCircle" size="large" />,
+                type: 'icon',
+                subMenuItems: [
+                  {
+                    label: user?.email || '',
+                    icon: <UiIcon name="Email" size="small" />,
+                  },
+                  {
+                    label: 'Profile',
+                    icon: <UiIcon name="AccountBox" size="small" />,
+                    onClick: gotoProfile,
+                  },
+                  { divider: true, label: '' },
+                  {
+                    label: 'Logout',
+                    icon: <UiIcon name="Logout" size="small" />,
+                    onClick: onLogout,
+                  },
+                ],
+              },
+            ]}
+          />
+        )}
       </Container>
     </div>
   );
