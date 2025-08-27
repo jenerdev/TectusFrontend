@@ -2,9 +2,17 @@
 
 .signup-page {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-  @extend %flex-center-column;
   gap: 2rem;
+
+  &__banner {
+    height: 45vh;
+    display: flex;
+    align-items: flex-end;
+  }
 
   &__form {
     @extend %flex-center-column;

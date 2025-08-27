@@ -94,9 +94,12 @@ export default function Signup() {
 
   return (
     <div className={B()}>
-      <PageBanner
-        title="Sign up for Tectus GO"
-      />
+      
+      <div className={E('banner')}>
+          <PageBanner
+          title="Sign up for Tectus GO"
+        />
+      </div>
 
       <form className={E('form')} onSubmit={handleSubmit(handleOnSubmit)}>
         <UiTextField
@@ -109,6 +112,7 @@ export default function Signup() {
           type="email"
           helperText={errors.email}
           error={Boolean(errors.email)}
+          helperTextPosition='relative'
         />
 
         <UiTextField
@@ -122,6 +126,7 @@ export default function Signup() {
           type="password"
           helperText={errors.password}
           error={Boolean(errors.password)}
+          helperTextPosition='relative'
         />
 
         <UiTextField
@@ -135,6 +140,7 @@ export default function Signup() {
           type="password"
           helperText={passwordErrorMessage}
           error={Boolean(errors.repeatPassword) || passwordNotMatch}
+          helperTextPosition='relative'
         />
 
         <UiButton type="submit" loading={loading || signInLoading} topspacing={3}>
