@@ -3,6 +3,16 @@ import { useState, useCallback, useEffect } from 'react';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
+interface Tokens {
+  token?: string;
+  refreshToken?: string;
+}
+
+interface RefreshedTokens {
+  idToken: string;
+  refreshToken: string;
+}
+
 interface HttpOptions<TBody = any> {
   method?: HttpMethod;
   headers?: Record<string, string>;
@@ -10,10 +20,11 @@ interface HttpOptions<TBody = any> {
   auto?: boolean;
   token?: string;
   refreshToken?: string;
-  getTokens?: () => { token?: string; refreshToken?: string };
+  getToken?: () => string | undefined;
+  refreshAuthToken?: () => Promise<RefreshedTokens | null>;
 }
 
-type HttpError = {
+export type HttpError = {
   statusCode: number;
   error: string;
   code: string;
@@ -44,62 +55,84 @@ export function useHttp<TResponse = any, TBody = any>(
       setLoading(true);
       setError(null);
 
-      // Get tokens from baseOptions or overrideOptions
-      const tokens = baseOptions.getTokens?.() || {};
-      const token = overrideOptions.token ?? baseOptions.token ?? tokens.token;
-      const refreshToken =
-        overrideOptions.refreshToken ?? baseOptions.refreshToken ?? tokens.refreshToken;
+      const getTokenValue = baseOptions.getToken?.();
+      let token = overrideOptions.token ?? baseOptions.token ?? getTokenValue;
 
       const body = overrideOptions.body ?? baseOptions.body;
       const isFormData = body instanceof FormData;
-      // Merge headers
+
+      const defaultHeaders: Record<string, string> = isFormData
+        ? {}
+        : { 'Content-Type': 'application/json' };
+
       const headers: Record<string, string> = {
-        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+        ...defaultHeaders,
         ...(baseOptions.headers ?? {}),
         ...(overrideOptions.headers ?? {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       };
 
       const method = overrideOptions.method ?? baseOptions.method ?? 'GET';
-      // const payload = body ? JSON.stringify(body) : undefined;
       const payload = isFormData ? body : body ? JSON.stringify(body) : undefined;
 
-      const finalUrl = url;
+      const attemptRequest = async (
+        customHeaders: Record<string, string> = headers,
+        retry = true,
+      ): Promise<{ data: TResponse | null; error: HttpError | null }> => {
+        try {
+          const response = await fetch(url, {
+            method,
+            headers: customHeaders,
+            body: payload,
+          });
 
-      try {
-        const response = await fetch(finalUrl, { method, headers, body: payload });
+          if (!response.ok) {
+            const errorResponse = await response.json().catch(() => ({}));
+            const errObj: HttpError = {
+              statusCode: response.status,
+              error: errorResponse.error ?? 'RequestError',
+              code: errorResponse.code ?? 'UNKNOWN_ERROR',
+              message: errorResponse.message ?? 'Request failed',
+            };
 
-        // const contentType = response.headers.get('content-type') || '';
-        // const isJSON = contentType.includes('application/json');
+            // Retry if token expired and handler provided
+            if (response.status === 403 && retry && token && baseOptions.refreshAuthToken) {
+              const newTokens = await baseOptions.refreshAuthToken();
+              if (newTokens?.idToken) {
+                token = newTokens.idToken;
 
-        if (!response.ok) {
-          const errorResponse = await response.json();
-          const errObj: HttpError = {
-            ...errorResponse,
+                // TODO: remove refreshToken here
+                // update token on user store
+
+                return attemptRequest(
+                  { ...headers, Authorization: `Bearer ${token}` },
+                  false, // prevent infinite retry
+                );
+              }
+            }
+
+            setError(errObj);
+            return { data: null, error: errObj };
+          }
+
+          const jsonData = await response.json().catch(() => null);
+          setData(jsonData);
+          return { data: jsonData, error: null };
+        } catch (err: any) {
+          const fallbackError: HttpError = {
+            statusCode: 500,
+            error: 'FetchError',
+            code: 'NETWORK_ERROR',
+            message: err instanceof Error ? err.message : 'Unknown error',
           };
-
-          setError(errObj);
-          return { data: null, error: errObj };
+          setError(fallbackError);
+          return { data: null, error: fallbackError };
+        } finally {
+          setLoading(false);
         }
+      };
 
-        const jsonData = await response.json();
-
-        setData(jsonData);
-        return { data: jsonData, error: null };
-      } catch (err: any) {
-        let message = 'Unknown error';
-        if (err instanceof Error) message = err.message;
-        const fallbackError: HttpError = {
-          statusCode: 500,
-          error: 'FetchError',
-          code: 'NETWORK_ERROR',
-          message,
-        };
-        setError(fallbackError);
-        return { data: null, error: fallbackError };
-      } finally {
-        setLoading(false);
-      }
+      return attemptRequest();
     },
     [url, baseOptions],
   );

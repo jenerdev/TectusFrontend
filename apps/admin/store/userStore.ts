@@ -107,6 +107,7 @@ export interface UserState {
   login: (data: { token: string; refreshToken: string; emailVerified: boolean }) => void;
   logout: () => void;
   setHasHydrated: (hydrated: boolean) => void;
+  updateTokens: (data: { token: string; refreshToken: string }) => void;
 }
 
 export const useUserStore: UseBoundStore<StoreApi<UserState>> = create<UserState>()(
@@ -126,6 +127,7 @@ export const useUserStore: UseBoundStore<StoreApi<UserState>> = create<UserState
         set({ user: undefined, token: undefined, refreshToken: undefined });
       },
       setHasHydrated: (hydrated) => set({ hasHydrated: hydrated }),
+      updateTokens: ({ token, refreshToken }) => set({ token, refreshToken }),
     }),
     {
       name: 'user',
