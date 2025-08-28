@@ -6,6 +6,20 @@
   width: 100%;
   background-color: #111111;
 
+  &__brand {
+    @extend %flex-center;
+
+    &-name {
+      font-family: var(--font-orbitron) !important;
+      span:nth-child(odd) {
+        color: var(--var-main-theme); /* odd characters */
+      }
+      span:nth-child(even) {
+        color: #ccc;
+      }
+    }
+  }
+
   &__container {
     @extend %flex-center;
     justify-content: space-between;

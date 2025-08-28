@@ -7,7 +7,7 @@ import UiIcon from '@tectus/ui/UiIcon/UiIcon';
 import UiMenu from '@tectus/ui/UiMenu/UiMenu';
 import { useUserStore } from '@/store';
 import { useRouter } from 'next/navigation';
-import { AppLink } from '@tectus/ui';
+import { AppLink, UiTypography } from '@tectus/ui';
 
 interface HeaderProps {
   center?: boolean;
@@ -31,9 +31,22 @@ export function Header({ center=false, noMenu=false }: HeaderProps) {
   return (
     <div className={B()}>
       <Container className={E('container', center ? 'center' : '')}>
-        <AppLink href="/dashboard">
-          <Image src="/logo-tectus-go.png" alt="Logo" width={80} height={80} className={E('logo')} />
-        </AppLink>
+        <div className={E('brand')}>
+          <AppLink href="/dashboard">
+            <Image src="/logo-tectus-go.png" alt="Logo" width={80} height={80} className={E('logo')} />
+          </AppLink>
+          <UiTypography variant='h5' className={E('brand-name')} fontWeight={700}>
+            <span>T</span>
+            <span>E</span>
+            <span>C</span>
+            <span>T</span>
+            <span>U</span>
+            <span>S</span>
+            <span> </span>
+            <span>G</span>
+            <span>O</span>
+          </UiTypography>
+        </div>
 
         {!noMenu && user && (
           <UiMenu
