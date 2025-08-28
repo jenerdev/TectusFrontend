@@ -39,6 +39,7 @@ export interface UiTextFieldProps {
   onPlaceSelected?: (place: any) => void;
 
   endIcon?: UiIconProps['name'];
+  helperTextPosition?: 'absolute' | 'relative';
 }
 
 export const UiTextField: React.FC<UiTextFieldProps> = ({
@@ -69,6 +70,7 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
     onChange,
     disablePastDates,
     endIcon,
+    helperTextPosition = 'absolute',
   } = props;
 
   const { B, E } = useBEM('ui-text-field', className);
@@ -116,11 +118,12 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
         </InputAdornment>
       );
     }
-    if (endIcon) return (
-      <InputAdornment position="end" className={E('end-icon')}>
-        <UiIcon name={endIcon} />
-      </InputAdornment>
-    );
+    if (endIcon)
+      return (
+        <InputAdornment position="end" className={E('end-icon')}>
+          <UiIcon name={endIcon} />
+        </InputAdornment>
+      );
   }, [error, endIcon]);
 
   return (
@@ -146,6 +149,16 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
       {...(register || {})}
       className={B()}
       slotProps={{
+        ...(helperTextPosition === 'absolute'
+          ? {
+              formHelperText: {
+                sx: {
+                  position: 'absolute',
+                  top: '100%',
+                },
+              },
+            }
+          : {}),
         ...(isDateField
           ? {
               inputLabel: { shrink: true },

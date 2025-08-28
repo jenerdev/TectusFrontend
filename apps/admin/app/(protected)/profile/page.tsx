@@ -359,12 +359,11 @@ export default function ProfilePage() {
                     onFileRemove={(index) => handleFileRemove(index, 'logo')}
                     onExpiryChange={(index, expiry) => handleExpiryChange(index, expiry, 'logo')}
                     button={
-                      <UiButton size="small" className={E('upload-button')}>
-                        Upload company logo*
+                      <UiButton size="small" className={E('upload-button')} disabled={isViewMode}>
+                        Update company logo*
                       </UiButton>
                     }
-                    maxFiles={1}
-                    disabled={isViewMode}
+                    maxFiles={1}                    
                   />
                 </div>
               </div>

@@ -14,7 +14,7 @@
   }
 
   &__th {
-    background-color: #d4af37;
+    background-color: var(--var-ui-main-theme, #1d6bff);
     color: #333333;
 
     &--highlighted {
@@ -23,7 +23,12 @@
   }
 
   &__td {
-    background-color: transparentize(#fff, 0.95);
+    background-color: rgba(#fff, 0.05);
     color: #cccccc;
+  }
+
+  &__message {
+    text-align: center;
+    padding: 1rem;
   }
 }

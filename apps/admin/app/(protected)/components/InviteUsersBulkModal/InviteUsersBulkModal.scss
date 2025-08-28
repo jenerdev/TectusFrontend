@@ -12,7 +12,7 @@
   }
 
   &__download-template {
-    color: #d4af37;
+    color: var(--var-main-theme, #1d6bff);
     text-decoration: none;
   }
 }

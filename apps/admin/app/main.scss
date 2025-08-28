@@ -1,6 +1,12 @@
+@use '@tectus/styles/helpers' as *;
+
 html {
   overflow-y: overlay;
-  font-size: var(--base-font-size, '16px');
+  font-size: calc(var(--base-font-size, 14px) + 2px);
+
+  @include respond-to(tablet-lg) {
+    font-size: var(--base-font-size, 16px);
+  }
 }
 
 /* ===== Light Mode Scrollbar ===== */
@@ -33,6 +39,9 @@ html {
 :root {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+
+  --var-main-theme: #d4af37;
+  --var-ui-main-theme: #d4af37;
 }
 
 @media (prefers-color-scheme: dark) {

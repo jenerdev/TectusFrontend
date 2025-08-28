@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import { useBEM } from '@tectus/hooks';
 import UiIcon from '../UiIcon/UiIcon';
+import { useMemo } from 'react';
 
 export interface UiSelectProps {
   id?: string;
@@ -40,6 +41,7 @@ export interface UiSelectProps {
   showCheckboxOption?: boolean;
   variant?: SelectProps['variant'];
   readOnly?: boolean;
+  onChange?: SelectProps['onChange'];
 }
 
 export const UiSelect: React.FC<UiSelectProps> = ({
@@ -59,11 +61,15 @@ export const UiSelect: React.FC<UiSelectProps> = ({
   onSelect,
   showCheckboxOption = false,
   variant = 'filled',
-  readOnly=false
+  readOnly=false,
+  onChange
 }) => {
   const { B, E } = useBEM('ui-select');
 
-  const finalValue = register?.value ?? value ?? '';
+  const finalValue = useMemo(() => {
+    if(register?.value)return register.value;
+    return value ?? '';
+  }, [register?.value, value]);
 
   return (
     <FormControl fullWidth={fullWidth} className={B(size)} error={error} variant={variant}>
@@ -74,7 +80,7 @@ export const UiSelect: React.FC<UiSelectProps> = ({
         id={id}
         name={register?.name}
         value={finalValue}
-        onChange={register?.onChange}
+        onChange={register?.onChange || onChange} // to suppress warning
         onBlur={register?.onBlur}
         label={label}
         className={className}
@@ -85,8 +91,10 @@ export const UiSelect: React.FC<UiSelectProps> = ({
         multiple={multiple}
         readOnly={readOnly}
         renderValue={(selected) => {
-          if (Array.isArray(selected)) return selected.join(', ');
-          return selected;
+          if (Array.isArray(selected)) {
+            return (options || []).filter(opt => selected.includes(opt.value)).map(opt => opt.label).join(', ');
+          }
+          return (options || []).find((opt) => opt.value === selected)?.label || '';
         }}
         input={
           <FilledInput

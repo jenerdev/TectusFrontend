@@ -131,6 +131,7 @@ export const VENDOR_VEHICLES = [
 ];
 
 export const RANGES_OF_NUMBER_OPTIONS = [
+  { value: '0', label: '0' },
   { value: '1-9', label: '1-9' },
   { value: '11-49', label: '11-49' },
   { value: '50-99', label: '50-99' },

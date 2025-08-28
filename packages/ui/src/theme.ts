@@ -81,14 +81,14 @@ export const getDesignTokens = (mode: 'light' | 'dark') => ({
         },
       },
     },
-    MuiFormHelperText: {
-      styleOverrides: {
-        root: {
-          position: 'absolute' as const,
-          top: '100%',
-        },
-      },
-    },
+    // MuiFormHelperText: {
+    //   styleOverrides: {
+    //     root: {
+    //       position: 'absolute' as const,
+    //       top: '100%',
+    //     },
+    //   },
+    // },
     MuiFilledInput: {
       styleOverrides: {
         root: {

@@ -16,16 +16,24 @@ export interface UiTableProps {
   mobileColumns?: Column[];
   data: Record<string, any>[];
   className?: string;
+  loading?: boolean;
 
   //TEMP
   variant?: 'default' | 'highlighted';
 }
 
-export function UiTable({ columns, mobileColumns, data, className, variant = 'default' }: UiTableProps) {
+export function UiTable({
+  columns,
+  mobileColumns,
+  data,
+  className,
+  variant = 'default',
+  loading = false,
+}: UiTableProps) {
   const { B, E } = useBEM('ui-table');
   const { isLessThan } = useBreakpoint();
 
-  const displayedColumns = isLessThan('tablet-md') ? (mobileColumns || columns): columns;
+  const displayedColumns = isLessThan('tablet-md') ? mobileColumns || columns : columns;
 
   return (
     <div className={B(className)}>
@@ -40,7 +48,7 @@ export function UiTable({ columns, mobileColumns, data, className, variant = 'de
           </tr>
         </thead>
         <tbody className={E('body')}>
-          {data.length > 0 ? (
+          {!loading && data.length > 0 ? (
             data.map((row, rowIndex) => (
               <tr key={rowIndex} className={E('tr')}>
                 {displayedColumns.map((col) => (
@@ -52,8 +60,8 @@ export function UiTable({ columns, mobileColumns, data, className, variant = 'de
             ))
           ) : (
             <tr>
-              <td colSpan={columns.length} className={E('empty')}>
-                No data available
+              <td colSpan={columns.length} className={E('message')}>
+                {loading ? 'Loading...' : 'No data available'}
               </td>
             </tr>
           )}

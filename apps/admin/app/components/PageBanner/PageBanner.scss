@@ -9,7 +9,7 @@
   padding: 0 1rem;
 
   &__title {
-    color: #d4af37;
+    color: var(--var-main-theme, #1d6bff);
   }
 
   &__subtitle {

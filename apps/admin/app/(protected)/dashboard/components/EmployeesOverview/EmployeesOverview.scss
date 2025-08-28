@@ -5,7 +5,7 @@
     align-items: center;
 
     > h5 {
-      color: #d4af37;
+      color: var(--var-main-theme, #1d6bff);
     }
   }
 }

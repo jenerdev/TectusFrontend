@@ -4,7 +4,7 @@ import { useBEM } from '@tectus/hooks';
 import './EmployeesOverview.scss';
 import { UiMenu, UiTable, UiTypography } from '@tectus/ui';
 import UiIcon from '@tectus/ui/UiIcon/UiIcon';
-import { ActionType, UserList } from '@/app/(protected)/components';
+import { ActionType, UserList, useUserList } from '@/app/(protected)/components';
 
 type EmployeeStatusType =
   | 'available'
@@ -33,6 +33,7 @@ export interface EmployeesOverviewProps {
 
 export function EmployeesOverview({ handleAction }: EmployeesOverviewProps) {
   const { B, E } = useBEM('employees-overview');
+  const { data, loading } = useUserList();
 
   return (
     <div className={B()}>
@@ -62,7 +63,7 @@ export function EmployeesOverview({ handleAction }: EmployeesOverviewProps) {
           ]}
         />
       </div>
-      <UserList />
+      <UserList data={data} loading={loading}/>
     </div>
   );
 }

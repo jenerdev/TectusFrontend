@@ -5,7 +5,7 @@
   @extend %flex-center-column;
 
   &__title {
-    color: #d4af37;
+    color: var(--var-main-theme, #1d6bff);
     padding: 1rem;
   }
 
@@ -53,7 +53,7 @@
     align-items: flex-start;
 
     &-title {
-      color: #d4af37;
+      color: var(--var-main-theme, #1d6bff);
       font-weight: 700;
     }
   }
@@ -70,9 +70,10 @@
   }
 
   &__terms {
-    span {
+    a {
       font-weight: 700;
       text-decoration: underline;
+      display: inline-block;
     }
   }
 
