@@ -161,10 +161,10 @@ export default function ProfilePage() {
   }, [values.statesCovered]);
 
   const onSubmitInternal = async (values: ApplicationFormValues) => {
-    if (files.logo.length === 0) {
-      showSnackbar('Please upload a company logo.', 'error');
-      return;
-    }
+    // if (files.logo.length === 0) {
+    //   showSnackbar('Please upload a company logo.', 'error');
+    //   return;
+    // }
 
     if (values.isInsured || values.isCompanyLicensed) {
       const allFiles = [...files.insurance, ...files.license];

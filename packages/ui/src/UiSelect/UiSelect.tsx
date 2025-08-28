@@ -61,13 +61,13 @@ export const UiSelect: React.FC<UiSelectProps> = ({
   onSelect,
   showCheckboxOption = false,
   variant = 'filled',
-  readOnly=false,
-  onChange
+  readOnly = false,
+  onChange,
 }) => {
   const { B, E } = useBEM('ui-select');
 
   const finalValue = useMemo(() => {
-    if(register?.value)return register.value;
+    if (register?.value) return register.value;
     return value ?? '';
   }, [register?.value, value]);
 
@@ -75,7 +75,7 @@ export const UiSelect: React.FC<UiSelectProps> = ({
     <FormControl fullWidth={fullWidth} className={B(size)} error={error} variant={variant}>
       {label && <InputLabel id={`${id}-label`}>{label}</InputLabel>}
 
-      <Select 
+      <Select
         labelId={`${id}-label`}
         id={id}
         name={register?.name}
@@ -91,24 +91,32 @@ export const UiSelect: React.FC<UiSelectProps> = ({
         multiple={multiple}
         readOnly={readOnly}
         renderValue={(selected) => {
-          if (Array.isArray(selected)) {
-            return (options || []).filter(opt => selected.includes(opt.value)).map(opt => opt.label).join(', ');
+          let selections = options;
+
+          if ((groupedOptions || []).length > 0) {
+            selections = groupedOptions.flatMap((g) => g.options);
           }
-          return (options || []).find((opt) => opt.value === selected)?.label || '';
+
+          return (selections || [])
+            .filter((opt) => {
+              const isArray = Array.isArray(selected);
+              return isArray ? selected.includes(opt.value) : selected === opt.value;
+            })
+            .map((opt) => opt.label)
+            .join(', ');
         }}
         input={
           <FilledInput
             endAdornment={
               error ? (
                 <InputAdornment position="end">
-                  <UiIcon name="Error" className={E('error-icon')}/>
+                  <UiIcon name="Error" className={E('error-icon')} />
                 </InputAdornment>
               ) : null
             }
           />
         }
       >
-        
         {groupedOptions?.flatMap((group) => [
           <ListSubheader key={group.label}>{group.label}</ListSubheader>,
           ...group.options.map((option) => (
