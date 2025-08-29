@@ -31,6 +31,8 @@ type GroupedOptions = NonNullable<UiSelectProps['groupedOptions']>;
 type attachmentType = 'logo' | 'insurance' | 'license';
 type fileAttachments = Record<attachmentType, FileAttachment[]>;
 
+const MAX_FILE_UPLOAD = 100;
+
 export default function ProfilePage() {
   const { B, E } = useBEM('profile-page');
   const user = useUserStore((state) => state.user);
@@ -290,7 +292,7 @@ export default function ProfilePage() {
                   />
 
                   <UiTextField
-                    label="Company legal entity*"
+                    label="Company legal entity (Example: Tectus Protection, Inc)*"
                     {...register('legalEntity', {
                       ...required('Company Legal Entity is required.'),
                     })}
@@ -385,15 +387,14 @@ export default function ProfilePage() {
                     readOnly={isViewMode}
                   />
                   <UiSelect
-                    label="Number of certified subcontractors*"
+                    label="Number of Independent Contractors*"
                     options={RANGES_OF_NUMBER_OPTIONS}
                     fullWidth
                     register={register('numberOfContractors', {
-                      ...required('Number of contractors is required.'),
+                      ...required('Number of Independent Contractors is required.'),
                     })}
                     helperText={errors.numberOfContractors}
                     error={Boolean(errors.numberOfContractors)}
-                    readOnly={isViewMode}
                   />
                 </div>
               </div>
@@ -487,7 +488,10 @@ export default function ProfilePage() {
                       // setTimeout(() => {
                       //   reset('insuranceProvider');
                       // }, 250);
-                      setValue('isInsured', e.target.checked);
+
+                      const isChecked = e.target.checked;
+                      if (!isChecked) clearFiles('insurance');
+                      setValue('isInsured', isChecked);
                     }}
                     className={E('company-insured')}
                     disabled={isViewMode}
@@ -505,11 +509,12 @@ export default function ProfilePage() {
                     onExpiryChange={(index, expiry) =>
                       handleExpiryChange(index, expiry, 'insurance')
                     }
-                    disabled={!values.isInsured}
+                    disabled={!values.isInsured || isViewMode || files.insurance.length >= MAX_FILE_UPLOAD}
+                    maxFiles={MAX_FILE_UPLOAD}
                     button={
                       <UiButton
                         size="small"
-                        disabled={!values.isInsured || isViewMode}
+                        disabled={!values.isInsured || isViewMode || files.insurance.length >= MAX_FILE_UPLOAD}
                         className={E('upload-button')}
                       >
                         Add Certificate of Insurance
@@ -547,12 +552,14 @@ export default function ProfilePage() {
                   onFileUpload={(file) => handleFileUpload(file, 'license')}
                   onFileRemove={(index) => handleFileRemove(index, 'license')}
                   onExpiryChange={(index, expiry) => handleExpiryChange(index, expiry, 'license')}
-                  disabled={!values.isCompanyLicensed}
+                  disabled={!values.isCompanyLicensed || isViewMode || files.license.length >= MAX_FILE_UPLOAD}
+                  maxFiles={MAX_FILE_UPLOAD}
                   button={
                     <UiButton
                       size="small"
-                      disabled={!values.isCompanyLicensed || isViewMode}
+                      disabled={!values.isCompanyLicensed || isViewMode || files.license.length >= MAX_FILE_UPLOAD}
                       className={E('upload-button')}
+                      
                     >
                       Add License
                     </UiButton>

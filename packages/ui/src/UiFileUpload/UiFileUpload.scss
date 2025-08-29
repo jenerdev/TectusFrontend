@@ -4,6 +4,11 @@
   gap: 0.5rem;
   flex-direction: column;
 
+  &__files {
+    max-height: 28rem;
+    overflow-y: auto;
+  }
+
   &__file {
     display: flex;
     gap: 1rem;

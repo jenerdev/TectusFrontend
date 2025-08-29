@@ -14,11 +14,11 @@ export function UiFileUpload({
   onExpiryChange,
   button,
   maxFiles = 3,
-	accept,
+  accept,
   validTypes,
   isSubmitted,
   disabled,
-  onInvalidFile
+  onInvalidFile,
 }: FileUploaderProps) {
   const { B, E } = useBEM('ui-file-upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,7 +32,7 @@ export function UiFileUpload({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
-      if(!validTypes) {
+      if (!validTypes) {
         onFileUpload(selectedFile);
         return;
       }
@@ -62,57 +62,56 @@ export function UiFileUpload({
 
   return (
     <div className={B()}>
-      {
-        (files.length === 0 || maxFiles > 1) && (
-          <div onClick={handleButtonClick} className={E('upload-button')}>
-            {button}
-          </div>
-        )
-      }
+      {(files.length === 0 || maxFiles > 1) && (
+        <div onClick={handleButtonClick} className={E('upload-button')}>
+          {button}
+        </div>
+      )}
 
       <input
         type="file"
         ref={fileInputRef}
         style={{ display: 'none' }}
         onChange={handleFileChange}
-				accept={Array.isArray(accept) ? accept.join(',') : accept}
+        accept={Array.isArray(accept) ? accept.join(',') : accept}
       />
 
-      {files.length > 0 && maxFiles > 1 &&
-        files.map((item, index) => (
-          <div key={index} className={E('file')}>
-            <UiTextField
-              label="File"
-              placeholder="File"
-              value={item.file.name}
-              readOnly
-            />
-            <UiTextField
-              label="Expiry*"
-              placeholder="Expiry*"
-              type="date"
-              value={item.expiry}
-              onChange={(e) => onExpiryChange ? onExpiryChange(index, e.target.value) : null}
-              disablePastDates
-              error={isSubmitted && !item.expiry}
-            />
-            <UiIconButton
-              icon="Clear"
-              className={E('file-remove')}
-              onClick={() => onFileRemove(index)}
-            />
-          </div>
-        ))}
+      {files.length > 0 && maxFiles > 1 && (
+        <div className={E('files')}>
+          {files.map((item, index) => (
+            <div key={index} className={E('file')}>
+              <UiTextField label="File" placeholder="File" value={item.file.name} readOnly />
+              <UiTextField
+                label="Expiry*"
+                placeholder="Expiry*"
+                type="date"
+                value={item.expiry}
+                onChange={(e) => (onExpiryChange ? onExpiryChange(index, e.target.value) : null)}
+                disablePastDates
+                error={isSubmitted && !item.expiry}
+              />
+              <UiIconButton
+                icon="Clear"
+                className={E('file-remove')}
+                onClick={() => onFileRemove(index)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
-				{
-					files && maxFiles === 1 && files.length === 1 && (
-						<div className={E('single-file')}>
-							{files[0]?.file.name}
+      {files && maxFiles === 1 && files.length === 1 && (
+        <div className={E('single-file')}>
+          {files[0]?.file.name}
 
-							<UiIconButton icon='Clear' size='small' onClick={() => onFileRemove(0)} className={E('single-file-remove')}/>
-						</div>
-					)
-				}
+          <UiIconButton
+            icon="Clear"
+            size="small"
+            onClick={() => onFileRemove(0)}
+            className={E('single-file-remove')}
+          />
+        </div>
+      )}
     </div>
   );
 }

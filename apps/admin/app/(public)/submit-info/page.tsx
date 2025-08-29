@@ -32,6 +32,9 @@ type fileAttachments = Record<attachmentType, FileAttachment[]>;
 
 
 type GroupedOptions = NonNullable<UiSelectProps['groupedOptions']>;
+
+const MAX_FILE_UPLOAD = 100;
+
 export default function SubmitInfo() {
   const { B, E } = useBEM('submit-info-page');
   const { getErrorMessage } = useApiErrorMessage();
@@ -315,7 +318,7 @@ export default function SubmitInfo() {
                   />
 
                   <UiTextField
-                    label="Company legal entity*"
+                    label="Company legal entity (Example: Tectus Protection, Inc)*"
                     {...register('legalEntity', {
                       ...required('Company Legal Entity is required.'),
                     })}
@@ -336,7 +339,7 @@ export default function SubmitInfo() {
                   <UiTextField
                     label="Company address (Line 2)"
                     {...register('companyAddressLine2', {
-                      ...required('Company Address Line 2 is required.'),
+                      // ...required('Company Address Line 2 is required.'),
                     })}
                     helperText={errors.companyAddressLine2}
                     error={Boolean(errors.companyAddressLine2)}
@@ -372,10 +375,10 @@ export default function SubmitInfo() {
                   />
 
                   <UiFileUpload
-                    validTypes={['.jpg', '.jpeg', '.png', '.gif']}
-                    onInvalidFile={() =>
-                      showSnackbar('Invalid file type. Please upload a valid image file.', 'error')
-                    }
+                    accept={['.jpg', '.jpeg', '.png', '.gif', '.webp']}
+                    // onInvalidFile={() =>
+                    //   showSnackbar('Invalid file type. Please upload a valid image file.', 'error')
+                    // }
                     files={files.logo}
                     onFileUpload={(file) => handleFileUpload(file, 'logo')}
                     onFileRemove={(index) => handleFileRemove(index, 'logo')}
@@ -406,11 +409,11 @@ export default function SubmitInfo() {
                     error={Boolean(errors.numberOfEmployees)}
                   />
                   <UiSelect
-                    label="Number of certified subcontractors*"
+                    label="Number of Independent Contractors*"
                     options={RANGES_OF_NUMBER_OPTIONS}
                     fullWidth
                     register={register('numberOfContractors', {
-                      ...required('Number of contractors is required.'),
+                      ...required('Number of Independent Contractors is required.'),
                     })}
                     helperText={errors.numberOfContractors}
                     error={Boolean(errors.numberOfContractors)}
@@ -503,7 +506,9 @@ export default function SubmitInfo() {
                       // setTimeout(() => {
                       //   reset('insuranceProvider');
                       // }, 250);
-                      setValue('isInsured', e.target.checked);
+                      const isChecked = e.target.checked;
+                      if (!isChecked) clearFiles('insurance');
+                      setValue('isInsured', isChecked);
                     }}
                     className={E('company-insured')}
                   />
@@ -531,11 +536,12 @@ export default function SubmitInfo() {
                     onExpiryChange={(index, expiry) =>
                       handleExpiryChange(index, expiry, 'insurance')
                     }
-                    disabled={!values.isInsured}
+                    disabled={!values.isInsured || files.insurance.length >= MAX_FILE_UPLOAD}
+                    maxFiles={MAX_FILE_UPLOAD}
                     button={
                       <UiButton
                         size="small"
-                        disabled={!values.isInsured}
+                        disabled={!values.isInsured || files.insurance.length >= MAX_FILE_UPLOAD}
                         className={E('upload-button')}
                       >
                         Add Certificate of Insurance
@@ -571,11 +577,12 @@ export default function SubmitInfo() {
                     onFileUpload={(file) => handleFileUpload(file, 'license')}
                     onFileRemove={(index) => handleFileRemove(index, 'license')}
                     onExpiryChange={(index, expiry) => handleExpiryChange(index, expiry, 'license')}
-                    disabled={!values.isCompanyLicensed}
+                    disabled={!values.isCompanyLicensed || files.license.length >= MAX_FILE_UPLOAD}
+                    maxFiles={MAX_FILE_UPLOAD}
                     button={
                       <UiButton
                         size="small"
-                        disabled={!values.isCompanyLicensed}
+                        disabled={!values.isCompanyLicensed || files.license.length >= MAX_FILE_UPLOAD}
                         className={E('upload-button')}
                       >
                         Add License
