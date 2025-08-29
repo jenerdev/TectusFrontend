@@ -327,7 +327,9 @@ export default function SubmitInfo() {
                   />
                   <UiTextField
                     label="Company address (Line 1)*"
-                    {...register('companyAddressLine1')}
+                    {...register('companyAddressLine1', {
+                      ...required('Company Address Line 1 is required.'),
+                    })}
                     helperText={errors.companyAddressLine1}
                     error={Boolean(errors.companyAddressLine1)}
                     googlePlaces

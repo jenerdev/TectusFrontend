@@ -35,7 +35,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  
   return (
     <html lang="en" style={{ '--base-font-size': baseFontSize } as React.CSSProperties} className={`${orbitron.variable}`}>
       <body>
