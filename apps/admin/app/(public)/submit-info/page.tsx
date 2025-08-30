@@ -171,14 +171,13 @@ export default function SubmitInfo() {
     }
 
     const allSupportingDocuments = [...insuranceDocuments, ...licenseDocuments].map(({ error, ...rest }) => rest);
-    const payload: User = {
+    let payload: User = {
       countryCode: 'US',
       fullName: values.fullName,
       companyName: values.companyName,
       legalEntity: values.legalEntity,
       address: [values.companyAddressLine1, values.companyAddressLine2].filter(Boolean).join(', '),
       yearFounded: Number(values.yearFounded),
-      website: values.website,
       statesCovered: values.statesCovered,
       citiesCovered: values.citiesCovered,
       vehiclesUsed: values.vehiclesUsed,
@@ -193,6 +192,13 @@ export default function SubmitInfo() {
       imageUrl: logoDocument[0]?.file,
       bio: values.bio,
     };
+
+    if(Boolean(values.website)) {
+      payload = {
+        ...payload,
+        website: values.website,
+      }
+    }
 
     const submitDetailsResult = await vendorRequest({
       body: payload,

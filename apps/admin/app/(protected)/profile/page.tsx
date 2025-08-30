@@ -243,7 +243,8 @@ export default function ProfilePage() {
     const allSupportingDocuments = [...insuranceDocuments, ...licenseDocuments, ...currentSupportingDocuments].map(
       ({ error, ...rest }) => rest,
     );
-    const payload: User = {
+
+    let payload: User = {
       countryCode: 'US',
       fullName: values.fullName,
       companyName: values.companyName,
@@ -265,6 +266,13 @@ export default function ProfilePage() {
       imageUrl: logoDocument[0]?.file || currentImageUrl,
       bio: values.bio,
     };
+
+    if (Boolean(values.website)) {
+      payload = {
+        ...payload,
+        website: values.website,
+      };
+    }
 
     const submitDetailsResult = await vendorRequest({
       body: payload,

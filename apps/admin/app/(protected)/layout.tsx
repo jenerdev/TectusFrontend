@@ -8,6 +8,7 @@ import { Header } from '../components';
 import { usePathname } from 'next/navigation';
 import { useProtectedRoute } from '../hooks';
 import { useBEM } from '@tectus/hooks';
+import { UserStatus, useUserStore } from '@/store';
 
 const tabs = [
   { label: 'Dashboard', path: '/dashboard' },
@@ -24,6 +25,8 @@ export default function RootLayout({
 }>) {
   const { B, E } = useBEM('protected-layout');
   const pathname = usePathname();
+  const { user } = useUserStore();
+  const isApproved = (user?.status || '').toUpperCase() === UserStatus.APPROVED;
 
   const { isChecking } = useProtectedRoute({ bypassApproved: true });
   if (isChecking) return;
@@ -34,16 +37,18 @@ export default function RootLayout({
     <div className={B()}>
       <div className={E('top')}>
         <Header />
-        <Container noPadding>
-          <UiTabs
-            className={E('tabs')}
-            value={currentTab === -1 ? 0 : currentTab}
-            items={tabs}
-            variant="scrollable"
-            scrollButtons="auto"
-            allowScrollButtonsMobile
-          />
-        </Container>
+        {isApproved && (
+          <Container noPadding>
+            <UiTabs
+              className={E('tabs')}
+              value={currentTab === -1 ? 0 : currentTab}
+              items={tabs}
+              variant="scrollable"
+              scrollButtons="auto"
+              allowScrollButtonsMobile
+            />
+          </Container>
+        )}
       </div>
       {children}
     </div>

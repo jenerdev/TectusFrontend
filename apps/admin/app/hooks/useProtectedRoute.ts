@@ -53,6 +53,12 @@ export function useProtectedRoute(props?: useProtectedRouteProps) {
       setDecided(true);
       return;
     }
+
+    if (status === UserStatus.PENDING && pathname === '/profile') {
+      setDecided(true);
+      return;
+    }
+
     if (route && pathname !== route) {
       router.replace(route);
     } else {
