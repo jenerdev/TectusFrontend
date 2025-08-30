@@ -244,13 +244,14 @@ export default function ProfilePage() {
       ({ error, ...rest }) => rest,
     );
 
-    let payload: User = {
+    const payload: User = {
       countryCode: 'US',
       fullName: values.fullName,
       companyName: values.companyName,
       legalEntity: values.legalEntity,
       address: [values.companyAddressLine1, values.companyAddressLine2].filter(Boolean).join(', '),
       yearFounded: Number(values.yearFounded),
+      website: values.website,
       statesCovered: values.statesCovered,
       citiesCovered: values.citiesCovered,
       vehiclesUsed: values.vehiclesUsed,
@@ -265,13 +266,6 @@ export default function ProfilePage() {
       imageUrl: logoDocument[0]?.file || currentImageUrl,
       bio: values.bio,
     };
-
-    if (Boolean(values.website)) {
-      payload = {
-        ...payload,
-        website: values.website,
-      };
-    }
 
     const submitDetailsResult = await vendorRequest({
       body: payload,
