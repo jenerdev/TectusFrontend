@@ -6,7 +6,6 @@ import './dashboard-page.scss';
 import { DashboardCard, DashboardCardProps } from './components';
 import { UiTabs, UiTypography } from '@tectus/ui';
 import { useMemo, useState } from 'react';
-import UiIcon from '@tectus/ui/UiIcon/UiIcon';
 import { EmployeesOverview } from './components/EmployeesOverview/EmployeesOverview';
 import { ActionType, InviteUsersBulkModal, InviteUsersModal } from '../components';
 

@@ -5,19 +5,26 @@ import { Container } from '../Container';
 import Image from 'next/image';
 import UiIcon from '@tectus/ui/UiIcon/UiIcon';
 import UiMenu from '@tectus/ui/UiMenu/UiMenu';
-import { useUserStore } from '@/store';
+import { UserStatus, useUserStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { AppLink, UiTypography } from '@tectus/ui';
+import { useMemo } from 'react';
 
 interface HeaderProps {
   center?: boolean;
   noMenu?: boolean;
 }
 
-export function Header({ center=false, noMenu=false }: HeaderProps) {
+export function Header({ center = false, noMenu = false }: HeaderProps) {
   const { B, E } = useBEM('header');
   const user = useUserStore((state) => state.user);
+  const userStatus = useUserStore.getState().getUserStatus();
   const router = useRouter();
+  const logoRedirectMapping = {
+    [UserStatus.PENDING]: '/application-submitted',
+    [UserStatus.APPROVED]: '/dashboard',
+    [UserStatus.REJECTED]: '#',
+  };
 
   const onLogout = () => {
     useUserStore.getState().logout();
@@ -28,14 +35,24 @@ export function Header({ center=false, noMenu=false }: HeaderProps) {
     router.push(`/profile`);
   };
 
+  const logoRedirect = useMemo(() => {
+    return logoRedirectMapping[userStatus || UserStatus.PENDING];
+  }, [userStatus]);
+
   return (
     <div className={B()}>
       <Container className={E('container', center ? 'center' : '')}>
         <div className={E('brand')}>
-          <AppLink href="/dashboard">
-            <Image src="/logo-tectus-go.png" alt="Logo" width={80} height={80} className={E('logo')} />
+          <AppLink href={logoRedirect}>
+            <Image
+              src="/logo-tectus-go.png"
+              alt="Logo"
+              width={80}
+              height={80}
+              className={E('logo')}
+            />
           </AppLink>
-          <UiTypography variant='h5' className={E('brand-name')} fontWeight={700}>
+          <UiTypography variant="h5" className={E('brand-name')} fontWeight={700}>
             <span>T</span>
             <span>E</span>
             <span>C</span>

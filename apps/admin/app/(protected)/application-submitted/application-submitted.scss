@@ -1,7 +1,7 @@
 @use '@tectus/styles/helpers' as *;
 
 .application-submitted-page {
-  min-height: 100vh;
+  min-height: calc(100vh - 7.5rem);
 
   @extend %flex-center-column;
   justify-content: space-around;

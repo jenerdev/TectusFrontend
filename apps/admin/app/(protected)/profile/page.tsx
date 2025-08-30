@@ -29,6 +29,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useApi } from '@/app/hooks/useApi';
 import { useApiErrorMessage } from '@/app/hooks';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 type GroupedOptions = NonNullable<UiSelectProps['groupedOptions']>;
 type attachmentType = 'logo' | 'insurance' | 'license';
@@ -43,6 +44,8 @@ export default function ProfilePage() {
   const { showSnackbar } = useUiSnackbar();
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [companyLogoError, setCompanyLogoError] = useState<boolean>(false);
+  const userStatus = useUserStore.getState().getUserStatus();
+  const router = useRouter();
 
   const isViewMode = mode === 'view';
 
@@ -60,23 +63,17 @@ export default function ProfilePage() {
     license: [],
   });
 
-  const [initialCurrentSupportingDocuments] = useState<
-    UserSupportingDocument[]
-  >(user?.supportingDocuments || []);
+  const [initialCurrentSupportingDocuments] = useState<UserSupportingDocument[]>(
+    user?.supportingDocuments || [],
+  );
 
   const [currentSupportingDocuments, setCurrentSupportingDocuments] = useState<
     UserSupportingDocument[]
   >(initialCurrentSupportingDocuments);
 
-  const [initialImageUrl] = useState<
-    string
-  >(user?.imageUrl || '');
+  const [initialImageUrl] = useState<string>(user?.imageUrl || '');
 
-  const [currentImageUrl, setCurrentImageUrl] = useState<
-    string
-  >(initialImageUrl);
-
-
+  const [currentImageUrl, setCurrentImageUrl] = useState<string>(initialImageUrl);
 
   const uploadPerAttachmentType = useCallback(
     async (type: attachmentType): Promise<UserSupportingDocument[]> => {
@@ -197,8 +194,18 @@ export default function ProfilePage() {
 
     if (values.isInsured || values.isCompanyLicensed) {
       const requiredDocs = [
-        { enabled: values.isInsured, files: files.insurance, label: 'Certificate of Insurance', type: 'INSURANCE' },
-        { enabled: values.isCompanyLicensed, files: files.license, label: 'License', type: 'LICENSE' },
+        {
+          enabled: values.isInsured,
+          files: files.insurance,
+          label: 'Certificate of Insurance',
+          type: 'INSURANCE',
+        },
+        {
+          enabled: values.isCompanyLicensed,
+          files: files.license,
+          label: 'License',
+          type: 'LICENSE',
+        },
       ];
 
       for (const { enabled, files: docFiles, label, type } of requiredDocs) {
@@ -240,9 +247,11 @@ export default function ProfilePage() {
       return;
     }
 
-    const allSupportingDocuments = [...insuranceDocuments, ...licenseDocuments, ...currentSupportingDocuments].map(
-      ({ error, ...rest }) => rest,
-    );
+    const allSupportingDocuments = [
+      ...insuranceDocuments,
+      ...licenseDocuments,
+      ...currentSupportingDocuments,
+    ].map(({ error, ...rest }) => rest);
 
     const payload: User = {
       countryCode: 'US',
@@ -282,6 +291,10 @@ export default function ProfilePage() {
       ...payload,
     });
 
+    setCurrentSupportingDocuments(allSupportingDocuments);
+    clearFiles('insurance');
+    clearFiles('license');
+
     showSnackbar('Profile successfully updated', 'success');
     setMode('view');
   };
@@ -299,7 +312,7 @@ export default function ProfilePage() {
 
   const handleRemoveDocument = (file: string) => {
     setCurrentSupportingDocuments((prev) => prev.filter((doc) => doc.file !== file));
-  }
+  };
 
   const renderCurrentDocuments = (type: 'INSURANCE' | 'LICENSE') => {
     const documents = (currentSupportingDocuments || []).filter((doc) => doc.type === type);
@@ -314,21 +327,28 @@ export default function ProfilePage() {
           {label} Document {index + 1}{' '}
         </UiTypography>
 
-        <UiTypography variant="body1">
-          {doc.expiry}
-        </UiTypography>
+        <UiTypography variant="body1">{doc.expiry}</UiTypography>
 
         <div className={E('current-document-actions')}>
-          
-          <AppLink href={doc.file} target="_blank" rel="noopener noreferrer" download>
+          {/* <AppLink href={doc.file} target="_blank" rel="noopener noreferrer" download>
             <UiIconButton icon="Download" className={E('file-remove')} size='small' />
-          </AppLink>
+          </AppLink> */}
 
-          <UiIconButton icon="Clear" className={E('file-remove')} size='small' disabled={isViewMode} onClick={() => handleRemoveDocument(doc.file)} />
+          <UiIconButton
+            icon="Clear"
+            className={E('file-remove')}
+            size="small"
+            disabled={isViewMode}
+            onClick={() => handleRemoveDocument(doc.file)}
+          />
         </div>
       </div>
     ));
   };
+
+  const onBackHandler = () => {
+    router.push('/application-submitted')
+  }
 
   return (
     <Page id="profile-page" className={B()}>
@@ -687,7 +707,7 @@ export default function ProfilePage() {
           </div>
 
           <div className={E('buttons')}>
-            {mode === 'edit' ? (
+            {!isViewMode ? (
               <>
                 <UiButton type="button" onClick={cancelEditHandler} variant="outlined">
                   Cancel
@@ -702,13 +722,27 @@ export default function ProfilePage() {
                 </UiButton>
               </>
             ) : (
-              <UiButton type="button" onClick={() => {
-                // TEMPORARY FIX to update isValid current value to enable update button
-                setValue('isCompanyLicensed', values.isCompanyLicensed);
-                setMode('edit');
-              }}>
-                Edit
-              </UiButton>
+              <>
+                {userStatus === UserStatus.PENDING && (
+                  <UiButton type="button" variant="outlined" onClick={onBackHandler}>
+                    Back
+                  </UiButton>
+                )}
+                <UiButton
+                  type="button"
+                  onClick={() => {
+
+                    // Note: add settimeout to fix clicking update button
+                    setTimeout(() => {
+                        // TEMPORARY FIX to update isValid current value to enable update button
+                      setValue('isCompanyLicensed', values.isCompanyLicensed);
+                      setMode('edit');
+                    }, 250)
+                  }}
+                >
+                  Edit
+                </UiButton>
+              </>
             )}
           </div>
         </form>

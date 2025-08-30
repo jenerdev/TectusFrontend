@@ -62,6 +62,7 @@ export default function ApplicationSubmittedPage() {
       <PageBanner
         title="Application submitted"
         subtitle="Thanks for submitting your application.<br/>You'll be notified once reviewed."
+        hideLogo
       />
 
       <UiButton onClick={handleOnRefresh} className={E('button')} loading={loading}>
