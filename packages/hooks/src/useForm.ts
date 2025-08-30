@@ -36,7 +36,7 @@ const validate = {
   }),
   url: (url: string) => ({
     pattern: {
-      value: /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/,
+      value: /^(?:$|(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?)$/,
       message: url || 'Invalid URL',
     },
   }),

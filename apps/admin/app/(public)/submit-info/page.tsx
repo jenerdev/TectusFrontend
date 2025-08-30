@@ -80,6 +80,7 @@ export default function SubmitInfo() {
           file: res.data?.url || '',
           expiry: files[type][index]?.expiry || null,
           details: res.error ? `Failed ${res.error.message}` : 'Upload successful',
+          error: Boolean(res.error),
         };
       });
       return parseResult;
@@ -115,6 +116,10 @@ export default function SubmitInfo() {
     }));
   };
 
+  const isValidDocuments = (documents: UserSupportingDocument[]): boolean => {
+    return documents.find(doc => doc.error) ? false : true;
+  };
+
   const onSubmitInternal = async (values: ApplicationFormValues) => {
     if (files.logo.length === 0) {
       showSnackbar('Please upload a company logo.', 'error');
@@ -122,28 +127,50 @@ export default function SubmitInfo() {
     }
 
     if (values.isInsured || values.isCompanyLicensed) {
-      const allFiles = [...files.insurance, ...files.license];
-      const hasMissingExpiry = allFiles.some((file) => !file.expiry);
+      const requiredDocs = [
+        { enabled: values.isInsured, files: files.insurance, label: 'Certificate of Insurance' },
+        { enabled: values.isCompanyLicensed, files: files.license, label: 'License' },
+      ];
 
-      // Check if no files uploaded
-      if (allFiles.length === 0) {
-        const docType = values.isInsured ? 'Certificate of Insurance' : 'License';
-        showSnackbar(`Please upload at least one ${docType}.`, 'error', {
-          anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-        });
-        return;
-      }
+      for (const { enabled, files: docFiles, label } of requiredDocs) {
+        if (!enabled) continue;
 
-      // Check if some files don't have expiry
-      if (hasMissingExpiry) {
-        showSnackbar('File expiration dates are required.', 'error');
-        return;
+        // Check if no files uploaded
+        if (docFiles.length === 0) {
+          showSnackbar(`Please upload at least one ${label}.`, 'error', {
+            anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+          });
+          return;
+        }
+
+        // Check if any file is missing expiry
+        const hasMissingExpiry = docFiles.some((file) => !file.expiry);
+        if (hasMissingExpiry) {
+          showSnackbar(`${label} expiration dates are required.`, 'error');
+          return;
+        }
       }
     }
 
     const insuranceDocuments = await uploadPerAttachmentType('insurance');
+    if(!isValidDocuments(insuranceDocuments)) {
+      showSnackbar('Certificate of Insurance failed to upload. Please try again', 'error');
+      return;
+    }
+
     const licenseDocuments = await uploadPerAttachmentType('license');
+    if(!isValidDocuments(licenseDocuments)) {
+      showSnackbar('License failed to upload. Please try again', 'error');
+      return;
+    }
+
     const logoDocument = await uploadPerAttachmentType('logo');
+    if(!isValidDocuments(logoDocument)) {
+      showSnackbar('Company logo failed to upload. Please try again', 'error');
+      return;
+    }
+
+    const allSupportingDocuments = [...insuranceDocuments, ...licenseDocuments].map(({ error, ...rest }) => rest);
     const payload: User = {
       countryCode: 'US',
       fullName: values.fullName,
@@ -162,7 +189,7 @@ export default function SubmitInfo() {
       isInsured: values.isInsured,
       isCompanyLicensed: values.isCompanyLicensed,
       // insuranceProvider: values.insuranceProvider,
-      supportingDocuments: [...insuranceDocuments, ...licenseDocuments],
+      supportingDocuments: allSupportingDocuments,
       imageUrl: logoDocument[0]?.file,
       bio: values.bio,
     };

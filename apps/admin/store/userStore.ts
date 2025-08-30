@@ -69,6 +69,7 @@ export interface UserSupportingDocument {
   file: string;
   expiry: string | null;
   details: string;
+  error?: boolean;
 }
 export interface User {
   id?: string;

@@ -12,19 +12,21 @@ export interface UiIconButtonProps {
   icon: UiIconProps['name'];
   size?: IconButtonProps['size'];
   onClick?: IconButtonProps['onClick'];
+  disabled?: boolean;
 }
 
 export function UiIconButton({
   className,
   icon,
   size,
-  onClick
+  onClick,
+  disabled
 }: UiIconButtonProps) {
 
   const { B } = useBEM('ui-icon-button', className);
 
   return (
-    <IconButton className={B()} size={size} onClick={onClick}>
+    <IconButton className={B()} size={size} onClick={onClick} disabled={disabled}>
       <UiIcon name={icon} />
     </IconButton>
   );

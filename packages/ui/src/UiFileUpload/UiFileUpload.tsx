@@ -49,7 +49,6 @@ export function UiFileUpload({
         }
         return selectedFile.type === type;
       });
-
       if (!isValid) {
         onInvalidFile?.(selectedFile); // 👈 call invalid file handler
       } else {
@@ -107,7 +106,10 @@ export function UiFileUpload({
           <UiIconButton
             icon="Clear"
             size="small"
-            onClick={() => onFileRemove(0)}
+            onClick={() => {
+              if (fileInputRef.current) fileInputRef.current.value = '';
+              onFileRemove(0);
+            }}
             className={E('single-file-remove')}
           />
         </div>

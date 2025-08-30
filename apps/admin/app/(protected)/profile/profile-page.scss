@@ -77,4 +77,16 @@
     gap: 1rem;
     padding: 2rem 0;
   }
+
+  &__current-document {
+    @extend %flex-center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.25rem 0rem 0.25rem 1rem;
+    border: 1px solid #ccc;
+
+    &-actions {
+      @extend %flex-center;
+    }
+  }
 }

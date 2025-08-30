@@ -4,10 +4,12 @@ import { Container, Page } from '../../components';
 import { useBEM, useForm } from '@tectus/hooks';
 import './profile-page.scss';
 import {
+  AppLink,
   FileAttachment,
   UiButton,
   UiCheckbox,
   UiFileUpload,
+  UiIconButton,
   UiSelect,
   UiSelectProps,
   UiTextField,
@@ -26,6 +28,7 @@ import { User, UserStatus, UserSupportingDocument, useUserStore } from '@/store'
 import { useCallback, useMemo, useState } from 'react';
 import { useApi } from '@/app/hooks/useApi';
 import { useApiErrorMessage } from '@/app/hooks';
+import Image from 'next/image';
 
 type GroupedOptions = NonNullable<UiSelectProps['groupedOptions']>;
 type attachmentType = 'logo' | 'insurance' | 'license';
@@ -39,6 +42,7 @@ export default function ProfilePage() {
   const { getErrorMessage } = useApiErrorMessage();
   const { showSnackbar } = useUiSnackbar();
   const [mode, setMode] = useState<'view' | 'edit'>('view');
+  const [companyLogoError, setCompanyLogoError] = useState<boolean>(false);
 
   const isViewMode = mode === 'view';
 
@@ -55,6 +59,24 @@ export default function ProfilePage() {
     logo: [],
     license: [],
   });
+
+  const [initialCurrentSupportingDocuments] = useState<
+    UserSupportingDocument[]
+  >(user?.supportingDocuments || []);
+
+  const [currentSupportingDocuments, setCurrentSupportingDocuments] = useState<
+    UserSupportingDocument[]
+  >(initialCurrentSupportingDocuments);
+
+  const [initialImageUrl] = useState<
+    string
+  >(user?.imageUrl || '');
+
+  const [currentImageUrl, setCurrentImageUrl] = useState<
+    string
+  >(initialImageUrl);
+
+
 
   const uploadPerAttachmentType = useCallback(
     async (type: attachmentType): Promise<UserSupportingDocument[]> => {
@@ -78,6 +100,7 @@ export default function ProfilePage() {
           file: res.data?.url || '',
           expiry: files[type][index]?.expiry || null,
           details: res.error ? `Failed ${res.error.message}` : 'Upload successful',
+          error: Boolean(res.error),
         };
       });
       return parseResult;
@@ -162,6 +185,10 @@ export default function ProfilePage() {
     return citiesGroupedByState;
   }, [values.statesCovered]);
 
+  const isValidDocuments = (documents: UserSupportingDocument[]): boolean => {
+    return documents.find((doc) => doc.error) ? false : true;
+  };
+
   const onSubmitInternal = async (values: ApplicationFormValues) => {
     // if (files.logo.length === 0) {
     //   showSnackbar('Please upload a company logo.', 'error');
@@ -169,28 +196,53 @@ export default function ProfilePage() {
     // }
 
     if (values.isInsured || values.isCompanyLicensed) {
-      const allFiles = [...files.insurance, ...files.license];
-      const hasMissingExpiry = allFiles.some((file) => !file.expiry);
+      const requiredDocs = [
+        { enabled: values.isInsured, files: files.insurance, label: 'Certificate of Insurance', type: 'INSURANCE' },
+        { enabled: values.isCompanyLicensed, files: files.license, label: 'License', type: 'LICENSE' },
+      ];
 
-      // Check if no files uploaded
-      if (allFiles.length === 0) {
-        const docType = values.isInsured ? 'Certificate of Insurance' : 'License';
-        showSnackbar(`Please upload at least one ${docType}.`, 'error', {
-          anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-        });
-        return;
-      }
+      for (const { enabled, files: docFiles, label, type } of requiredDocs) {
+        if (!enabled) continue;
 
-      // Check if some files don't have expiry
-      if (hasMissingExpiry) {
-        showSnackbar('File expiration dates are required.', 'error');
-        return;
+        const hasExistingDocs = currentSupportingDocuments.find((doc) => doc.type === type);
+        // Check if no files uploaded
+        if (docFiles.length === 0 && !hasExistingDocs) {
+          showSnackbar(`Please upload at least one ${label}.`, 'error', {
+            anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+          });
+          return;
+        }
+
+        // Check if any file is missing expiry
+        const hasMissingExpiry = docFiles.some((file) => !file.expiry);
+        if (hasMissingExpiry) {
+          showSnackbar(`${label} expiration dates are required.`, 'error');
+          return;
+        }
       }
     }
 
     const insuranceDocuments = await uploadPerAttachmentType('insurance');
+    if (!isValidDocuments(insuranceDocuments)) {
+      showSnackbar('Certificate of Insurance failed to upload. Please try again', 'error');
+      return;
+    }
+
     const licenseDocuments = await uploadPerAttachmentType('license');
+    if (!isValidDocuments(licenseDocuments)) {
+      showSnackbar('License failed to upload. Please try again', 'error');
+      return;
+    }
+
     const logoDocument = await uploadPerAttachmentType('logo');
+    if (!isValidDocuments(logoDocument)) {
+      showSnackbar('Company logo failed to upload. Please try again', 'error');
+      return;
+    }
+
+    const allSupportingDocuments = [...insuranceDocuments, ...licenseDocuments, ...currentSupportingDocuments].map(
+      ({ error, ...rest }) => rest,
+    );
     const payload: User = {
       countryCode: 'US',
       fullName: values.fullName,
@@ -209,8 +261,8 @@ export default function ProfilePage() {
       isInsured: values.isInsured,
       isCompanyLicensed: values.isCompanyLicensed,
       // insuranceProvider: values.insuranceProvider,
-      supportingDocuments: [...insuranceDocuments, ...licenseDocuments],
-      imageUrl: logoDocument[0]?.file,
+      supportingDocuments: allSupportingDocuments,
+      imageUrl: logoDocument[0]?.file || currentImageUrl,
       bio: values.bio,
     };
 
@@ -235,8 +287,47 @@ export default function ProfilePage() {
 
   const cancelEditHandler = () => {
     setMode('view');
+    setCurrentSupportingDocuments(initialCurrentSupportingDocuments);
+    clearFiles('insurance');
+    clearFiles('license');
+    clearFiles('logo');
+
+    setCurrentImageUrl(initialImageUrl);
     reset();
+  };
+
+  const handleRemoveDocument = (file: string) => {
+    setCurrentSupportingDocuments((prev) => prev.filter((doc) => doc.file !== file));
   }
+
+  const renderCurrentDocuments = (type: 'INSURANCE' | 'LICENSE') => {
+    const documents = (currentSupportingDocuments || []).filter((doc) => doc.type === type);
+
+    if (documents.length === 0) return null;
+
+    const label = type === 'INSURANCE' ? 'Insurance' : 'License';
+
+    return documents.map((doc, index) => (
+      <div key={doc.file || `${type}-${index}`} className={E('current-document')}>
+        <UiTypography variant="body1">
+          {label} Document {index + 1}{' '}
+        </UiTypography>
+
+        <UiTypography variant="body1">
+          {doc.expiry}
+        </UiTypography>
+
+        <div className={E('current-document-actions')}>
+          
+          <AppLink href={doc.file} target="_blank" rel="noopener noreferrer" download>
+            <UiIconButton icon="Download" className={E('file-remove')} size='small' />
+          </AppLink>
+
+          <UiIconButton icon="Clear" className={E('file-remove')} size='small' disabled={isViewMode} onClick={() => handleRemoveDocument(doc.file)} />
+        </div>
+      </div>
+    ));
+  };
 
   return (
     <Page id="profile-page" className={B()}>
@@ -362,11 +453,23 @@ export default function ProfilePage() {
                     onExpiryChange={(index, expiry) => handleExpiryChange(index, expiry, 'logo')}
                     button={
                       <UiButton size="small" className={E('upload-button')} disabled={isViewMode}>
-                        Update company logo*
+                        Change company logo*
                       </UiButton>
                     }
-                    maxFiles={1}                    
+                    maxFiles={1}
                   />
+                  {user?.imageUrl && !companyLogoError && (
+                    <Image
+                      src={user?.imageUrl}
+                      alt="Company Logo"
+                      height={100}
+                      width={100}
+                      style={{ height: '5rem', width: '5rem' }}
+                      onError={() => {
+                        setCompanyLogoError(true);
+                      }}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -496,32 +599,36 @@ export default function ProfilePage() {
                     className={E('company-insured')}
                     disabled={isViewMode}
                   />
-
-                  <UiFileUpload
-                    validTypes={['.pdf']}
-                    onInvalidFile={() =>
-                      showSnackbar('Invalid file type. Please upload a PDF file.', 'error')
-                    }
-                    isSubmitted={isSubmitAttempted}
-                    files={files.insurance}
-                    onFileUpload={(file) => handleFileUpload(file, 'insurance')}
-                    onFileRemove={(index) => handleFileRemove(index, 'insurance')}
-                    onExpiryChange={(index, expiry) =>
-                      handleExpiryChange(index, expiry, 'insurance')
-                    }
-                    disabled={!values.isInsured || isViewMode || files.insurance.length >= MAX_FILE_UPLOAD}
-                    maxFiles={MAX_FILE_UPLOAD}
-                    button={
-                      <UiButton
-                        size="small"
-                        disabled={!values.isInsured || isViewMode || files.insurance.length >= MAX_FILE_UPLOAD}
-                        className={E('upload-button')}
-                      >
-                        Add Certificate of Insurance
-                      </UiButton>
-                    }
-                  />
                 </div>
+
+                {renderCurrentDocuments('INSURANCE')}
+
+                <UiFileUpload
+                  validTypes={['.pdf']}
+                  onInvalidFile={() =>
+                    showSnackbar('Invalid file type. Please upload a PDF file.', 'error')
+                  }
+                  isSubmitted={isSubmitAttempted}
+                  files={files.insurance}
+                  onFileUpload={(file) => handleFileUpload(file, 'insurance')}
+                  onFileRemove={(index) => handleFileRemove(index, 'insurance')}
+                  onExpiryChange={(index, expiry) => handleExpiryChange(index, expiry, 'insurance')}
+                  disabled={
+                    !values.isInsured || isViewMode || files.insurance.length >= MAX_FILE_UPLOAD
+                  }
+                  maxFiles={MAX_FILE_UPLOAD}
+                  button={
+                    <UiButton
+                      size="small"
+                      disabled={
+                        !values.isInsured || isViewMode || files.insurance.length >= MAX_FILE_UPLOAD
+                      }
+                      className={E('upload-button')}
+                    >
+                      Add Certificate of Insurance
+                    </UiButton>
+                  }
+                />
               </div>
 
               <div className={E('form-section')}>
@@ -542,6 +649,8 @@ export default function ProfilePage() {
                   />
                 </div>
 
+                {renderCurrentDocuments('LICENSE')}
+
                 <UiFileUpload
                   validTypes={['.pdf']}
                   onInvalidFile={() =>
@@ -552,14 +661,21 @@ export default function ProfilePage() {
                   onFileUpload={(file) => handleFileUpload(file, 'license')}
                   onFileRemove={(index) => handleFileRemove(index, 'license')}
                   onExpiryChange={(index, expiry) => handleExpiryChange(index, expiry, 'license')}
-                  disabled={!values.isCompanyLicensed || isViewMode || files.license.length >= MAX_FILE_UPLOAD}
+                  disabled={
+                    !values.isCompanyLicensed ||
+                    isViewMode ||
+                    files.license.length >= MAX_FILE_UPLOAD
+                  }
                   maxFiles={MAX_FILE_UPLOAD}
                   button={
                     <UiButton
                       size="small"
-                      disabled={!values.isCompanyLicensed || isViewMode || files.license.length >= MAX_FILE_UPLOAD}
+                      disabled={
+                        !values.isCompanyLicensed ||
+                        isViewMode ||
+                        files.license.length >= MAX_FILE_UPLOAD
+                      }
                       className={E('upload-button')}
-                      
                     >
                       Add License
                     </UiButton>
@@ -585,7 +701,11 @@ export default function ProfilePage() {
                 </UiButton>
               </>
             ) : (
-              <UiButton type="button" onClick={() => setMode('edit')}>
+              <UiButton type="button" onClick={() => {
+                // TEMPORARY FIX to update isValid current value to enable update button
+                setValue('isCompanyLicensed', values.isCompanyLicensed);
+                setMode('edit');
+              }}>
                 Edit
               </UiButton>
             )}
