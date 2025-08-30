@@ -251,7 +251,6 @@ export default function ProfilePage() {
       legalEntity: values.legalEntity,
       address: [values.companyAddressLine1, values.companyAddressLine2].filter(Boolean).join(', '),
       yearFounded: Number(values.yearFounded),
-      website: values.website,
       statesCovered: values.statesCovered,
       citiesCovered: values.citiesCovered,
       vehiclesUsed: values.vehiclesUsed,
