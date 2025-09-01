@@ -22,6 +22,7 @@ interface ActionButton {
   color?: UIButtonProps['color'];
   fontWeight?: UIButtonProps['fontWeight'];
   disabled?: boolean;
+  loading?: boolean;
 }
 
 export interface UiModalProps {
@@ -74,6 +75,7 @@ export function UiModal({
               color={button.color || 'primary'}
               fontWeight={button.fontWeight}
               disabled={button.disabled}
+              loading={button.loading}
               onClick={() => {
                 onActionClick(button);
               }}

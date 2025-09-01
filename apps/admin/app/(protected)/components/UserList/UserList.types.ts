@@ -24,6 +24,6 @@ export const ALL_OPTION = { label: 'All', value: 'all' };
 export type ApiPersonnel = {
   fullName: string;
   email: string;
-  user: { role: string };
+  role: string;
   status: string;
 };

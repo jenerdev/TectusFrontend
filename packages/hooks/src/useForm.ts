@@ -7,7 +7,7 @@ type ValidationRule<T = unknown> = {
   minLength?: { value: number; message: string };
   minValue?: { value: number; message: string };
   maxValue?: { value: number; message: string };
-  pattern?: RegExp | { value: RegExp; message: string };
+  pattern?: RegExp | { value: RegExp; message: string; data?: Record<string, any> };
   password?: RegExp | { value: RegExp; message: string };
   custom?: { fn: () => boolean; message?: string };
   disabled?: boolean;
@@ -21,10 +21,14 @@ const validate = {
   required: (message?: string) => ({
     required: message || 'This field is required...',
   }),
-  email: (message: string) => ({
+  // Separator for multiple email addresses in single string ex. test@email.com, test2@email.com
+  email: (message: string, separator?: string) => ({
     pattern: {
       value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
       message: message || 'Invalid email address',
+      data: {
+        separator: separator || ',',
+      },
     },
   }),
   password: (message?: string) => ({
@@ -110,12 +114,24 @@ export function useForm<T extends object>(initialValues: T) {
     }
 
     if (rules.pattern) {
-      const { value: pattern, message } =
-        rules.pattern instanceof RegExp
-          ? { value: rules.pattern, message: 'Invalid format' }
-          : rules.pattern;
+      const {
+        value: pattern,
+        message,
+        data,
+      } = rules.pattern instanceof RegExp
+        ? { value: rules.pattern, message: 'Invalid format' }
+        : rules.pattern;
 
-      if (typeof value === 'string' && !pattern.test(value)) return message;
+      // for values that are separated by any character ex. , | etc..
+      if (data?.separator && typeof value === 'string') {
+        const values = (value || '')
+          .split(data.separator)
+          .filter(Boolean)
+          .map((v) => v.trim());
+        if (values.some((val) => !pattern.test(val))) return message;
+      } else {
+        if (typeof value === 'string' && !pattern.test(value)) return message;
+      }
     }
 
     if (rules.password) {

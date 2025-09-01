@@ -3,17 +3,50 @@
 import { useBEM } from '@tectus/hooks';
 import './InviteUsersBulkModal.scss';
 import { AppLink, FileAttachment, UiButton, UiFileUpload, UiModal, UiModalProps, UiSelect, UiTextField, UiTypography, useUiSnackbar } from '@tectus/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useApi } from '@/app/hooks';
 
 export interface InviteUsersBulkModalProps {
   open: boolean;
   onClose?: UiModalProps['handleClose'];
+  refetchUsers?: () => void;
 }
 
-export function InviteUsersBulkModal({ open, onClose }: InviteUsersBulkModalProps) {
+export function InviteUsersBulkModal({ open, onClose, refetchUsers }: InviteUsersBulkModalProps) {
   const { B, E } = useBEM('invite-users-bulk-modal');
   const { showSnackbar } = useUiSnackbar();
   const [csv, setCsv] = useState<FileAttachment>();
+
+  const { loading, sendRequest } = useApi(`api/go/personnel/bulk-upload?dryRun=false&sendInvite=true`, {
+    method: 'POST',
+  });
+
+
+  const handleActionButton = async () => {
+    if(!csv)return;
+    const formData = new FormData();
+    formData.append('file', csv?.file);
+
+    const result = await sendRequest({
+      body: formData,
+    });
+    const {
+      total = 0,
+      inviteEmailsSent = 0,
+      skipped = 0,
+    } = result.data || {};
+
+    const message = `📊 ${total} total processed — ✅ ${inviteEmailsSent} invite sent, ⚠️ ${skipped} skipped (some emails already exist)`;
+    showSnackbar(message, 'info');
+    if(refetchUsers) refetchUsers();
+    if(onClose) onClose({}, 'escapeKeyDown');
+  }
+
+  useEffect(() => {
+    if(!open) {
+      setCsv(undefined);
+    }
+  }, [open])
 
   return (
     <UiModal
@@ -34,16 +67,18 @@ export function InviteUsersBulkModal({ open, onClose }: InviteUsersBulkModalProp
           label: 'Upload CSV',
           action: 'upload_csv',
           variant: 'text',
-          closeOnClick: true,
+          closeOnClick: false,
           fontWeight: 400,
           disabled: !csv,
+          loading: loading,
         },
       ]}
       handleClose={onClose}
+      handleActionButton={handleActionButton}
     >
       <ul className={E('instruction')}>
         <li>
-          <AppLink href='#' target='_blank' className={E('download-template')} >
+          <AppLink href='/sample-bulk-upload-personnel.csv' target='_blank' download className={E('download-template')} >
             Download the CSV template
           </AppLink>
         </li>

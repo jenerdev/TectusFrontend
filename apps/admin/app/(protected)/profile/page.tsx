@@ -150,7 +150,7 @@ export default function ProfilePage() {
     companyName: user?.companyName || '',
     legalEntity: user?.legalEntity || '',
     companyAddressLine1: user?.address || '',
-    companyAddressLine2: '',
+    companyAddressLine2: user?.address2 || '',
     yearFounded: String(user?.yearFounded) || '',
     website: user?.website || '',
     numberOfEmployees: user?.numberOfEmployees || '',
@@ -258,7 +258,8 @@ export default function ProfilePage() {
       fullName: values.fullName,
       companyName: values.companyName,
       legalEntity: values.legalEntity,
-      address: [values.companyAddressLine1, values.companyAddressLine2].filter(Boolean).join(', '),
+      address: values.companyAddressLine1,
+      address2: values.companyAddressLine2 || '',
       yearFounded: Number(values.yearFounded),
       website: values.website,
       statesCovered: values.statesCovered,
@@ -330,9 +331,9 @@ export default function ProfilePage() {
         <UiTypography variant="body1">{doc.expiry}</UiTypography>
 
         <div className={E('current-document-actions')}>
-          {/* <AppLink href={doc.file} target="_blank" rel="noopener noreferrer" download>
-            <UiIconButton icon="Download" className={E('file-remove')} size='small' />
-          </AppLink> */}
+          <AppLink href={doc.file} target="_blank" rel="noopener noreferrer" download>
+            <UiIconButton icon="Visibility" className={E('file-remove')} size='small' />
+          </AppLink>
 
           <UiIconButton
             icon="Clear"

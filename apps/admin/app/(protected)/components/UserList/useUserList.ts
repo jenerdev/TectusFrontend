@@ -15,26 +15,37 @@ export function useUserList() {
   const [filters, setFilters] = useState<UserListFilterType>(DEFAULT_FILTERS);
   const [data, setData] = useState<Personnel[]>([]);
 
-  const { loading, sendRequest } = useApi<void, { data: ApiPersonnel[] }>('api/go/personnel', {
-    method: 'GET',
-  });
+  const [refetchFlag, setRefetchFlag] = useState(0);
+
+  const { loading, sendRequest } = useApi<void, { data: ApiPersonnel[] }>(
+    'api/go/personnel/employees',
+    {
+      method: 'GET',
+    },
+  );
 
   const loaded = useRef(false);
+
+  useEffect(() => {
+    if (refetchFlag === 0) return;
+    loaded.current = false;
+  }, [refetchFlag]);
+
   useEffect(() => {
     if (loaded.current) return;
     (async () => {
       const results = await sendRequest();
       setData(
         (results?.data || []).map((item: any) => ({
-          name: item.fullName,
+          name: item.fullName === 'null null' ? '' : item.fullName,
           email: item.email,
-          role: item.user.role,
+          role: item.role,
           status: item.status,
         })),
       );
     })();
     loaded.current = true;
-  }, []);
+  }, [refetchFlag]);
 
   const updateFilter = (type: FilterType, value: string) => {
     setFilters((prev) => ({ ...prev, [type]: value }));
@@ -74,6 +85,10 @@ export function useUserList() {
     }));
   }, [data]);
 
+  const refetch = () => {
+    setRefetchFlag((prev) => prev + 1);
+  };
+
   return {
     data: finalData,
     loading,
@@ -82,5 +97,6 @@ export function useUserList() {
     statusOptions: [ALL_OPTION, ...statusOptions],
     updateFilter,
     clearFilter,
+    refetch,
   };
 }

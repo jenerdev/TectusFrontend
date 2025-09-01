@@ -8,7 +8,7 @@ export const UiSnackbarProvider = ({ children }: { children: React.ReactNode }) 
   return (
     <NotistackProvider
       maxSnack={3}
-      autoHideDuration={3000}
+      autoHideDuration={5000}
     >
       {children}
     </NotistackProvider>

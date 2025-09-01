@@ -80,6 +80,7 @@ export interface User {
   countryCode?: string;
   legalEntity?: string;
   address?: string;
+  address2?: string;
   yearFounded?: number;
   website?: string;
   statesCovered?: string[];

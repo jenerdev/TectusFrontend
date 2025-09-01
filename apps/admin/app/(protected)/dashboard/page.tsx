@@ -78,7 +78,6 @@ const dashboardCards: Record<
   },
 };
 
-
 export default function DashboardPage() {
   const { B, E } = useBEM('dashboard-page');
   const [mobileTab, setMobileTab] = useState(0);
@@ -92,8 +91,8 @@ export default function DashboardPage() {
 
   const employeesOverviewHandleAction = (action: ActionType) => {
     if (action === 'invite_user') setOpenInviteModal(true);
-    if (action === 'invite_user_bulk')  setOpenInviteBulkModal(true);
-  }
+    if (action === 'invite_user_bulk') setOpenInviteBulkModal(true);
+  };
 
   return (
     <Page id="dashboard-page" className={B()}>
@@ -129,11 +128,21 @@ export default function DashboardPage() {
             );
           })}
         </div>
-        <EmployeesOverview handleAction={employeesOverviewHandleAction}/>
+        <EmployeesOverview handleAction={employeesOverviewHandleAction} />
       </Container>
 
-      <InviteUsersModal open={openInviteModal} onClose={() => setOpenInviteModal(false)} />
-      <InviteUsersBulkModal open={openInviteBulkModal} onClose={() => setOpenInviteBulkModal(false)} />
+      <InviteUsersModal
+        open={openInviteModal}
+        onClose={() => setOpenInviteModal(false)}
+        switchToBulk={() => {
+          setOpenInviteModal(false);
+          setOpenInviteBulkModal(true);
+        }}
+      />
+      <InviteUsersBulkModal
+        open={openInviteBulkModal}
+        onClose={() => setOpenInviteBulkModal(false)}
+      />
     </Page>
   );
 }

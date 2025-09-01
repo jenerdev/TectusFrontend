@@ -21,7 +21,7 @@ import Image from 'next/image';
 import { useApi, useApiErrorMessage, useProtectedRoute } from '@/app/hooks';
 import { ApiErrorCode, STATE_CITIES, VENDOR_SERVICES, VENDOR_VEHICLES, RANGES_OF_NUMBER_OPTIONS } from '@/app/constants';
 
-export interface ApplicationFormValues extends Omit<User, 'address' | 'yearFounded'> {
+export interface ApplicationFormValues extends Omit<User, 'address' | 'address2' | 'yearFounded'> {
   companyAddressLine1: string;
   companyAddressLine2: string;
   yearFounded?: string;
@@ -176,7 +176,8 @@ export default function SubmitInfo() {
       fullName: values.fullName,
       companyName: values.companyName,
       legalEntity: values.legalEntity,
-      address: [values.companyAddressLine1, values.companyAddressLine2].filter(Boolean).join(', '),
+      address: values.companyAddressLine1,
+      address2: values.companyAddressLine2,
       yearFounded: Number(values.yearFounded),
       statesCovered: values.statesCovered,
       citiesCovered: values.citiesCovered,
@@ -645,7 +646,7 @@ export default function SubmitInfo() {
 
           <UiButton
             type="submit"
-            disabled={!agreedWithTermsAndConditions || !isValid}
+            disabled={!agreedWithTermsAndConditions || !isValid || files.logo.length === 0}
             loading={uploadLoading || vendorLoading}
           >
             Submit application
