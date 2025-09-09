@@ -2,8 +2,7 @@
 
 import { useBEM } from '@tectus/hooks';
 import './DashboardCard.scss';
-import { UiCard, UiTypography } from '@tectus/ui';
-import UiIcon from '@tectus/ui/UiIcon/UiIcon';
+import { UiCard, UiTypography, UiIcon } from '@tectus/ui';
 
 export interface DashboardCardProps {
   title: string;

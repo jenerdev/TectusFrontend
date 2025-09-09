@@ -186,8 +186,6 @@ export function UiMenu({ items }: UiMenuProps) {
   );
 }
 
-export default UiMenu;
-
 // USAGE
 // <UiMenu
 //   triggers={[

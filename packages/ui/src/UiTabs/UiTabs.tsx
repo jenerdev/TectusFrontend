@@ -5,12 +5,13 @@ import './UiTabs.scss';
 export interface UiTabsProps {
   onChange?: TabsProps['onChange'];
   value?: TabsProps['value'];
-  items: { label: string; path?: string }[];
+  items: { label: string; value?: string; path?: string }[];
   variant?: TabsProps['variant'];
   scrollButtons?: TabsProps['scrollButtons'];
   allowScrollButtonsMobile?: TabsProps['allowScrollButtonsMobile'];
   className?: string;
   color?: TabsProps['color'];
+  componentLink?: React.ElementType;
 }
 
 export function UiTabs({
@@ -21,7 +22,8 @@ export function UiTabs({
   scrollButtons,
   allowScrollButtonsMobile,
   className,
-  color
+  color,
+  componentLink
 }: UiTabsProps) {
   return (
     <Tabs
@@ -43,12 +45,13 @@ export function UiTabs({
         },
       } : {}}
     >
-      {items.map(({ label, path }, index) => (
+      {items.map(({ label, path, value }, index) => (
         <Tab
           key={index}
           label={label}
           sx={{ textTransform: 'none' }}
-          {...(path ? { component: Link, href: path } : {})}
+          value={value || index}
+          {...(path ? { component: componentLink || Link, href: path } : {})}
         />
       ))}
     </Tabs>

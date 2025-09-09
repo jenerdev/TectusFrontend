@@ -9,6 +9,7 @@ import { usePathname } from 'next/navigation';
 import { useProtectedRoute } from '../hooks';
 import { useBEM } from '@tectus/hooks';
 import { UserStatus, useUserStore } from '@/store';
+import NextLink from 'next/link';
 
 const tabs = [
   { label: 'Dashboard', path: '/dashboard' },
@@ -46,6 +47,7 @@ export default function RootLayout({
               variant="scrollable"
               scrollButtons="auto"
               allowScrollButtonsMobile
+              componentLink={NextLink}
             />
           </Container>
         )}

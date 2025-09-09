@@ -10,7 +10,16 @@
     font-size: 1rem;
     text-align: left;
     height: 2.5rem;
-    padding: 0 1rem;
+    padding: 0.25rem 1rem;
+  }
+
+  &__tr {
+    &--clickable {
+      cursor: pointer;
+      &:hover {
+        background-color: rgba(#fff, 0.1);
+      }
+    }
   }
 
   &__th {
@@ -18,7 +27,7 @@
     color: #333333;
 
     &--highlighted {
-      background-color: #00cccc;
+      background-color: var(--var-secondary-theme);
     }
   }
 

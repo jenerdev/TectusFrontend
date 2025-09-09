@@ -3,7 +3,7 @@
 import * as React from 'react';
 import MuiTextField, { TextFieldProps } from '@mui/material/TextField';
 import { InputAdornment } from '@mui/material';
-import UiIcon, { UiIconProps } from '../UiIcon/UiIcon';
+import { UiIconProps, UiIcon } from '../UiIcon/UiIcon';
 import { useBEM } from '@tectus/hooks';
 import './UiTextField.scss';
 import { JSX, useMemo } from 'react';
@@ -40,6 +40,7 @@ export interface UiTextFieldProps {
 
   endIcon?: UiIconProps['name'];
   helperTextPosition?: 'absolute' | 'relative';
+  prefix?: string;
 }
 
 export const UiTextField: React.FC<UiTextFieldProps> = ({
@@ -71,6 +72,7 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
     disablePastDates,
     endIcon,
     helperTextPosition = 'absolute',
+    prefix
   } = props;
 
   const { B, E } = useBEM('ui-text-field', className);
@@ -167,6 +169,7 @@ export const UiTextField: React.FC<UiTextFieldProps> = ({
         input: {
           readOnly: readOnly,
           endAdornment: renderEndAdornment,
+          startAdornment: prefix ? <InputAdornment position="start">{prefix}</InputAdornment> : null,
           ...(disablePastDates && isDateField
             ? {
                 inputProps: {

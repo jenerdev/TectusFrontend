@@ -2,12 +2,10 @@
 import { useBEM } from '@tectus/hooks';
 import './Header.scss';
 import { Container } from '../Container';
-import Image from 'next/image';
-import UiIcon from '@tectus/ui/UiIcon/UiIcon';
-import UiMenu from '@tectus/ui/UiMenu/UiMenu';
+import Image from 'next/image'; 
 import { UserStatus, useUserStore } from '@/store';
 import { useRouter } from 'next/navigation';
-import { AppLink, UiTypography } from '@tectus/ui';
+import { AppLink, UiTypography, UiIcon, UiMenu } from '@tectus/ui';
 import { useMemo } from 'react';
 
 interface HeaderProps {

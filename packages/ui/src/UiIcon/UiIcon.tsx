@@ -11,7 +11,7 @@ export interface UiIconProps  {
   color?: SvgIconProps['color'];
 }
 
-const UiIcon: React.FC<UiIconProps> = ({ name, size, color }) => {
+export const UiIcon: React.FC<UiIconProps> = ({ name, size, color }) => {
   const IconComponent = MuiIcons[name];
 
   if (!IconComponent) {
@@ -22,4 +22,3 @@ const UiIcon: React.FC<UiIconProps> = ({ name, size, color }) => {
   return <IconComponent sx={{ color }} fontSize={size} />;
 };
 
-export default UiIcon;

@@ -17,8 +17,8 @@ import {
   ListSubheader,
 } from '@mui/material';
 import { useBEM } from '@tectus/hooks';
-import UiIcon from '../UiIcon/UiIcon';
 import { useMemo } from 'react';
+import { UiIcon } from '../UiIcon';
 
 export interface UiSelectProps {
   id?: string;

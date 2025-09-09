@@ -38,7 +38,8 @@ export function InviteUsersModal({ open, onClose, refetchUsers, switchToBulk }: 
     errors,
     values,
     reset,
-    isValid
+    isValid,
+    setValue,
   } = useForm<InviteFormValues>({
     email: '',
     role: '',
@@ -71,18 +72,19 @@ export function InviteUsersModal({ open, onClose, refetchUsers, switchToBulk }: 
       message: res.error?.message
     }));
 
+    const hasError = mapResults.some(res => Boolean(res.code));
     mapResults.forEach(res => {
       if(Boolean(res.code)){
         const reason = res.code === 'USER_ALREADY_EXISTS' ? res.message : 'Failed to send invitation to:';
         const message = `${reason}: ${res.email}`;
         showSnackbar(message, 'error');
+        return;
       } else {
         showSnackbar(`Invitation sent successfully to: ${res.email}`, 'success');
       }
     });
-
+    if(hasError)return;
     if(refetchUsers) refetchUsers();
-
     if(onClose) onClose({}, 'escapeKeyDown');
   }
 

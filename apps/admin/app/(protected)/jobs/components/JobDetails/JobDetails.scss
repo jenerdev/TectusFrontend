@@ -1,0 +1,143 @@
+@use '@tectus/styles/helpers' as *;
+
+.job-details {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 1rem;
+  margin-bottom: 15rem;
+
+  @include respond-to(tablet-lg) {
+    flex-direction: row;
+    gap: 4rem;
+    margin-bottom: 0rem;
+  }
+
+  &__section {
+    flex: 1;
+
+    &--left {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    &--right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 4rem;
+
+      @include respond-to(tablet-lg) {
+        max-width: 31.25rem;
+      }
+    }
+  }
+
+  &__info-group {
+    &--price {
+      display: none;
+
+      @include respond-to(tablet-lg) {
+        display: block;
+      }
+    }
+  }
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &--rate {
+      font-size: 0.875rem !important;
+
+      @include respond-to(tablet-lg) {
+        font-size: 1.25rem !important;
+      }
+    }
+  }
+
+  &__service-category {
+    font-size: 2.25rem;
+    color: var(--var-secondary-theme);
+  }
+
+  &__details {
+    padding-left: 2rem;
+  }
+
+  &__price {
+    color: #00ff66;
+  }
+
+  &__buttons {
+    &--desktop {
+      display: none;
+      gap: 0.5rem;
+
+      @include respond-to(tablet-lg) {
+        display: flex;
+      }
+    }
+  }
+
+  &__accept-job {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__place-bid {
+    display: none;
+    gap: 1rem;
+    max-width: 25rem;
+    align-items: center;
+
+    &--desktop {
+      @include respond-to(tablet-lg) {
+        display: flex;
+      }
+    }
+  }
+
+  &__for-bidding {
+    text-align: center;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+
+    &-input {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+  }
+
+  &__bid-button {
+    min-width: 9rem !important;
+  }
+
+  &__cancel {
+    margin-top: 2.5rem !important;
+  }
+}
+
+//TODO: create separate component
+.pop-out-modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  background-color: #222222;
+  width: 100%;
+  border-top-left-radius: 1.25rem;
+  border-top-right-radius: 1.25rem;
+  padding: 1rem;
+  text-align: center;
+
+  @include respond-to(tablet-lg) {
+    display: none;
+  }
+}

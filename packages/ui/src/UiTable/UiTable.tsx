@@ -3,20 +3,23 @@ import { useBEM, useBreakpoint } from '@tectus/hooks';
 import './UiTable.scss';
 import { JSX } from 'react';
 
+
 export interface Column {
   key: string; // field name in data
   label: string; // header label
   template?: {
-    td?: (row: Record<string, any>) => JSX.Element;
+    td?: (row: Record<string, any>) => JSX.Element | string;
   };
+  isMobile?: boolean;
+  width?: string;
 }
 
 export interface UiTableProps {
   columns: Column[];
-  mobileColumns?: Column[];
   data: Record<string, any>[];
   className?: string;
   loading?: boolean;
+  onSelectRow?: (row: Record<string, any>) => void;
 
   //TEMP
   variant?: 'default' | 'highlighted';
@@ -24,16 +27,17 @@ export interface UiTableProps {
 
 export function UiTable({
   columns,
-  mobileColumns,
   data,
   className,
   variant = 'default',
   loading = false,
+  onSelectRow,
 }: UiTableProps) {
   const { B, E } = useBEM('ui-table');
   const { isLessThan } = useBreakpoint();
 
-  const displayedColumns = isLessThan('tablet-md') ? mobileColumns || columns : columns;
+  const mobileColumns = columns.filter(col => col.isMobile);
+  const displayedColumns = isLessThan('tablet-md') ? (mobileColumns.length ? mobileColumns : columns) : columns;
 
   return (
     <div className={B(className)}>
@@ -41,7 +45,7 @@ export function UiTable({
         <thead className={E('head')}>
           <tr>
             {displayedColumns.map((col) => (
-              <th key={col.key} className={E('th', variant)}>
+              <th key={col.key} className={E('th', variant)} style={{ width: col.width || 'auto' }}>
                 {col.label}
               </th>
             ))}
@@ -50,7 +54,7 @@ export function UiTable({
         <tbody className={E('body')}>
           {!loading && data.length > 0 ? (
             data.map((row, rowIndex) => (
-              <tr key={rowIndex} className={E('tr')}>
+              <tr key={rowIndex} className={E('tr', Boolean(onSelectRow) ? 'clickable' : '')} onClick={() => onSelectRow?.(row)} >
                 {displayedColumns.map((col) => (
                   <td key={col.key} className={E('td')}>
                     {col.template?.td ? col.template.td(row) : (row[col.key] ?? '')}

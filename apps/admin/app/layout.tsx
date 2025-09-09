@@ -5,7 +5,7 @@ import './main.scss';
 import { ThemeProvider } from '@tectus/ui/ThemeProvider';
 import { UiSnackbarProvider } from '@tectus/ui';
 import Script from 'next/script';
-import { Orbitron } from "next/font/google";
+import { Orbitron, Inter } from "next/font/google";
 
 
 const orbitron = Orbitron({
@@ -14,6 +14,11 @@ const orbitron = Orbitron({
   variable: "--font-orbitron",
 });
 
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "Tectus GO",
@@ -36,7 +41,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" style={{ '--base-font-size': baseFontSize } as React.CSSProperties} className={`${orbitron.variable}`}>
+    <html lang="en" style={{ '--base-font-size': baseFontSize } as React.CSSProperties} className={`${orbitron.variable} ${inter.variable}`}>
       <body>
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}

@@ -12,7 +12,7 @@ import {
 } from '../components';
 import { UserListFilter } from './components';
 import './users-page.scss';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
 export default function SchedulePage() {
   const { B, E } = useBEM('users-page');

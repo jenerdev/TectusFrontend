@@ -42,12 +42,8 @@ export function UserList({ data, loading = false }: UserListProps) {
       <UiTable
         className={E('table')}
         loading={loading}
-        mobileColumns={[
-          { key: 'name', label: 'Name' },
-          { key: 'actions', label: 'Actions' },
-        ]}
         columns={[
-          { key: 'name', label: 'Name' },
+          { key: 'name', label: 'Name', isMobile: true },
           { key: 'email', label: 'Email' },
           { key: 'role', label: 'Role' },
           {
@@ -61,7 +57,7 @@ export function UserList({ data, loading = false }: UserListProps) {
               ),
             },
           },
-          { key: 'actions', label: 'Actions' },
+          { key: 'actions', label: 'Actions', isMobile: true},
         ]}
         data={data}
         // data={[

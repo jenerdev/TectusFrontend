@@ -2,8 +2,7 @@
 
 import { useBEM } from '@tectus/hooks';
 import './UserListFilter.scss';
-import { UiMenu, UiSelect, UiSelectProps, UiTextField, UiTypography } from '@tectus/ui';
-import UiIcon from '@tectus/ui/UiIcon/UiIcon';
+import { UiMenu, UiSelect, UiSelectProps, UiTextField, UiIcon } from '@tectus/ui';
 import { ActionType, FilterType, UserListFilterType } from '@/app/(protected)/components';
 
 export interface UserListFilterProps {

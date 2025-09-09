@@ -2,8 +2,7 @@
 
 import './UiIconButton.scss';
 import { IconButton, IconButtonProps } from '@mui/material';
-import { UiIconProps } from '../UiIcon';
-import UiIcon from '../UiIcon/UiIcon';
+import { UiIconProps, UiIcon } from '../UiIcon';
 import { useBEM } from '@tectus/hooks';
 
 
