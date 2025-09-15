@@ -11,13 +11,13 @@ import {
   UiTextField,
 } from '@tectus/ui';
 import { GoogleMap } from '@/app/components';
-import { Job } from '../../Job.types';
 import { useMemo, useState } from 'react';
+import { JobModel } from '@/app/api/models/JobModel';
 
 export type JobDetailsActionType = 'accept' | 'cancel';
 
 export interface JobDetailsProps {
-  job: Job;
+  job: JobModel;
   actionHandler: (action: JobDetailsActionType) => void;
 }
 
@@ -97,7 +97,7 @@ export function JobDetails({ job, actionHandler }: JobDetailsProps) {
       <div className={E('section', 'left')}>
         <div className={E('info-group')}>
           <UiTypography className={E('service-category')} variant="h4" fontWeight={700}>
-            {job.categories.join(', ')}
+            {job.title}
           </UiTypography>
 
           {renderInfo({

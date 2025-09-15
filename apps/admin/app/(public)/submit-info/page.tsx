@@ -44,10 +44,12 @@ export default function SubmitInfo() {
   const [showTerms, setShowTerms] = useState(false);
   const { showSnackbar } = useUiSnackbar();
 
+  // TODO: create a model and hook for this on /api
   const { loading: uploadLoading, sendRequest: uploadRequest } = useApi(`files/images/upload`, {
     method: 'POST',
   });
 
+  // TODO: create a model and hook for this on /api
   const { loading: vendorLoading, sendRequest: vendorRequest } = useApi(`api/go/user/me`, {
     method: 'PUT',
   });

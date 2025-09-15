@@ -1,27 +1,25 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { SigninFormValues, SigninPostResponse } from './SignInForm.types';
 import { User, UserStatus, useUserStore } from '@/store';
 import { useApi, useApiErrorMessage } from '@/app/hooks';
 import { useUiSnackbar } from '@tectus/ui';
 import { ApiErrorCode } from '@/app/constants';
+import { useUserApi } from '@/app/api';
+import { LoginInForm } from '@/app/api/models';
 
 export function useSignInForm() {
   const router = useRouter();
   const { showSnackbar } = useUiSnackbar();
   const { getErrorMessage } = useApiErrorMessage();
 
-  const { loading: loginLoading, sendRequest: loginRequest } = useApi<
-    SigninPostResponse,
-    SigninFormValues
-  >(`api/go/user/login`, {
-    method: 'POST',
-  });
+  const { loading: loginLoading, login } = useUserApi();
 
+  // TODO: create a model and hook for this on /api
   const { loading: userLoading, sendRequest: userRequest } = useApi<User>(`api/go/user/me`, {
     method: 'GET',
   });
 
+  // TODO: create a model and hook for this on /api
   const { loading: verifyEmailLoading, sendRequest: verifyEmailRequest } = useApi<any>(
     `api/go/user/sendVerificationEmail`,
     {
@@ -29,8 +27,8 @@ export function useSignInForm() {
     },
   );
 
-  const handleSignIn = async (values: SigninFormValues, verifyEmail = true) => {
-    const loginResult = await loginRequest({ body: values });
+  const handleSignIn = async (values: LoginInForm, verifyEmail = true) => {
+    const loginResult = await login(values);
     const {
       idToken: token,
       refreshToken,

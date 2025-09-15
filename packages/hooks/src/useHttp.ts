@@ -13,7 +13,7 @@ interface RefreshedTokens {
   refreshToken: string;
 }
 
-interface HttpOptions<TBody = any> {
+export interface HttpOptions<TBody = any> {
   method?: HttpMethod;
   headers?: Record<string, string>;
   body?: TBody;

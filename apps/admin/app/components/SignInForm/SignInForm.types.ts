@@ -1,16 +1,7 @@
-export type SigninFormValues = {
-  email: string;
-  password: string;
-};
+import { LoginInForm } from "@/app/api/models";
 
 export interface SigninFormProps {
-  onSubmit?: (data: SigninFormValues) => void;
+  onSubmit?: (data: LoginInForm) => void;
   loading?: boolean;
 }
 
-export interface SigninPostResponse {
-  emailVerified: boolean;
-  idToken: string;
-  refreshToken: string;
-  expiresIn: number;
-}

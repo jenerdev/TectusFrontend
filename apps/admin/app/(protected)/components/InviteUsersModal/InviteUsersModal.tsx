@@ -24,6 +24,7 @@ export function InviteUsersModal({ open, onClose, refetchUsers, switchToBulk }: 
   const { B, E } = useBEM('invite-users-modal');
   const { showSnackbar } = useUiSnackbar();
 
+  // TODO: create a model and hook for this on /api
   const { loading, sendRequest } = useApi<
     any,
     InviteFormValues

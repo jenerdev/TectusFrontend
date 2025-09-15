@@ -3,8 +3,9 @@
 import { useBEM } from '@tectus/hooks';
 import './EmployeesOverview.scss';
 import { UiMenu, UiTypography, UiIcon } from '@tectus/ui';
-import { ActionType, InviteUsersBulkModal, InviteUsersModal, UserList, useUserList } from '@/app/(protected)/components';
+import { ActionType, InviteUsersBulkModal, InviteUsersModal, UserList } from '@/app/(protected)/components';
 import { useState } from 'react';
+import { usePersonnelApi } from '@/app/api';
 
 type EmployeeStatusType =
   | 'available'
@@ -34,7 +35,7 @@ export function EmployeesOverview({  }: EmployeesOverviewProps) {
   const { B, E } = useBEM('employees-overview');
   const [openInviteModal, setOpenInviteModal] = useState(false);
   const [openInviteBulkModal, setOpenInviteBulkModal] = useState(false);
-  const { data, loading, refetch } = useUserList();
+  const { list, loading, refetch } = usePersonnelApi();
 
   const employeesOverviewHandleAction = (action: ActionType) => {
     if (action === 'invite_user') setOpenInviteModal(true);
@@ -69,7 +70,7 @@ export function EmployeesOverview({  }: EmployeesOverviewProps) {
           ]}
         />
       </div>
-      <UserList data={data} loading={loading}/>
+      <UserList data={list} loading={loading}/>
 
       <InviteUsersModal
         open={openInviteModal}

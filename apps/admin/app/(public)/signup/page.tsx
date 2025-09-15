@@ -35,6 +35,7 @@ export default function Signup() {
   const { showSnackbar } = useUiSnackbar();
   const { handleSignIn, loading: signInLoading } = useSignInForm();
 
+  // TODO: create a model and hook for this on /api
   const { loading, sendRequest } = useApi<
     SignupPostResponse,
     Omit<SignupFormValues, 'repeatPassword'>

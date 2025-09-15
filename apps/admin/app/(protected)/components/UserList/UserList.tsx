@@ -3,7 +3,7 @@
 import { useBEM } from '@tectus/hooks';
 import './UserList.scss';
 import { UiTable } from '@tectus/ui'; 
-import { Personnel } from './UserList.types';
+import { PersonnelModel } from '@/app/api/models';
 
 export type ActionType = 'invite_user' | 'invite_user_bulk';
 
@@ -30,7 +30,7 @@ const statusLabels: Record<EmployeeStatusType, string> = {
 
 
 export interface UserListProps {
-  data: Personnel[];
+  data: PersonnelModel[];
   loading?: boolean;
 }
 
@@ -43,7 +43,7 @@ export function UserList({ data, loading = false }: UserListProps) {
         className={E('table')}
         loading={loading}
         columns={[
-          { key: 'name', label: 'Name', isMobile: true },
+          { key: 'fullName', label: 'Name', isMobile: true },
           { key: 'email', label: 'Email' },
           { key: 'role', label: 'Role' },
           {
@@ -60,38 +60,6 @@ export function UserList({ data, loading = false }: UserListProps) {
           { key: 'actions', label: 'Actions', isMobile: true},
         ]}
         data={data}
-        // data={[
-        //   { name: 'Alice Smith', email: 'alice@email.com', role: 'Admin', status: 'available' },
-        //   { name: 'Bob Johnson', email: 'bob@email.com', role: 'User', status: 'archived' },
-        //   {
-        //     name: 'Charlie Brown',
-        //     email: 'charlie@email.com',
-        //     role: 'User',
-        //     status: 'clocked_in',
-        //   },
-        //   { name: 'Diana Prince', email: 'diana@email.com', role: 'Admin', status: 'busy' },
-        //   {
-        //     name: 'Ethan Hunt',
-        //     email: 'ethan@email.com',
-        //     role: 'User',
-        //     status: 'pending_profile_approval',
-        //   },
-        //   {
-        //     name: 'Fiona Gallagher',
-        //     email: 'fiona@email.com',
-        //     role: 'User',
-        //     status: 'invited',
-        //   },
-        //   {
-        //     name: 'George Miller',
-        //     email: 'george@email.com',
-        //     role: 'User',
-        //     status: 'pending_documents',
-        //   },
-        //   { name: 'Hannah Davis', email: 'hannah@email.com', role: 'Admin', status: 'removed' },
-        //   { name: 'Ian Curtis', email: 'ian@email.com', role: 'User', status: 'available' },
-        //   { name: 'Jenna Lee', email: 'jenna@email.com', role: 'User', status: 'clocked_in' },
-        // ]}
       />
     </div>
   );

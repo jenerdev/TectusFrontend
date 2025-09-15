@@ -6,10 +6,10 @@ import './dashboard-page.scss';
 import { DashboardCard, DashboardCardProps } from './components';
 import { UiTabs, UiTypography } from '@tectus/ui';
 import { useEffect, useMemo, useState } from 'react';
-import { EmployeesOverview } from './components/EmployeesOverview/EmployeesOverview';
-import { useJobList } from '../jobs/useJobList';
-import { Job } from '../jobs/Job.types';
+import { EmployeesOverview } from './components/EmployeesOverview/EmployeesOverview'; 
 import { useRouter } from 'next/navigation';
+import { useJobApi } from '@/app/api';
+import { JobModel } from '@/app/api/models';
 
 type DashboardCardType = 'availableJobs' | 'jobsForBidding' | 'earnings';
 const dashboardCards: Record<
@@ -59,8 +59,8 @@ export default function DashboardPage() {
   const { B, E } = useBEM('dashboard-page');
   const [mobileTab, setMobileTab] = useState(0);
   const { isLessThan } = useBreakpoint();
-  const { data: availableJobs, loading: availableJobsLoading } = useJobList('available');
-  const { data: jobsForBidding, loading: jobsForBiddingLoading } = useJobList('bidding');
+  const { list: availableJobs, loading: availableJobsLoading } = useJobApi({ status: 'available' });
+  const { list: jobsForBidding, loading: jobsForBiddingLoading } = useJobApi({ status: 'bidding' });
 
   const [dashboardCardsState, setDashboardCardState] = useState(dashboardCards);
 
@@ -68,11 +68,11 @@ export default function DashboardPage() {
     return Object.values(dashboardCards).map((section) => section.section);
   }, [dashboardCards]);
 
-  const mapJob = (job: Job) => {
+  const mapJob = (job: JobModel) => {
     const budget = parseFloat(job.budget);
     const rate = (budget / job.numberOfPersonnel).toFixed(2);
     return {
-      title: job.categories[0] as string,
+      title: job.title,
       location: job.location?.address || '~',
       details: {
         dateTime: job.startAt,
@@ -81,6 +81,27 @@ export default function DashboardPage() {
       },
     };
   };
+
+  const mapLocations = useMemo(() => {
+    if (availableJobsLoading || jobsForBiddingLoading) return [];
+    const allJobs = [
+      ...availableJobs.map((job) => {
+        return {
+          ...job.location,
+          title: job.location?.address,
+          pinColor: 'green' as const,
+        };
+      }),
+      ...jobsForBidding.map((job) => {
+        return {
+          ...job.location,
+          title: job.location?.address,
+          pinColor: 'blue' as const,
+        };
+      }),
+    ];
+    return allJobs;
+  }, [jobsForBidding, availableJobs, availableJobsLoading, jobsForBiddingLoading]);
 
   useEffect(() => {
     setDashboardCardState((prevState) => ({
@@ -107,7 +128,7 @@ export default function DashboardPage() {
   return (
     <Page id="dashboard-page" className={B()}>
       <Container inner className={E('container')}>
-        <GoogleMap />
+        <GoogleMap locations={mapLocations}/>
 
         <UiTabs
           className={E('tabs')}

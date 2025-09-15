@@ -19,6 +19,7 @@ function ResetPasswordForm() {
   const email = searchParams.get("email");
   const code = searchParams.get("code");
 
+  // TODO: create a model and hook for this on /api
   const { loading, sendRequest } = useApi<any, ResetPasswordPayload>(
     `api/go/user/confirmPasswordReset`,
     {

@@ -7,6 +7,7 @@ import { UserStatus, useUserStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { AppLink, UiTypography, UiIcon, UiMenu } from '@tectus/ui';
 import { useMemo } from 'react';
+import { useUserApi } from '@/app/api';
 
 interface HeaderProps {
   center?: boolean;
@@ -15,6 +16,7 @@ interface HeaderProps {
 
 export function Header({ center = false, noMenu = false }: HeaderProps) {
   const { B, E } = useBEM('header');
+  const { logout } = useUserApi();
   const user = useUserStore((state) => state.user);
   const userStatus = useUserStore.getState().getUserStatus();
   const router = useRouter();
@@ -24,7 +26,8 @@ export function Header({ center = false, noMenu = false }: HeaderProps) {
     [UserStatus.REJECTED]: '#',
   };
 
-  const onLogout = () => {
+  const onLogout = async () => {
+    await logout();
     useUserStore.getState().logout();
     router.push('/');
   };

@@ -19,7 +19,8 @@ export function useApi<TResponse = any, TBody = any>(
   }, [token]);
 
   const refreshAuthToken = useCallback(async () => {
-    const refreshTokenUrl = `${BASE_URL}api/user/refreshAuth?refreshToken=${refreshToken}`;
+    // const refreshTokenUrl = `${BASE_URL}api/user/refreshAuth?refreshToken=${refreshToken}`;
+    const refreshTokenUrl = `${BASE_URL}api/go/user/refreshAuth?refreshToken=${refreshToken}`;
     const response = await fetch(refreshTokenUrl, { method: 'POST' });
     if (!response.ok) return;
     const newTokens = await response.json();

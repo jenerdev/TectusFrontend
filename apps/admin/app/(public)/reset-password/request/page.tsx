@@ -16,6 +16,7 @@ export default function ResetPasswordRequestPage() {
   const router = useRouter();
   const { showSnackbar } = useUiSnackbar();
 
+  // TODO: create a model and hook for this on /api
   const { loading, sendRequest } = useApi<ResetPasswordPostResponse, ResetPasswordFormValues>(
     `api/go/user/sendPasswordResetEmail`,
     {

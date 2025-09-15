@@ -2,9 +2,10 @@
 import { useBEM, useForm } from '@tectus/hooks';
 import './SignInForm.scss';
 import { UiButton, UiTextField } from '@tectus/ui';
-import { SigninFormProps, SigninFormValues } from './SignInForm.types';
+import { SigninFormProps } from './SignInForm.types';
 import { UiSwitch } from '@tectus/ui';
 import { useState } from 'react';
+import { LoginInForm } from '@/app/api/models';
 
 export function SignInForm({ onSubmit, loading }: SigninFormProps) {
   const { B, E } = useBEM('sign-in-form');
@@ -15,12 +16,12 @@ export function SignInForm({ onSubmit, loading }: SigninFormProps) {
     handleSubmit,
     validate: { required, email },
     errors,
-  } = useForm<SigninFormValues>({
+  } = useForm<LoginInForm>({
     email: '',
     password: '',
   });
 
-  const onSubmitInternal = async (values: SigninFormValues) => {
+  const onSubmitInternal = async (values: LoginInForm) => {
     onSubmit?.(values);
   };
 

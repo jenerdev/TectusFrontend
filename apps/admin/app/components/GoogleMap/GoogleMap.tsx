@@ -43,7 +43,6 @@ export function GoogleMap({
   heightTabletLg = '37.5rem',
   locations = [],
 }: GoogleMapProps) {
-  console.log({locations})
   const { B } = useBEM('google-map');
   const mapRef = useRef<HTMLDivElement>(null);
 

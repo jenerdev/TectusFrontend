@@ -17,6 +17,8 @@ export default function ApplicationSubmittedPage() {
   const { B, E } = useBEM('application-submitted-page');
   const { getErrorMessage } = useApiErrorMessage();
   const { showSnackbar } = useUiSnackbar();
+
+  // TODO: create a model and hook for this on /api
   const { loading, sendRequest } = useApi<User>(`api/go/user/me`, {
     method: 'GET',
   });

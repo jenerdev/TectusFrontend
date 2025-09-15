@@ -17,6 +17,7 @@ export function InviteUsersBulkModal({ open, onClose, refetchUsers }: InviteUser
   const { showSnackbar } = useUiSnackbar();
   const [csv, setCsv] = useState<FileAttachment>();
 
+  // TODO: create a model and hook for this on /api
   const { loading, sendRequest } = useApi(`api/go/personnel/bulk-upload?dryRun=false&sendInvite=true`, {
     method: 'POST',
   });

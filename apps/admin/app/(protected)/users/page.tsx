@@ -4,19 +4,21 @@ import { Container, Page } from '../../components';
 import { useBEM } from '@tectus/hooks';
 import {
   ActionType,
-  InviteFormValues,
   InviteUsersBulkModal,
   InviteUsersModal,
   UserList,
-  useUserList,
+  usePersonnelFilter,
 } from '../components';
 import { UserListFilter } from './components';
 import './users-page.scss';
 import { useState } from 'react';
+import { usePersonnelApi } from '@/app/api';
 
 export default function SchedulePage() {
   const { B, E } = useBEM('users-page');
-  const { data, loading, filters, updateFilter, statusOptions, roleOptions, refetch } = useUserList();
+  const { loading, list, refetch } = usePersonnelApi();
+
+  const { filters, updateFilter, statusOptions, roleOptions, data } = usePersonnelFilter(list || []);
 
   const [openInviteModal, setOpenInviteModal] = useState(false);
   const [openInviteBulkModal, setOpenInviteBulkModal] = useState(false);

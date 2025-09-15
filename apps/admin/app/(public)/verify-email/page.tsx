@@ -14,6 +14,8 @@ export default function VerifyEmailPage() {
   const { B, E } = useBEM('verify-email-page');
   const { getErrorMessage } = useApiErrorMessage();
   const { showSnackbar } = useUiSnackbar();
+
+  // TODO: create a model and hook for this on /api
   const { loading, sendRequest } = useApi<User>(`api/go/user/me`, {
     method: 'GET',
   });
