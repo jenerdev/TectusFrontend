@@ -113,7 +113,6 @@ export const useJobApi = ({
   const refetch = () => {
     setRefetchFlag((prev) => prev + 1);
   };
-
   return {
     loading: listLoading || detailsLoading,
     list,
