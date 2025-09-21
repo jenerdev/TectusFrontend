@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { UserStatus, useUserStore } from '@/store';
+import { AuthRoleEnum } from '../api/models';
 
 interface useProtectedRouteProps {
   bypassApproved?: boolean; // Note as long as the user is approved, they will be stay on current route
@@ -11,9 +12,10 @@ interface useProtectedRouteProps {
 export function useProtectedRoute(props?: useProtectedRouteProps) {
   const { bypassApproved = false } = props || {};
 
-  const token = useUserStore((state) => state.token);
-  const emailVerified = useUserStore((state) => state.user?.emailVerified);
-  const status = useUserStore((state) => (state.user?.status || '').toUpperCase() as UserStatus);
+  const token = useUserStore((state) => state.auth?.idToken);
+  const role = useUserStore((state) => state.auth?.role);
+  const user = useUserStore.getState().getUser();
+  const status = useUserStore.getState().getUserStatus();
   const hasHydrated = useUserStore((state) => state.hasHydrated);
 
   const router = useRouter();
@@ -33,38 +35,46 @@ export function useProtectedRoute(props?: useProtectedRouteProps) {
       router.replace('/');
       return;
     }
-    const statusRedirects: Record<UserStatus, string> = {
-      [UserStatus.REJECTED]: '/application-rejected',
-      [UserStatus.PENDING]: '/application-submitted',
-      [UserStatus.APPROVED]: '/dashboard',
-    };
 
-    let route = '';
-    if (token && !emailVerified) {
-      route = '/verify-email';
-    } else {
-      route = statusRedirects[status] ?? '/submit-info';
+    if (role === AuthRoleEnum.PROVIDER) {
+      const statusRedirects: Record<UserStatus, string> = {
+        [UserStatus.REJECTED]: '/application-rejected',
+        [UserStatus.PENDING]: '/application-submitted',
+        [UserStatus.APPROVED]: '/dashboard',
+      };
+
+      let route = '';
+      if (token && !user?.emailVerified) {
+        route = '/verify-email';
+      } else {
+        route = statusRedirects[status] ?? '/submit-info';
+      }
+
+      if (
+        status === UserStatus.APPROVED &&
+        (pathname === '/application-approved' || bypassApproved)
+      ) {
+        setDecided(true);
+        return;
+      }
+
+      if (status === UserStatus.PENDING && pathname === '/profile') {
+        setDecided(true);
+        return;
+      }
+
+      if (route && pathname !== route) {
+        router.replace(route);
+      } else {
+        setDecided(true);
+      }
     }
 
-    if (
-      status === UserStatus.APPROVED &&
-      (pathname === '/application-approved' || bypassApproved)
-    ) {
+    if (role === AuthRoleEnum.PERSONNEL) {
+      // TODO: handle personnel route guarding
       setDecided(true);
-      return;
     }
-
-    if (status === UserStatus.PENDING && pathname === '/profile') {
-      setDecided(true);
-      return;
-    }
-
-    if (route && pathname !== route) {
-      router.replace(route);
-    } else {
-      setDecided(true);
-    }
-  }, [hasHydrated, token, status, emailVerified, pathname, router, setDecided]);
+  }, [hasHydrated, token, status, user?.emailVerified, pathname, router, setDecided]);
 
   return {
     isChecking: !hasHydrated || !decided,

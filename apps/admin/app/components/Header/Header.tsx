@@ -7,7 +7,7 @@ import { UserStatus, useUserStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { AppLink, UiTypography, UiIcon, UiMenu } from '@tectus/ui';
 import { useMemo } from 'react';
-import { useUserApi } from '@/app/api';
+import { useAuthApi } from '@/app/api';
 
 interface HeaderProps {
   center?: boolean;
@@ -16,8 +16,8 @@ interface HeaderProps {
 
 export function Header({ center = false, noMenu = false }: HeaderProps) {
   const { B, E } = useBEM('header');
-  const { logout } = useUserApi();
-  const user = useUserStore((state) => state.user);
+  const { logout } = useAuthApi();
+  const user = useUserStore.getState().getUser();
   const userStatus = useUserStore.getState().getUserStatus();
   const router = useRouter();
   const logoRedirectMapping = {
@@ -32,12 +32,8 @@ export function Header({ center = false, noMenu = false }: HeaderProps) {
     router.push('/');
   };
 
-  const gotoProfile = () => {
-    router.push(`/profile`);
-  };
-
   const logoRedirect = useMemo(() => {
-    return logoRedirectMapping[userStatus || UserStatus.PENDING];
+    return logoRedirectMapping[userStatus] || '/';
   }, [userStatus]);
 
   return (
@@ -80,7 +76,12 @@ export function Header({ center = false, noMenu = false }: HeaderProps) {
                   {
                     label: 'Profile',
                     icon: <UiIcon name="AccountBox" size="small" />,
-                    onClick: gotoProfile,
+                    onClick: () => router.push(`/profile`),
+                  },
+                  {
+                    label: 'Change Password',
+                    icon: <UiIcon name="Password" size="small" />,
+                    onClick: () => router.push('/change-password'),
                   },
                   { divider: true, label: '' },
                   {

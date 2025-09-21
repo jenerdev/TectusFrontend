@@ -8,35 +8,49 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useMemo } from 'react';
 import { UiTabs } from '../../../../../packages/ui/src/UiTabs';
 import { useJobApi } from '@/app/api';
-import { JobModel, JobStatusType } from '@/app/api/models';
+import { AuthRoleEnum, JobModel, JobStatusType } from '@/app/api/models';
+import { useUserStore } from '@/store';
 
-export default function JobsPage() {
-  const { B, E } = useBEM('jobs-page');
-  
-  const tabItems = [
+const tabItems = [
     {
-      label: 'Active Jobs',
+      label: 'Available Jobs',
       value: 'active',
+      roles: [AuthRoleEnum.PROVIDER],
+    },
+    {
+      label: 'Available Jobs',
+      value: 'available',
+      roles: [AuthRoleEnum.PERSONNEL],
     },
     {
       label: 'Jobs for Bidding',
       value: 'bidding',
+      roles: [AuthRoleEnum.PROVIDER],
     },
     {
       label: 'Accepted Jobs',
       value: 'accepted',
+      roles: [AuthRoleEnum.PROVIDER],
     },
     {
       label: 'Completed Jobs',
       value: 'completed',
+      roles: [AuthRoleEnum.PROVIDER],
     },
   ];
+
+
+export default function JobsPage() {
+  const { B, E } = useBEM('jobs-page');
+  const role = useUserStore((state) => state.auth?.role);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get('tab') as JobStatusType;
-  const [tab, setTab] = useState<JobStatusType>(initialTab || 'active');
+  const isPersonnel = role === AuthRoleEnum.PERSONNEL;
+  const initialTab = (searchParams.get('tab') || (isPersonnel ? 'available' : 'active')) as JobStatusType;
   
-  const { list: data, loading } = useJobApi({ status: tab });
+  const [tab, setTab] = useState<JobStatusType>(initialTab);
+  
+  const { list: data, loading } = useJobApi({ status: tab, role });
   const mapLocations = useMemo(() => {
     return data.map((job) => {
       return {
@@ -59,6 +73,8 @@ export default function JobsPage() {
     router.replace(`?${params.toString()}`);
   };
 
+  if(!role)return null;
+
   return (
     <Page id="jobs-page" className={B()}>
       <Container inner className={E('container')}>
@@ -67,7 +83,7 @@ export default function JobsPage() {
           <UiTabs
             className={E('tabs')}
             value={tab}
-            items={tabItems}
+            items={tabItems.filter(item => item.roles.includes(role))}
             onChange={(_, newValue) => tabOnChange(newValue)}
             color="#00cccc"
             variant="scrollable"

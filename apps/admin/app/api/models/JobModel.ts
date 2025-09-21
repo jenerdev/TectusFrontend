@@ -34,6 +34,7 @@ export interface JobModel {
   awardedVendor: string | null;
   createdAt: string;
   updatedAt: string;
+  isArmed: boolean;
 }
 
 export type JobStatusType = 'active' | 'bidding' | 'completed' | 'available' | 'accepted';

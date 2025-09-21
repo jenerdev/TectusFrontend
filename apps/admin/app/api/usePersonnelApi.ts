@@ -2,26 +2,50 @@ import { useApi } from '@/app/hooks';
 import { useEffect, useRef, useState } from 'react';
 import { PersonnelModel } from './models';
 import endpoints from './endpoints';
+import { HttpError } from '@tectus/hooks';
 
-
-type useGetJobReturn = {
+type usePersonnelApiType = {
   loading: boolean;
   list: PersonnelModel[];
   refetch: () => void;
+  createProfile: (data: any) => Promise<{
+    data: any | null;
+    error: HttpError | null;
+  }>;
+  getPersonnelDetails: (data?: any) => Promise<{
+    data: any | null;
+    error: HttpError | null;
+  }>;
 };
 
-export const usePersonnelApi = (): useGetJobReturn => {
-  const [list, setList] = useState<PersonnelModel[]>([]); 
+// TODO: add types for personnel remove type any
+
+export const usePersonnelApi = (manual = false): usePersonnelApiType => {
+  const [list, setList] = useState<PersonnelModel[]>([]);
   const [refetchFlag, setRefetchFlag] = useState(0);
 
   const loaded = useRef(false);
 
-  const { loading, sendRequest } = useApi<PersonnelModel[], any>(
-    endpoints.vendor.personnels,
-    {
-      method: 'GET',
-    },
-  );
+  const { loading: getPersonnelListLoading, sendRequest: getPersonnelList } = useApi<
+    PersonnelModel[],
+    any
+  >(endpoints.personnel.list, {
+    method: 'GET',
+  });
+
+  const { loading: createProfileLoading, sendRequest: createProfile } = useApi<
+    PersonnelModel[],
+    any
+  >(endpoints.personnel.details, {
+    method: 'PUT',
+  });
+
+  const { loading: getPersonnelDetailsLoading, sendRequest: getPersonnelDetails } = useApi<
+    PersonnelModel[],
+    any
+  >(endpoints.personnel.details, {
+    method: 'GET',
+  });
 
   useEffect(() => {
     if (refetchFlag === 0) return;
@@ -29,25 +53,27 @@ export const usePersonnelApi = (): useGetJobReturn => {
   }, [refetchFlag]);
 
   useEffect(() => {
-    if (loaded.current) return;
+    if (loaded.current || manual) return;
     (async () => {
-      const results = await sendRequest();
-      const personnels = (results?.data || []).map( item => {
+      const results = await getPersonnelList();
+      const personnels = (results?.data || []).map((item) => {
         const fullName = item.fullName === 'null null' ? '' : item.fullName;
-        return {...item, fullName};
+        return { ...item, fullName };
       });
       setList(personnels);
     })();
     loaded.current = true;
-  }, [refetchFlag]);
+  }, [refetchFlag, manual]);
 
   const refetch = () => {
     setRefetchFlag((prev) => prev + 1);
   };
 
   return {
-    loading,
+    loading: getPersonnelListLoading || createProfileLoading || getPersonnelDetailsLoading,
     list,
     refetch,
+    createProfile,
+    getPersonnelDetails,
   };
 };

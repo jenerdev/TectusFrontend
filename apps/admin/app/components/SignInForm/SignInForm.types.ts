@@ -1,7 +1,6 @@
-import { LoginInForm } from "@/app/api/models";
+import { LoginDTO } from '@/app/api/models';
 
 export interface SigninFormProps {
-  onSubmit?: (data: LoginInForm) => void;
+  onSubmit?: (data: LoginDTO) => void;
   loading?: boolean;
 }
-

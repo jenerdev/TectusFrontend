@@ -12,15 +12,15 @@ export function useApi<TResponse = any, TBody = any>(
   options = {},
 ): HttpState<TResponse> {
   const url = `${BASE_URL}${endpoint}`;
-  const { token, refreshToken, updateTokens } = useUserStore();
+  const { updateTokens, auth } = useUserStore();
 
   const getToken = useCallback(() => {
-    return token;
-  }, [token]);
+    return auth?.idToken;
+  }, [auth?.idToken]);
 
   const refreshAuthToken = useCallback(async () => {
     // const refreshTokenUrl = `${BASE_URL}api/user/refreshAuth?refreshToken=${refreshToken}`;
-    const refreshTokenUrl = `${BASE_URL}api/go/user/refreshAuth?refreshToken=${refreshToken}`;
+    const refreshTokenUrl = `${BASE_URL}api/go/user/refreshAuth?refreshToken=${auth?.refreshToken}`;
     const response = await fetch(refreshTokenUrl, { method: 'POST' });
     if (!response.ok) return;
     const newTokens = await response.json();
@@ -30,7 +30,7 @@ export function useApi<TResponse = any, TBody = any>(
     });
 
     return newTokens;
-  }, [refreshToken, updateTokens]);
+  }, [auth, updateTokens]);
 
   return useHttp<TResponse, TBody>(url, { ...options, getToken, refreshAuthToken });
 }

@@ -13,8 +13,6 @@ export interface JobListProps {
 
 export function JobList({ onSelectJob, loading, data = [] }: JobListProps) {
   const { B, E } = useBEM('job-list');
-
-  console.log({ data1: data });
   return (
     <div className={B()}>
       <UiTable
@@ -29,6 +27,11 @@ export function JobList({ onSelectJob, loading, data = [] }: JobListProps) {
             isMobile: true,
           },
           {
+            key: 'category',
+            label: 'Category',
+            isMobile: true,
+          },
+          {
             key: 'location',
             label: 'Location',
             template: {
@@ -37,23 +40,38 @@ export function JobList({ onSelectJob, loading, data = [] }: JobListProps) {
           },
           {
             key: 'startAt',
-            label: 'Date & Time',
+            label: 'Start Date',
             width: '11rem',
           },
-          { key: 'tags', label: 'Tags', isMobile: true },
-          { key: 'numberOfPersonnel', label: 'Personnel Needed', width: '11rem' },
           {
-            key: 'budget',
-            label: 'Rate',
+            key: 'endAt',
+            label: 'End Date',
+            width: '11rem',
+          },
+          { key: 'numberOfPersonnel', label: 'Personnel', width: '11rem' },
+          {
+            key: 'fee',
+            label: 'Fee',
             template: {
               td: (row) => {
-                // const rate = parseFloat(row.budget) / (row.numberOfPersonnel || 1);
-                const rate = `${parseFloat(row.budget)}/hr`;
-                return <span className={E('rate')}>{rate}</span>;
+                if(!row.fee)return '-';
+                return <span className={E('fee')}>${row.fee}</span>;
               },
             },
           },
-          { key: 'actions', label: 'Actions', isMobile: true },
+          {
+            key: 'rate',
+            label: 'Effective Rate',
+            template: {
+              td: (row) => {
+                // if(row.budget === '0') return '-';
+                // const 
+                const amount = parseFloat(row.fee || row.budget || '0');
+                const rate = amount / (row.numberOfPersonnel || 1);
+                return `$${rate.toFixed(2)}/person/hr`;
+              },
+            },
+          },
         ]}
         data={data}
       />

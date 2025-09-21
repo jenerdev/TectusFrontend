@@ -67,15 +67,7 @@ function ResetPasswordForm() {
       });
 
       if (result.error) {
-        const message =
-          apiErrorMessageMapping[result.error.message as ApiErrorCode] ||
-          apiErrorMessageMapping.GENERIC;
-        showSnackbar(message, "error", {
-          anchorOrigin: {
-            vertical: "bottom",
-            horizontal: "left",
-          },
-        });
+        showSnackbar(result.error.message, "error");
         return;
       }
 

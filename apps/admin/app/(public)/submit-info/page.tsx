@@ -13,19 +13,15 @@ import { useBEM, useForm } from '@tectus/hooks';
 import './submit-info-page.scss';
 import { useRouter } from 'next/navigation';
 import { UiCheckbox } from '@tectus/ui';
-import { User, UserStatus, UserSupportingDocument, useUserStore } from '@/store';
+import { UserStatus, useUserStore } from '@/store';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FileAttachment, UiFileUpload } from '@tectus/ui';
 // import { isValidUSPhone } from '@tectus/utils'; TODO: need fix
 import Image from 'next/image';
 import { useApi, useApiErrorMessage, useProtectedRoute } from '@/app/hooks';
 import { ApiErrorCode, STATE_CITIES, VENDOR_SERVICES, VENDOR_VEHICLES, RANGES_OF_NUMBER_OPTIONS } from '@/app/constants';
-
-export interface ApplicationFormValues extends Omit<User, 'address' | 'address2' | 'yearFounded'> {
-  companyAddressLine1: string;
-  companyAddressLine2: string;
-  yearFounded?: string;
-}
+import { VendorForm, VendorModel, VendorSupportingDocument } from '@/app/api/models';
+import { useVendorApi } from '@/app/api';
 
 type attachmentType = 'logo' | 'insurance' | 'license';
 type fileAttachments = Record<attachmentType, FileAttachment[]>;
@@ -39,7 +35,7 @@ export default function SubmitInfo() {
   const { B, E } = useBEM('submit-info-page');
   const { getErrorMessage } = useApiErrorMessage();
   const router = useRouter();
-  const user = useUserStore((state) => state.user);
+  const vendor = useUserStore((state) => state.vendor);
   const [agreedWithTermsAndConditions, setAgreedWithTermsAndConditions] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const { showSnackbar } = useUiSnackbar();
@@ -49,10 +45,7 @@ export default function SubmitInfo() {
     method: 'POST',
   });
 
-  // TODO: create a model and hook for this on /api
-  const { loading: vendorLoading, sendRequest: vendorRequest } = useApi(`api/go/user/me`, {
-    method: 'PUT',
-  });
+  const { loading: vendorLoading, saveVendorDetails } = useVendorApi();
 
   const [files, setFiles] = useState<fileAttachments>({
     insurance: [],
@@ -61,7 +54,7 @@ export default function SubmitInfo() {
   });
 
   const uploadPerAttachmentType = useCallback(
-    async (type: attachmentType): Promise<UserSupportingDocument[]> => {
+    async (type: attachmentType): Promise<VendorSupportingDocument[]> => {
       const filesToUpload = files[type].map((file) => file.file);
       if (filesToUpload.length === 0) return [];
 
@@ -118,11 +111,11 @@ export default function SubmitInfo() {
     }));
   };
 
-  const isValidDocuments = (documents: UserSupportingDocument[]): boolean => {
+  const isValidDocuments = (documents: VendorSupportingDocument[]): boolean => {
     return documents.find(doc => doc.error) ? false : true;
   };
 
-  const onSubmitInternal = async (values: ApplicationFormValues) => {
+  const onSubmitInternal = async (values: VendorForm) => {
     if (files.logo.length === 0) {
       showSnackbar('Please upload a company logo.', 'error');
       return;
@@ -173,39 +166,17 @@ export default function SubmitInfo() {
     }
 
     const allSupportingDocuments = [...insuranceDocuments, ...licenseDocuments].map(({ error, ...rest }) => rest);
-    let payload: User = {
+
+    const {email, ...formValues} = values;
+    let payload: VendorModel = {
+      ...formValues,
       countryCode: 'US',
-      fullName: values.fullName,
-      companyName: values.companyName,
-      legalEntity: values.legalEntity,
-      address: values.companyAddressLine1,
-      address2: values.companyAddressLine2,
       yearFounded: Number(values.yearFounded),
-      statesCovered: values.statesCovered,
-      citiesCovered: values.citiesCovered,
-      vehiclesUsed: values.vehiclesUsed,
-      servicesOffered: values.servicesOffered,
-      contactNumber: values.contactNumber,
-      numberOfEmployees: values.numberOfEmployees,
-      numberOfContractors: values.numberOfContractors,
-      isInsured: values.isInsured,
-      isCompanyLicensed: values.isCompanyLicensed,
-      // insuranceProvider: values.insuranceProvider,
       supportingDocuments: allSupportingDocuments,
-      imageUrl: logoDocument[0]?.file,
-      bio: values.bio,
+      imageUrl: logoDocument[0]?.file || '',
     };
 
-    if(Boolean(values.website)) {
-      payload = {
-        ...payload,
-        website: values.website,
-      }
-    }
-
-    const submitDetailsResult = await vendorRequest({
-      body: payload,
-    });
+    const submitDetailsResult = await saveVendorDetails(payload);
 
     if (submitDetailsResult.error) {
       const errorMessage = getErrorMessage(submitDetailsResult.error?.message as ApiErrorCode);
@@ -213,11 +184,14 @@ export default function SubmitInfo() {
       return;
     }
 
-    useUserStore.getState().setUser({
-      ...user,
-      ...payload,
-      status: UserStatus.PENDING,
-    });
+    if(vendor){
+      useUserStore.getState().setVendor({
+        ...vendor,
+        ...payload,
+        yearFounded: Number(payload.yearFounded),
+        status: UserStatus.PENDING,
+      });
+    }
 
     router.push('/application-submitted');
   };
@@ -232,14 +206,14 @@ export default function SubmitInfo() {
     reset,
     isSubmitAttempted,
     isValid,
-  } = useForm<ApplicationFormValues>({
+  } = useForm<VendorForm>({
     email: '',
     fullName: '',
     contactNumber: '',
     companyName: '',
     legalEntity: '',
-    companyAddressLine1: '',
-    companyAddressLine2: '',
+    address: '',
+    address2: '',
     yearFounded: '',
     website: '',
     numberOfEmployees: '',
@@ -252,13 +226,17 @@ export default function SubmitInfo() {
     // insuranceProvider: '',
     isCompanyLicensed: false,
     bio: '',
+    countryCode: 'US',
+    imageUrl: '',
+    insuranceProvider: '',
+    supportingDocuments: []
   });
 
   useEffect(() => {
-    if (user?.email && !values.email) {
-      setValue('email', user.email);
+    if (vendor?.email && !values.email) {
+      setValue('email', vendor.email);
     }
-  }, [user?.email, setValue, values]);
+  }, [vendor?.email, setValue, values]);
 
   const statesCoveredRef = useRef<string>('');
   useEffect(() => {
@@ -363,24 +341,24 @@ export default function SubmitInfo() {
                   />
                   <UiTextField
                     label="Company address (Line 1)*"
-                    {...register('companyAddressLine1', {
+                    {...register('address', {
                       ...required('Company Address Line 1 is required.'),
                     })}
-                    helperText={errors.companyAddressLine1}
-                    error={Boolean(errors.companyAddressLine1)}
+                    helperText={errors.address}
+                    error={Boolean(errors.address)}
                     googlePlaces
                     googlePlacesCountry="US"
                     onPlaceSelected={(place) => {
-                      setValue('companyAddressLine1', place.formatted_address);
+                      setValue('address', place.formatted_address);
                     }}
                   />
                   <UiTextField
                     label="Company address (Line 2)"
-                    {...register('companyAddressLine2', {
+                    {...register('address2', {
                       // ...required('Company Address Line 2 is required.'),
                     })}
-                    helperText={errors.companyAddressLine2}
-                    error={Boolean(errors.companyAddressLine2)}
+                    helperText={errors.address2}
+                    error={Boolean(errors.address2)}
                   />
                   <UiTextField
                     label="Year Founded*"

@@ -1,23 +1,20 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { User, UserStatus, useUserStore } from '@/store';
+import { UserStatus, useUserStore } from '@/store';
 import { useApi, useApiErrorMessage } from '@/app/hooks';
 import { useUiSnackbar } from '@tectus/ui';
 import { ApiErrorCode } from '@/app/constants';
-import { useUserApi } from '@/app/api';
-import { LoginInForm } from '@/app/api/models';
+import { useAuthApi, usePersonnelApi, useVendorApi } from '@/app/api';
+import { AuthRoleEnum, LoginDTO } from '@/app/api/models';
 
 export function useSignInForm() {
   const router = useRouter();
   const { showSnackbar } = useUiSnackbar();
   const { getErrorMessage } = useApiErrorMessage();
 
-  const { loading: loginLoading, login } = useUserApi();
-
-  // TODO: create a model and hook for this on /api
-  const { loading: userLoading, sendRequest: userRequest } = useApi<User>(`api/go/user/me`, {
-    method: 'GET',
-  });
+  const { loading: loginLoading, login } = useAuthApi();
+  const { loading: vendorLoading, getVendorDetails } = useVendorApi();
+  const { loading: personnelLoading, getPersonnelDetails } = usePersonnelApi();
 
   // TODO: create a model and hook for this on /api
   const { loading: verifyEmailLoading, sendRequest: verifyEmailRequest } = useApi<any>(
@@ -27,15 +24,16 @@ export function useSignInForm() {
     },
   );
 
-  const handleSignIn = async (values: LoginInForm, verifyEmail = true) => {
+  const handleSignIn = async (values: LoginDTO, verifyEmail = true) => {
     const loginResult = await login(values);
     const {
       idToken: token,
       refreshToken,
       expiresIn,
       emailVerified = false,
+      role,
     } = loginResult.data || {};
-    if (loginResult.error || !token || !refreshToken) {
+    if (!loginResult.data || loginResult.error || !token || !refreshToken) {
       const errorMessage = getErrorMessage(loginResult.error?.code as ApiErrorCode);
 
       showSnackbar(errorMessage, 'error', {
@@ -46,37 +44,71 @@ export function useSignInForm() {
       });
       return;
     }
-    const userResult = await userRequest({
-      token: token,
-      refreshToken: refreshToken,
-    });
-    if (userResult.error || !userResult.data) {
-      const errorMessage = getErrorMessage(userResult.error?.message as ApiErrorCode);
 
-      showSnackbar(errorMessage, 'error', {
-        anchorOrigin: {
-          vertical: 'bottom',
-          horizontal: 'left',
-        },
+    let userStatus;
+    const isPersonnel = role === AuthRoleEnum.PERSONNEL;
+
+    if (role === AuthRoleEnum.PROVIDER) {
+      const vendorResult = await getVendorDetails({
+        token: token,
+        refreshToken: refreshToken,
       });
-      return;
+      if (vendorResult?.error?.message) {
+        showSnackbar(vendorResult?.error?.message || '', 'error', {
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'left',
+          },
+        });
+        return;
+      }
+      userStatus = vendorResult?.data?.status;
+      useUserStore.getState().setVendor(vendorResult?.data);
     }
+
+    if (isPersonnel) {
+      const { data, error } = await getPersonnelDetails({
+        token: token,
+        refreshToken: refreshToken,
+      });
+      if (error) {
+        showSnackbar(error.message || '', 'error');
+        return;
+      }
+      useUserStore.getState().setPersonnel(data);
+      userStatus = data.personnelInfo.status;
+    }
+
     // Note: this cookie will be used for authentication in the middleware for route guarding
     document.cookie = `token=${token}; path=/; max-age=${expiresIn}; secure; samesite=lax`;
-    useUserStore.getState().login({ token, refreshToken, emailVerified });
-    useUserStore.getState().setUser(userResult.data);
+    useUserStore.getState().setAuth(loginResult.data);
 
-    if (emailVerified) {
-      const status = (userResult.data.status || '').toUpperCase() as UserStatus;
+    if (isPersonnel) {
+      // TODO: improve handling personnel specific logic
+      if (userStatus === 'SignedUp') {
+        router.push('/create-profile');
+        return;
+      }
 
+      if (userStatus === 'Pending') {
+        router.push('/application-submitted');
+        return;
+      }
+
+      router.push('/dashboard');
+
+      return;
+    }
+
+    if (emailVerified && userStatus) {
       const statusRoutes: Record<UserStatus, string> = {
         [UserStatus.APPROVED]: '/dashboard',
         [UserStatus.PENDING]: '/application-submitted',
         [UserStatus.REJECTED]: '/application-rejected',
       };
 
-      const targetRoute = statusRoutes[status] ?? '/submit-info';
-
+      const statusUpperCase = (userStatus || '').toUpperCase() as UserStatus;
+      const targetRoute = statusRoutes[statusUpperCase] ?? '/submit-info';
       router.push(targetRoute);
       return;
     }
@@ -95,6 +127,6 @@ export function useSignInForm() {
 
   return {
     handleSignIn,
-    loading: loginLoading || userLoading || verifyEmailLoading,
+    loading: loginLoading || verifyEmailLoading || vendorLoading || personnelLoading,
   };
 }

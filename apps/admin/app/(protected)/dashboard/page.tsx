@@ -9,12 +9,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { EmployeesOverview } from './components/EmployeesOverview/EmployeesOverview'; 
 import { useRouter } from 'next/navigation';
 import { useJobApi } from '@/app/api';
-import { JobModel } from '@/app/api/models';
+import { AuthRoleEnum, JobModel } from '@/app/api/models';
+import { useUserStore } from '@/store';
 
 type DashboardCardType = 'availableJobs' | 'jobsForBidding' | 'earnings';
 const dashboardCards: Record<
   DashboardCardType,
-  { section: string; data: DashboardCardProps[]; action: { label: string; href: string }; loading: boolean }
+  { section: string; data: DashboardCardProps[]; action: { label: string; href: string }; loading: boolean, roles?: AuthRoleEnum[] }
 > = {
   availableJobs: {
     section: 'Available Jobs',
@@ -33,6 +34,7 @@ const dashboardCards: Record<
       href: '/jobs?tab=bidding',
     },
     loading: false,
+    roles: [AuthRoleEnum.PROVIDER]
   },
   earnings: {
     section: 'Earnings',
@@ -51,6 +53,7 @@ const dashboardCards: Record<
       href: '/earnings',
     },
     loading: false,
+    roles: [AuthRoleEnum.PROVIDER]
   },
 };
 
@@ -59,14 +62,20 @@ export default function DashboardPage() {
   const { B, E } = useBEM('dashboard-page');
   const [mobileTab, setMobileTab] = useState(0);
   const { isLessThan } = useBreakpoint();
-  const { list: availableJobs, loading: availableJobsLoading } = useJobApi({ status: 'available' });
-  const { list: jobsForBidding, loading: jobsForBiddingLoading } = useJobApi({ status: 'bidding' });
-
+  const role = useUserStore((state) => state.auth?.role);
+  const isPersonnel = role === AuthRoleEnum.PERSONNEL;
+  const { list: availableJobs, loading: availableJobsLoading } = useJobApi({ status: isPersonnel ? 'available' : 'active', role });
+  const { list: jobsForBidding, loading: jobsForBiddingLoading } = useJobApi({ status: 'bidding', role, disable: isPersonnel});
   const [dashboardCardsState, setDashboardCardState] = useState(dashboardCards);
 
-  const sectionTitles = useMemo(() => {
-    return Object.values(dashboardCards).map((section) => section.section);
-  }, [dashboardCards]);
+
+  const sectionTitles = useMemo(
+    () =>
+      Object.values(dashboardCards)
+        .filter(card => !card.roles || !role || card.roles.includes(role))
+        .map(section => section.section),
+    [dashboardCards, role]
+  );
 
   const mapJob = (job: JobModel) => {
     const budget = parseFloat(job.budget);
@@ -140,6 +149,7 @@ export default function DashboardPage() {
         <div className={E('card-container')}>
           {Object.keys(dashboardCardsState).map((dc: string, indx: number) => {
             const cardData = dashboardCardsState[dc as DashboardCardType];
+            if (cardData.roles && role && !cardData.roles.includes(role)) return null;
             if (indx !== mobileTab && isLessThan(`tablet-lg`)) return null;
 
             return (
@@ -173,7 +183,7 @@ export default function DashboardPage() {
             );
           })}
         </div>
-        <EmployeesOverview />
+        { role !== AuthRoleEnum.PERSONNEL && <EmployeesOverview />}        
       </Container>
     </Page>
   );

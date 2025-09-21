@@ -2,31 +2,55 @@
 
 import { useBEM } from '@tectus/hooks';
 import './application-submitted.scss';
-import { User, UserStatus, useUserStore } from '@/store';
+import { UserStatus, useUserStore } from '@/store';
 import { UiButton, useUiSnackbar } from '@tectus/ui';
 import { usePathname, useRouter } from 'next/navigation';
 import { ApiErrorCode } from '@/app/constants';
-import { useApi, useApiErrorMessage, useProtectedRoute } from '@/app/hooks';
+import { useApiErrorMessage, useProtectedRoute } from '@/app/hooks';
 import { PageBanner } from '@/app/components';
+import { usePersonnelApi, useVendorApi } from '@/app/api';
+import { AuthRoleEnum } from '@/app/api/models';
+
+
+const BannerPropsMapping = {
+  [AuthRoleEnum.PROVIDER]: {
+    title: 'Application submitted',
+    subtitle: "Thanks for submitting your application.<br/>You'll be notified once reviewed.",
+  },
+  [AuthRoleEnum.PERSONNEL]: {
+    title: 'Profile Created',
+    subtitle: "Thanks for creating your profile.<br/>You'll be notified once reviewed.",
+  }
+}
 
 export default function ApplicationSubmittedPage() {
-
 
   const router = useRouter();
   const pathname = usePathname();
   const { B, E } = useBEM('application-submitted-page');
   const { getErrorMessage } = useApiErrorMessage();
   const { showSnackbar } = useUiSnackbar();
-
-  // TODO: create a model and hook for this on /api
-  const { loading, sendRequest } = useApi<User>(`api/go/user/me`, {
-    method: 'GET',
-  });
+  const { auth } = useUserStore();
+  const { loading, getVendorDetails } = useVendorApi();
+  const { loading: getPersonnelDetailsLoading, getPersonnelDetails } = usePersonnelApi(true);
+  
 
   const { isChecking } = useProtectedRoute();
   if(isChecking)return;
   const handleOnRefresh = async () => {
-    const userResult = await sendRequest();
+    const isPersonnel = auth?.role === AuthRoleEnum.PERSONNEL;
+
+    if(isPersonnel){
+      const personnelResult = await getPersonnelDetails();
+      const status = (personnelResult.data?.personnelInfo.status || '').toUpperCase() as UserStatus;
+      if (status === UserStatus.PENDING) return;
+      
+      router.push('/dashboard');
+      return;
+    }
+
+    
+    const userResult = await getVendorDetails();
     if (userResult.error || !userResult.data) {
       const errorMessage = getErrorMessage(userResult.error?.message as ApiErrorCode);
 
@@ -52,22 +76,26 @@ export default function ApplicationSubmittedPage() {
     
     if (status === UserStatus.APPROVED && pathname === '/application-approved') return;
     const targetRoute = statusRoutes[status] ?? '/submit-info'
-    useUserStore.getState().setUser({
+    useUserStore.getState().setVendor({
       ...userResult.data,
-      // ...( !!TEST_STATUS ? { status: TEST_STATUS } : {} ),
     });
     router.push(targetRoute);
   };
 
   return (
     <div className={B()}>
-      <PageBanner
-        title="Application submitted"
-        subtitle="Thanks for submitting your application.<br/>You'll be notified once reviewed."
-        hideLogo
-      />
 
-      <UiButton onClick={handleOnRefresh} className={E('button')} loading={loading}>
+      { 
+        auth?.role && 
+        <PageBanner
+          title={BannerPropsMapping[auth?.role]?.title}
+          subtitle={BannerPropsMapping[auth?.role]?.subtitle}
+          hideLogo
+        />      
+      }
+
+
+      <UiButton onClick={handleOnRefresh} className={E('button')} loading={loading || getPersonnelDetailsLoading}>
         Refresh
       </UiButton>
     </div>

@@ -1,6 +1,6 @@
 import { useApi } from '@/app/hooks';
 import { useEffect, useRef, useState } from 'react';
-import { JobModel, JobStatusType } from './models';
+import { AuthRoleEnum, JobModel, JobStatusType } from './models';
 import endpoints from './endpoints';
 
 // TODO: create a util for this
@@ -21,6 +21,8 @@ const formatDate = (date: string) => {
 type useGetJobProps = {
   status?: JobStatusType;
   id?: string;
+  role?: AuthRoleEnum;
+  disable?: boolean;
 };
 
 type useGetJobReturn = {
@@ -30,13 +32,18 @@ type useGetJobReturn = {
   refetch: () => void;
 };
 
-export const useJobApi = ({ status, id }: useGetJobProps): useGetJobReturn => {
+export const useJobApi = ({
+  status,
+  id,
+  role = AuthRoleEnum.PROVIDER,
+  disable = false,
+}: useGetJobProps): useGetJobReturn => {
   const [list, setList] = useState<JobModel[]>([]);
   const [details, setDetails] = useState<JobModel | null>(null);
   const [refetchFlag, setRefetchFlag] = useState(0);
 
   const loaded = useRef(false);
-  const listEndpoint = endpoints.job.list(status || 'active');
+  const listEndpoint = endpoints.job.list(status as JobStatusType, role);
 
   const { loading: listLoading, sendRequest: sendRequestList } = useApi<JobModel[], any>(
     listEndpoint,
@@ -59,15 +66,22 @@ export const useJobApi = ({ status, id }: useGetJobProps): useGetJobReturn => {
   }, [refetchFlag, status]);
 
   useEffect(() => {
+    if (!status) return;
     loaded.current = false;
   }, [status]);
 
   useEffect(() => {
-    if (loaded.current || !status) return;
+    console.log(loaded.current);
+    if (loaded.current || !status || disable) return;
     (async () => {
       const results = await sendRequestList();
+      let list = results?.data || [];
 
-      const dataWithFormattedDates = (results?.data || []).map(({ startAt, endAt, location, budget, ...others }) => {
+      if (status === 'accepted') {
+        list = (list as any[]).map((item) => item.job);
+      }
+
+      const dataWithFormattedDates = list.map(({ startAt, endAt, location, budget, ...others }) => {
         const { address = '', lat = 0, lng = 0 } = location || {};
         return {
           ...others,

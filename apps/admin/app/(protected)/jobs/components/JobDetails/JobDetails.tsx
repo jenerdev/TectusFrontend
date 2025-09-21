@@ -132,6 +132,13 @@ export function JobDetails({ job, actionHandler }: JobDetailsProps) {
         </div>
 
         <div className={E('info-group')}>
+
+          {renderInfo({
+            value: job.category,
+            icon: 'Book',
+            className: 'category',
+          })}
+
           {renderInfo({
             value: job.location?.address || '~',
             icon: 'Place',
@@ -156,7 +163,7 @@ export function JobDetails({ job, actionHandler }: JobDetailsProps) {
             className: 'personnel',
           })}
 
-          {renderInfo({
+          {job.isArmed && renderInfo({
             value: 'Armed',
             icon: 'Shield',
             className: 'type',

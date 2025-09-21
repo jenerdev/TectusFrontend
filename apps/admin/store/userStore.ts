@@ -1,60 +1,4 @@
-// import { create } from 'zustand';
-// import { persist } from 'zustand/middleware';
-
-// export interface User {
-//   id: string;
-//   email: string;
-//   companyName: string;
-//   emailVerified: boolean;
-
-//   status?: 'Pending' | 'Rejected' | 'Approved';
-//   // TODO: add missing fields
-// }
-
-// interface UserState {
-//   user?: User;
-//   token?: string;
-//   refreshToken?: string;
-//   hasHydrated: boolean;
-//   setUser: (user: User) => void;
-//   login: (data: { token: string; refreshToken: string }) => void;
-//   logout: () => void;
-//   setHasHydrated: (hydrated: boolean) => void;
-// }
-
-// export const useUserStore = create<UserState>()(
-//   persist(
-//     (set) => ({
-//       user: undefined,
-//       token: undefined,
-//       refreshToken: undefined,
-//       hasHydrated: false,
-//       emailVerified: false,
-
-//       setUser: (user) => set({ user }),
-//       login: ({ token, refreshToken }) => set({ token, refreshToken }),
-//       logout: () => {
-//         document.cookie = 'token=; path=/; max-age=0';
-//         set({ user: undefined, token: undefined, refreshToken: undefined });
-//       },
-
-//       setHasHydrated: (hydrated) => set({ hasHydrated: hydrated }),
-//     }),
-//     {
-//       name: 'user',
-//       partialize: (state) => ({
-//         user: state.user,
-//         token: state.token,
-//         refreshToken: state.refreshToken,
-//       }),
-//       // ✅ this is the key: tells Zustand when it's finished restoring from storage
-//       onRehydrateStorage: () => (state) => {
-//         state?.setHasHydrated(true);
-//       },
-//     },
-//   ),
-// );
-
+import { AuthModel, AuthRoleEnum, VendorModel } from '@/app/api/models';
 import { create, StoreApi, UseBoundStore } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -64,85 +8,57 @@ export enum UserStatus {
   APPROVED = 'APPROVED',
 }
 
-export interface UserSupportingDocument {
-  type: string;
-  file: string;
-  expiry: string | null;
-  details: string;
-  error?: boolean;
-}
-export interface User {
-  id?: string;
-  email?: string;
-  companyName?: string;
-  emailVerified?: boolean;
-  status?: UserStatus;
-  countryCode?: string;
-  legalEntity?: string;
-  address?: string;
-  address2?: string;
-  yearFounded?: number;
-  website?: string;
-  statesCovered?: string[];
-  citiesCovered?: string[];
-  vehiclesUsed?: string[];
-  servicesOffered?: string[];
-  numberOfEmployees?: string;
-  numberOfContractors?: string;
-  isInsured?: boolean;
-  isCompanyLicensed?: boolean;
-  insuranceProvider?: string;
-  supportingDocuments?: UserSupportingDocument[];
-  contactNumber?: string;
-  fullName?: string;
-  imageUrl?: string;
-  bio?: string;
-}
-
 export interface UserState {
-  user?: User;
-  token?: string;
-  refreshToken?: string;
+  auth?: AuthModel;
+  vendor?: VendorModel | null;
+  personnel?: any; //TODO: define personnel model
   hasHydrated: boolean;
-  emailVerified: boolean;
-  setUser: (user: User) => void;
-  login: (data: { token: string; refreshToken: string; emailVerified: boolean }) => void;
+  setAuth: (data: AuthModel) => void;
+  setVendor: (data: VendorModel | null) => void;
+  setPersonnel: (data: any) => void;
   logout: () => void;
   setHasHydrated: (hydrated: boolean) => void;
   updateTokens: (data: { token: string; refreshToken: string }) => void;
-  getUserStatus: () => UserStatus | undefined;
+  getUserStatus: () => UserStatus;
+  getUser: () => VendorModel | null | any;
 }
 
 export const useUserStore: UseBoundStore<StoreApi<UserState>> = create<UserState>()(
-  persist<UserState, [], [], Pick<UserState, 'user' | 'token' | 'refreshToken'>>(
+  persist<UserState, [], [], Pick<UserState, 'vendor'>>(
     (set, get) => ({
-      user: undefined,
-      token: undefined,
-      refreshToken: undefined,
+      auth: undefined,
+      vendor: undefined,
+      personnel: undefined,
       hasHydrated: false,
-      emailVerified: false,
 
-      setUser: (user) => set({ user }),
-      login: ({ token, refreshToken, emailVerified }) =>
-        set({ token, refreshToken, emailVerified }),
+      setAuth: (auth) => set({ auth }),
+      setVendor: (vendor) => set({ vendor }),
+      setPersonnel: (personnel) => set({ personnel }),
       logout: () => {
         document.cookie = 'token=; path=/; max-age=0';
-        set({ user: undefined, token: undefined, refreshToken: undefined });
+        set({ vendor: undefined, auth: undefined, personnel: undefined });
       },
       setHasHydrated: (hydrated) => set({ hasHydrated: hydrated }),
-      updateTokens: ({ token, refreshToken }) => set({ token, refreshToken }),
+      updateTokens: ({ token, refreshToken }) => {
+        const currentAuth = get().auth as AuthModel;
+        set({ auth: { ...currentAuth, idToken: token, refreshToken } });
+      },
       getUserStatus: () => {
-        const status = get().user?.status;
-        return status ? (status.toUpperCase() as UserStatus) : undefined;
+        const isPersonnel = get().auth?.role === AuthRoleEnum.PERSONNEL;
+        const status = isPersonnel ? get().personnel?.personnelInfo.status : get().vendor?.status;
+        return (status || '').toUpperCase() as UserStatus;
+      },
+      getUser: () => {
+        const isPersonnel = get().auth?.role === AuthRoleEnum.PERSONNEL;
+        return isPersonnel ? get().personnel : get().vendor;
       },
     }),
     {
       name: 'user',
       partialize: (state) => ({
-        user: state.user,
-        token: state.token,
-        refreshToken: state.refreshToken,
-        emailVerified: state.emailVerified,
+        auth: state.auth,
+        vendor: state.vendor,
+        personnel: state.personnel,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);

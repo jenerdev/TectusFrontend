@@ -10,13 +10,14 @@ import { useProtectedRoute } from '../hooks';
 import { useBEM } from '@tectus/hooks';
 import { UserStatus, useUserStore } from '@/store';
 import NextLink from 'next/link';
+import { AuthRoleEnum } from '../api/models';
 
 const tabs = [
   { label: 'Dashboard', path: '/dashboard' },
   { label: 'Jobs', path: '/jobs' },
-  { label: 'Schedule', path: '/schedule' },
-  { label: 'Users', path: '/users' },
-  { label: 'Earnings', path: '/earnings' },
+  { label: 'Schedule', path: '/schedule', roles: [ AuthRoleEnum.PROVIDER ] },
+  { label: 'Users', path: '/users', roles: [ AuthRoleEnum.PROVIDER ] },
+  { label: 'Earnings', path: '/earnings', roles: [ AuthRoleEnum.PROVIDER ] },
 ];
 
 export default function RootLayout({
@@ -26,11 +27,12 @@ export default function RootLayout({
 }>) {
   const { B, E } = useBEM('protected-layout');
   const pathname = usePathname();
-  const { user } = useUserStore();
-  const isApproved = (user?.status || '').toUpperCase() === UserStatus.APPROVED;
+  const userStatus = useUserStore.getState().getUserStatus();
+  const role = useUserStore((state) => state.auth?.role);
+  const isApproved = userStatus === UserStatus.APPROVED;
 
   const { isChecking } = useProtectedRoute({ bypassApproved: true });
-  if (isChecking) return;
+  if (isChecking || !role) return;
 
   const currentTab = tabs.findIndex((t) => pathname.startsWith(t.path));
 
@@ -43,7 +45,7 @@ export default function RootLayout({
             <UiTabs
               className={E('tabs')}
               value={currentTab === -1 ? 0 : currentTab}
-              items={tabs}
+              items={tabs.filter((tab) => !tab.roles || tab.roles.includes(role))}
               variant="scrollable"
               scrollButtons="auto"
               allowScrollButtonsMobile

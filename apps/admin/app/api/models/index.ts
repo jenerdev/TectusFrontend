@@ -1,3 +1,4 @@
 export * from './JobModel';
 export * from './PersonnelModel';
-export * from './UserModel';
+export * from './AuthModel';
+export * from './VendorModel';

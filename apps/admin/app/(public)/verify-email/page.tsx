@@ -2,12 +2,13 @@
 
 import { useBEM } from '@tectus/hooks';
 import './verify-email-page.scss'; 
-import { User, useUserStore } from '@/store'; 
+import { useUserStore } from '@/store'; 
 import { UiButton, useUiSnackbar } from '@tectus/ui';
 import { useRouter } from 'next/navigation';
 import { useApi, useApiErrorMessage, useProtectedRoute } from '@/app/hooks';
 import { ApiErrorCode } from '@/app/constants';
 import { PageBanner } from '@/app/components';
+import { useVendorApi } from '@/app/api';
 
 export default function VerifyEmailPage() {
   const router = useRouter();
@@ -15,18 +16,15 @@ export default function VerifyEmailPage() {
   const { getErrorMessage } = useApiErrorMessage();
   const { showSnackbar } = useUiSnackbar();
 
-  // TODO: create a model and hook for this on /api
-  const { loading, sendRequest } = useApi<User>(`api/go/user/me`, {
-    method: 'GET',
-  });
+  const { loading, getVendorDetails } = useVendorApi();
 
   const { isChecking } = useProtectedRoute();
   if(isChecking)return;
 
   const handleOnRefresh = async () => {
-    const userResult = await sendRequest();
-    if (userResult.error || !userResult.data) {
-      const errorMessage = getErrorMessage(userResult.error?.message as ApiErrorCode);
+    const vendor = await getVendorDetails();
+    if (vendor.error || !vendor.data) {
+      const errorMessage = getErrorMessage(vendor.error?.message as ApiErrorCode);
 
       showSnackbar(errorMessage, 'error', {
         anchorOrigin: {
@@ -36,8 +34,8 @@ export default function VerifyEmailPage() {
       });
       return;
     }
-    if(userResult.data.emailVerified){
-      useUserStore.getState().setUser(userResult.data);
+    if(vendor.data.emailVerified){
+      useUserStore.getState().setVendor(vendor.data);
       router.push('/submit-info');
     }
     

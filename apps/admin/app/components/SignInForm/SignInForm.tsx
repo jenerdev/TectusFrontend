@@ -5,7 +5,7 @@ import { UiButton, UiTextField } from '@tectus/ui';
 import { SigninFormProps } from './SignInForm.types';
 import { UiSwitch } from '@tectus/ui';
 import { useState } from 'react';
-import { LoginInForm } from '@/app/api/models';
+import { LoginDTO } from '@/app/api/models';
 
 export function SignInForm({ onSubmit, loading }: SigninFormProps) {
   const { B, E } = useBEM('sign-in-form');
@@ -16,12 +16,12 @@ export function SignInForm({ onSubmit, loading }: SigninFormProps) {
     handleSubmit,
     validate: { required, email },
     errors,
-  } = useForm<LoginInForm>({
+  } = useForm<LoginDTO>({
     email: '',
     password: '',
   });
 
-  const onSubmitInternal = async (values: LoginInForm) => {
+  const onSubmitInternal = async (values: LoginDTO) => {
     onSubmit?.(values);
   };
 

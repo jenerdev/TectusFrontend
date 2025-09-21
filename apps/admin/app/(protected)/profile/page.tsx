@@ -16,7 +16,6 @@ import {
   UiTypography,
   useUiSnackbar,
 } from '@tectus/ui';
-import { ApplicationFormValues } from '@/app/(public)/submit-info/page';
 import {
   ApiErrorCode,
   RANGES_OF_NUMBER_OPTIONS,
@@ -24,12 +23,14 @@ import {
   VENDOR_SERVICES,
   VENDOR_VEHICLES,
 } from '@/app/constants';
-import { User, UserStatus, UserSupportingDocument, useUserStore } from '@/store';
+import { UserStatus, useUserStore } from '@/store';
 import { useCallback, useMemo, useState } from 'react';
 import { useApi } from '@/app/hooks/useApi';
 import { useApiErrorMessage } from '@/app/hooks';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { AuthRoleEnum, VendorForm, VendorSupportingDocument } from '@/app/api/models';
+import { useVendorApi } from '@/app/api';
 
 type GroupedOptions = NonNullable<UiSelectProps['groupedOptions']>;
 type attachmentType = 'logo' | 'insurance' | 'license';
@@ -39,7 +40,7 @@ const MAX_FILE_UPLOAD = 100;
 
 export default function ProfilePage() {
   const { B, E } = useBEM('profile-page');
-  const user = useUserStore((state) => state.user);
+  const vendor = useUserStore((state) => state.vendor);
   const { getErrorMessage } = useApiErrorMessage();
   const { showSnackbar } = useUiSnackbar();
   const [mode, setMode] = useState<'view' | 'edit'>('view');
@@ -54,10 +55,7 @@ export default function ProfilePage() {
     method: 'POST',
   });
 
-  // TODO: create a model and hook for this on /api
-  const { loading: vendorLoading, sendRequest: vendorRequest } = useApi(`api/go/user/me`, {
-    method: 'PUT',
-  });
+  const { loading: vendorLoading, saveVendorDetails } = useVendorApi();
 
   const [files, setFiles] = useState<fileAttachments>({
     insurance: [],
@@ -65,20 +63,20 @@ export default function ProfilePage() {
     license: [],
   });
 
-  const [initialCurrentSupportingDocuments] = useState<UserSupportingDocument[]>(
-    user?.supportingDocuments || [],
+  const [initialCurrentSupportingDocuments] = useState<VendorSupportingDocument[]>(
+    vendor?.supportingDocuments || [],
   );
 
   const [currentSupportingDocuments, setCurrentSupportingDocuments] = useState<
-    UserSupportingDocument[]
+    VendorSupportingDocument[]
   >(initialCurrentSupportingDocuments);
 
-  const [initialImageUrl] = useState<string>(user?.imageUrl || '');
+  const [initialImageUrl] = useState<string>(vendor?.imageUrl || '');
 
   const [currentImageUrl, setCurrentImageUrl] = useState<string>(initialImageUrl);
 
   const uploadPerAttachmentType = useCallback(
-    async (type: attachmentType): Promise<UserSupportingDocument[]> => {
+    async (type: attachmentType): Promise<VendorSupportingDocument[]> => {
       const filesToUpload = files[type].map((file) => file.file);
       if (filesToUpload.length === 0) return [];
 
@@ -145,25 +143,29 @@ export default function ProfilePage() {
     reset,
     isSubmitAttempted,
     isValid,
-  } = useForm<ApplicationFormValues>({
-    email: user?.email || '',
-    fullName: user?.fullName || '',
-    contactNumber: user?.contactNumber || '',
-    companyName: user?.companyName || '',
-    legalEntity: user?.legalEntity || '',
-    companyAddressLine1: user?.address || '',
-    companyAddressLine2: user?.address2 || '',
-    yearFounded: String(user?.yearFounded) || '',
-    website: user?.website || '',
-    numberOfEmployees: user?.numberOfEmployees || '',
-    numberOfContractors: user?.numberOfContractors || '',
-    statesCovered: user?.statesCovered || [],
-    citiesCovered: user?.citiesCovered || [],
-    servicesOffered: user?.servicesOffered || [],
-    vehiclesUsed: user?.vehiclesUsed || [],
-    isInsured: Boolean(user?.isInsured),
-    isCompanyLicensed: Boolean(user?.isCompanyLicensed),
-    bio: user?.bio,
+  } = useForm<VendorForm>({
+    email: vendor?.email || '',
+    fullName: vendor?.fullName || '',
+    contactNumber: vendor?.contactNumber || '',
+    companyName: vendor?.companyName || '',
+    legalEntity: vendor?.legalEntity || '',
+    address: vendor?.address || '',
+    address2: vendor?.address2 || '',
+    yearFounded: String(vendor?.yearFounded) || '',
+    website: vendor?.website || '',
+    numberOfEmployees: vendor?.numberOfEmployees || '',
+    numberOfContractors: vendor?.numberOfContractors || '',
+    statesCovered: vendor?.statesCovered || [],
+    citiesCovered: vendor?.citiesCovered || [],
+    servicesOffered: vendor?.servicesOffered || [],
+    vehiclesUsed: vendor?.vehiclesUsed || [],
+    isInsured: Boolean(vendor?.isInsured),
+    isCompanyLicensed: Boolean(vendor?.isCompanyLicensed),
+    bio: vendor?.bio || '',
+    countryCode: vendor?.countryCode || 'US',
+    imageUrl: vendor?.imageUrl || '',
+    insuranceProvider: vendor?.insuranceProvider || '',
+    supportingDocuments: vendor?.supportingDocuments || [],
   });
 
   const citiesCoveredOptions = useMemo(() => {
@@ -184,11 +186,11 @@ export default function ProfilePage() {
     return citiesGroupedByState;
   }, [values.statesCovered]);
 
-  const isValidDocuments = (documents: UserSupportingDocument[]): boolean => {
+  const isValidDocuments = (documents: VendorSupportingDocument[]): boolean => {
     return documents.find((doc) => doc.error) ? false : true;
   };
 
-  const onSubmitInternal = async (values: ApplicationFormValues) => {
+  const onSubmitInternal = async (values: VendorForm) => {
     // if (files.logo.length === 0) {
     //   showSnackbar('Please upload a company logo.', 'error');
     //   return;
@@ -255,33 +257,17 @@ export default function ProfilePage() {
       ...currentSupportingDocuments,
     ].map(({ error, ...rest }) => rest);
 
-    const payload: User = {
+
+    const {email, ...formValues} = values;
+    const payload = {
+      ...formValues,
       countryCode: 'US',
-      fullName: values.fullName,
-      companyName: values.companyName,
-      legalEntity: values.legalEntity,
-      address: values.companyAddressLine1,
-      address2: values.companyAddressLine2 || '',
-      yearFounded: Number(values.yearFounded),
-      website: values.website,
-      statesCovered: values.statesCovered,
-      citiesCovered: values.citiesCovered,
-      vehiclesUsed: values.vehiclesUsed,
-      servicesOffered: values.servicesOffered,
-      contactNumber: values.contactNumber,
-      numberOfEmployees: values.numberOfEmployees,
-      numberOfContractors: values.numberOfContractors,
-      isInsured: values.isInsured,
-      isCompanyLicensed: values.isCompanyLicensed,
-      // insuranceProvider: values.insuranceProvider,
-      supportingDocuments: allSupportingDocuments,
       imageUrl: logoDocument[0]?.file || currentImageUrl,
-      bio: values.bio,
+      supportingDocuments: allSupportingDocuments,
+      yearFounded: Number(values.yearFounded),
     };
 
-    const submitDetailsResult = await vendorRequest({
-      body: payload,
-    });
+    const submitDetailsResult = await saveVendorDetails(payload);
 
     if (submitDetailsResult.error) {
       const errorMessage = getErrorMessage(submitDetailsResult.error?.message as ApiErrorCode);
@@ -289,10 +275,16 @@ export default function ProfilePage() {
       return;
     }
 
-    useUserStore.getState().setUser({
-      ...user,
+    useUserStore.getState().setVendor({
+      ...vendor,
       ...payload,
+      email: vendor?.email || '',
+      emailVerified: vendor?.emailVerified || false,
+      yearFounded: Number(vendor?.yearFounded),
+      role: vendor?.role as AuthRoleEnum,
+      status: vendor?.status as string,
     });
+
 
     setCurrentSupportingDocuments(allSupportingDocuments);
     clearFiles('insurance');
@@ -417,23 +409,23 @@ export default function ProfilePage() {
                   />
                   <UiTextField
                     label="Company address (Line 1)*"
-                    {...register('companyAddressLine1', {
+                    {...register('address', {
                       ...required('Company Address is required.'),
                     })}
-                    helperText={errors.companyAddressLine1}
-                    error={Boolean(errors.companyAddressLine1)}
+                    helperText={errors.address}
+                    error={Boolean(errors.address)}
                     googlePlaces
                     googlePlacesCountry="US"
                     onPlaceSelected={(place) => {
-                      setValue('companyAddressLine1', place.formatted_address);
+                      setValue('address', place.formatted_address);
                     }}
                     readOnly={isViewMode}
                   />
                   <UiTextField
                     label="Company address (Line 2)"
-                    {...register('companyAddressLine2')}
-                    helperText={errors.companyAddressLine2}
-                    error={Boolean(errors.companyAddressLine2)}
+                    {...register('address2')}
+                    helperText={errors.address2}
+                    error={Boolean(errors.address2)}
                     readOnly={isViewMode}
                   />
                   <UiTextField
@@ -482,9 +474,9 @@ export default function ProfilePage() {
                     }
                     maxFiles={1}
                   />
-                  {user?.imageUrl && !companyLogoError && (
+                  {vendor?.imageUrl && !companyLogoError && (
                     <Image
-                      src={user?.imageUrl}
+                      src={vendor?.imageUrl}
                       alt="Company Logo"
                       height={100}
                       width={100}
