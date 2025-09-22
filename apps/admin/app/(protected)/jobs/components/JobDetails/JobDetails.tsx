@@ -13,17 +13,28 @@ import {
 import { GoogleMap } from '@/app/components';
 import { useMemo, useState } from 'react';
 import { JobModel } from '@/app/api/models/JobModel';
+import { AssignedPersonnel } from '../AssignedPersonnel';
 
-export type JobDetailsActionType = 'accept' | 'cancel';
+export type JobDetailsActionType = 'accept' | 'back' | 'refetch';
 
 export interface JobDetailsProps {
   job: JobModel;
   actionHandler: (action: JobDetailsActionType) => void;
+  loading?: boolean;
+  assignedPersonnels?: any[];
+  availablePersonnels?: any[];
 }
 
-export function JobDetails({ job, actionHandler }: JobDetailsProps) {
+export function JobDetails({ job, actionHandler, loading, assignedPersonnels = [], availablePersonnels = []}: JobDetailsProps) {
   const { B, E } = useBEM('job-details');
-  const isForBidding = job.status === 'Bidding';
+  const isForBidding = useMemo(() => job.status === 'Bidding' && job.type === 'Scheduled', [job]);
+  const isAccepted = useMemo(() => {
+    if(job.type === 'Scheduled') return job.status === 'Awarded';
+    if(job.type === 'Instant') return job.status === 'Accepted';
+    return false;
+  }, [job]);
+  const isForAccept = useMemo(() => job.type === 'Instant' && job.status !== 'Accepted', [job]);
+
   const [bidAmount, setBidAmount] = useState<number>(Number(job.budget));
 
   const renderInfo = ({
@@ -185,11 +196,26 @@ export function JobDetails({ job, actionHandler }: JobDetailsProps) {
 
       {/* RIGHT */}
       <div className={E('section', 'right')}>
-        <GoogleMap
-          height="12.5rem"
-          heightTabletLg="31.25rem"
-          locations={googleMapPinLocation}
-        />
+        
+        <div className={E('section-content')}>
+          <GoogleMap
+            height="12.5rem"
+            heightTabletLg="31.25rem"
+            locations={googleMapPinLocation}
+          />
+          {
+            isAccepted && 
+            <div className={E('assigned-personnel-desktop')}>
+              <AssignedPersonnel 
+                jobId={job.id} 
+                numberOfPersonnel={job.numberOfPersonnel} 
+                assignedPersonnels={assignedPersonnels} 
+                availablePersonnels={availablePersonnels} 
+                onRefetch={() => actionHandler('refetch')} />
+            </div>
+          }
+        </div>
+
 
         {isForBidding && (
           <div className={E('place-bid', 'desktop')}>
@@ -203,18 +229,18 @@ export function JobDetails({ job, actionHandler }: JobDetailsProps) {
             <UiButton className={E('bid-button')}>Place Bid</UiButton>
           </div>
         )}
-
+        
         <div className={E('buttons', 'desktop')}>
-          <UiButton variant="outlined" onClick={() => actionHandler('cancel')}>
-            Cancel
+          <UiButton variant="outlined" onClick={() => actionHandler('back')}>
+            Back
           </UiButton>
 
-          {!isForBidding && <UiButton className={E('accept-button')}>Accept Job</UiButton>}
+          {isForAccept && <UiButton className={E('accept-button')} onClick={() => actionHandler('accept')} loading={loading}>Accept Job</UiButton>}
         </div>
       </div>
 
       <div className="pop-out-modal">
-        {!isForBidding ? (
+        {isForAccept && (
           <div className={E('accept-job')}>
             <div>
               <UiTypography className={E('price')} variant="h4" fontWeight={700}>
@@ -225,10 +251,12 @@ export function JobDetails({ job, actionHandler }: JobDetailsProps) {
                 className: 'rate',
               })}
             </div>
-            <UiButton className={E('accept-button')}>Accept Job</UiButton>
+            <UiButton className={E('accept-button')} onClick={() => actionHandler('accept')} loading={loading}>Accept Job</UiButton>
           </div>
-        ) : (
-          <div className={E('for-bidding')}>
+        )}
+
+        {
+          isForBidding && <div className={E('for-bidding')}>
             <div>
               <UiTypography className={E('price')} variant="h4" fontWeight={700}>
                 For Bidding
@@ -251,14 +279,23 @@ export function JobDetails({ job, actionHandler }: JobDetailsProps) {
               <UiButton className={E('bid-button')}>Place Bid</UiButton>
             </div>
           </div>
-        )}
+        }
+
+        {
+          isAccepted && <AssignedPersonnel 
+            jobId={job.id} 
+            numberOfPersonnel={job.numberOfPersonnel} 
+            assignedPersonnels={assignedPersonnels} 
+            availablePersonnels={availablePersonnels} 
+            onRefetch={() => actionHandler('refetch')} />
+        }
 
         <UiButton
           className={E('cancel')}
           variant="outlined"
-          onClick={() => actionHandler('cancel')}
+          onClick={() => actionHandler('back')}
         >
-          Cancel
+          Back
         </UiButton>
       </div>
     </div>

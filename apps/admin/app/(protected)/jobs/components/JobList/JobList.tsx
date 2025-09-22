@@ -64,9 +64,11 @@ export function JobList({ onSelectJob, loading, data = [] }: JobListProps) {
             label: 'Effective Rate',
             template: {
               td: (row) => {
+                // if(row.budget === '0') return '-';
+                // const 
                 const amount = parseFloat(row.fee || row.budget || '0');
-                const rate = (amount / (row.numberOfPersonnel || 1)).toFixed(2);
-                return `$${rate}/person/hr`;
+                const rate = amount / (row.numberOfPersonnel || 1);
+                return `$${rate.toFixed(2)}/person/hr`;
               },
             },
           },

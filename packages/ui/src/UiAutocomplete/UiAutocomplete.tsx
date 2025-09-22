@@ -131,7 +131,7 @@
 
 import * as React from 'react';
 import './UiAutocomplete.scss';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, AutocompleteProps, TextField } from '@mui/material';
 import { useBEM } from '@tectus/hooks';
 
 export interface UiAutocompleteOption {
@@ -155,12 +155,14 @@ export interface UiAutocompleteProps {
 
   // from useForm
   register?: ReturnType<any> & { error?: string }; // <-- allow error message
+  onChange?: (value: any) => void;
 }
 
 export const UiAutocomplete: React.FC<UiAutocompleteProps> = ({
   register,
   helperText,
   error,
+  onChange,
   ...props
 }) => {
   const { B } = useBEM('ui-autocomplete');
@@ -188,6 +190,7 @@ export const UiAutocomplete: React.FC<UiAutocompleteProps> = ({
             target: { name: register.name, value: newValue }
           });
         }
+        onChange?.(newValue);
       }}
       onBlur={register?.onBlur}
       getOptionLabel={(option) => option?.label || ''}

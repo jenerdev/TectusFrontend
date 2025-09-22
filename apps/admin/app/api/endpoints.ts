@@ -3,6 +3,7 @@ import { AuthRoleEnum, JobStatusType } from './models';
 const endpoints = {
   job: {
     detail: (id: string) => `api/jobs/vendor/${id}`,
+    accept: (id: string) => `api/jobs/vendor/${id}/accept`,
     list: (status: JobStatusType, role: AuthRoleEnum) => {
       if (status === 'accepted' && role === AuthRoleEnum.PROVIDER) {
         return 'api/go/vendor/my-assigned-jobs';
@@ -14,6 +15,9 @@ const endpoints = {
       };
       return mapping[role];
     },
+    assignedPersonnel: (id: string) => `api/go/vendor/job/${id}/personnel-assignments`,
+    availablePersonnels: (id: string) => `api/go/vendor/available-personnel/${id}`,
+    assignPersonnel: (id: string) => `api/go/vendor/assign-personnel/${id}`,
   },
   personnel: {
     list: 'api/go/personnel/employees',
