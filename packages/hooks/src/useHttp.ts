@@ -37,6 +37,7 @@ export interface HttpState<TResponse> {
   loading: boolean;
   sendRequest: (
     overrideOptions?: Partial<HttpOptions>,
+    urlParams?: Record<string, string | number>,
   ) => Promise<{ data: TResponse | null; error: HttpError | null }>;
 }
 
@@ -48,9 +49,19 @@ export function useHttp<TResponse = any, TBody = any>(
   const [error, setError] = useState<HttpError | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const buildUrl = (template: string, params: Record<string, string | number>): string => {
+    return template.replace(/{{(\w+)}}/g, (_, key) => {
+      if (params[key] === undefined) {
+        throw new Error(`Missing parameter: ${key}`);
+      }
+      return String(params[key]);
+    });
+  };
+
   const sendRequest = useCallback(
     async (
       overrideOptions: Partial<HttpOptions<TBody>> = {},
+      urlParams?: Record<string, string | number>,
     ): Promise<{ data: TResponse | null; error: HttpError | null }> => {
       setLoading(true);
       setError(null);
@@ -80,7 +91,8 @@ export function useHttp<TResponse = any, TBody = any>(
         retry = true,
       ): Promise<{ data: TResponse | null; error: HttpError | null }> => {
         try {
-          const response = await fetch(url, {
+          const finalUrl = urlParams ? buildUrl(url, urlParams) : url;
+          const response = await fetch(finalUrl, {
             method,
             headers: customHeaders,
             body: payload,

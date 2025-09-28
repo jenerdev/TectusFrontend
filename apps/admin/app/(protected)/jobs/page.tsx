@@ -1,11 +1,11 @@
 'use client';
 
 import { Container, GoogleMap, Page } from '../../components';
-import { useBEM } from '@tectus/hooks';
+import { useBEM, useEffectDebounce } from '@tectus/hooks';
 import './jobs-page.scss';
 import { JobList } from './components';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { UiTabs } from '../../../../../packages/ui/src/UiTabs';
 import { useJobApi } from '@/app/api';
 import { AuthRoleEnum, JobModel, JobStatusType } from '@/app/api/models';
@@ -48,18 +48,30 @@ export default function JobsPage() {
   const isPersonnel = role === AuthRoleEnum.PERSONNEL;
   const initialTab = (searchParams.get('tab') || (isPersonnel ? 'available' : 'active')) as JobStatusType;
   
+  const [jobList, setJobList] = useState<JobModel[]>([]);
   const [tab, setTab] = useState<JobStatusType>(initialTab);
   
-  const { list: data, loading } = useJobApi({ status: tab, role });
+  const { loading, getJobList } = useJobApi({ status: tab, role });
   const mapLocations = useMemo(() => {
-    return data.map((job) => {
+    return jobList.map((job) => {
       return {
         ...job.location,
         title: job.location.address,
         pinColor: 'blue' as const,
       }
     });
-  }, [data]);
+  }, [jobList]);
+
+  useEffectDebounce(() => {
+    if(!tab) return;
+    (async () => {
+      const result = await getJobList();
+      if (!result.error) {
+        setJobList(result.data || []);
+      }
+    })();
+  }, [tab]);  
+
 
   const onSelectJob = (job: JobModel) => {
     router.push(`/jobs/${job.id}`);
@@ -90,7 +102,7 @@ export default function JobsPage() {
             scrollButtons="auto"
             allowScrollButtonsMobile
           />
-          <JobList onSelectJob={onSelectJob} loading={loading} data={data} />
+          <JobList onSelectJob={onSelectJob} loading={loading} data={jobList} />
         </div>
       </Container>
     </Page>

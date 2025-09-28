@@ -3,8 +3,9 @@
 import { useBEM } from '@tectus/hooks';
 import './AssignedPersonnel.scss';
 import { UiAutocomplete, UiIcon, UiIconButton, UiTypography, useUiSnackbar } from '@tectus/ui';
-import { useMemo, useState, useEffect} from 'react';
+import { useMemo, useState, useEffect, useCallback} from 'react';
 import { useJobApi } from '@/app/api';
+import { on } from 'events';
 
 export interface AssignedPersonnelProps {
   jobId: string;
@@ -16,17 +17,18 @@ export interface AssignedPersonnelProps {
 
 export function AssignedPersonnel({ jobId, numberOfPersonnel, assignedPersonnels = [], availablePersonnels = [], onRefetch }: AssignedPersonnelProps) {
   const { B, E } = useBEM('assigned-personnel');
-  const {loading, assignPersonnel } = useJobApi({id: jobId});
+  const {loading, assignPersonnel, acceptPersonnelAssignment, cancelPersonnelAssignment } = useJobApi({id: jobId});
   const { showSnackbar } = useUiSnackbar();
   const [addIndex, setAddIndex] = useState<number | null>(null);
   const [toAddPersonnel, addPersonnel] = useState<any | null>(null);
 
-  const actionMapping = (index?: number) => ({
+  const buttonMapping = {
     accepted: <UiIcon name='Cancel' size='small'/>,
     assigned: <UiIcon name='Cancel' size='small'/>,
+    declined: <UiIcon name='Cancel' size='small'/>,
     requested: <UiIcon name='CheckCircle' size='small'/>,
     // invited: <UiIcon name='Cancel' size='small'/>,
-  });
+  };
 
 
   useEffect(() => {
@@ -42,9 +44,7 @@ export function AssignedPersonnel({ jobId, numberOfPersonnel, assignedPersonnels
       addPersonnel(null);
       onRefetch();
     })()
-
   }, [toAddPersonnel])
-  
 
   const isAllAssigned = useMemo(() => {
     return assignedPersonnels.filter( ap => ap.assignmentStatus === 'Accepted').length >= numberOfPersonnel;
@@ -59,11 +59,39 @@ export function AssignedPersonnel({ jobId, numberOfPersonnel, assignedPersonnels
     }).filter(option => !assignedPersonnels.find(ap => ap.id === option.value));
   }, [availablePersonnels, assignedPersonnels]);
 
-  const onActrionHandler = (status: string, index: number) => {
-    if(status === 'unassigned') {
-      setAddIndex(index);
+  const cancelPersonnel = useCallback(async (personnelId: string, name: string) => {
+    const res = await cancelPersonnelAssignment(personnelId);
+    if(res.error) {
+      showSnackbar(res.error.message || `Failed to remove ${name}`, 'error');
+      return
     }
-  }
+    showSnackbar(`Successfully removed ${name}`, 'success');
+    onRefetch();
+  }, [])
+
+  const onActrionHandler = useCallback((status: string, index: number) => {
+    const assignment = assignedPersonnels[index];
+    const name = assignment?.fullName || assignment?.email || 'Personnel';
+    const actionMapping = {
+      unassigned: () => setAddIndex(index),
+      assigned: () => cancelPersonnel(assignment.id, name),
+      declined: () => cancelPersonnel(assignment.id, name),
+      // Note: Accept personnel requested to join
+      requested: async () => {
+        const assignment = assignedPersonnels[index];
+        const res = await acceptPersonnelAssignment(assignment.assignmentId);
+        if(res.error) {
+          showSnackbar(res.error.message || `Failed to accept ${name}`, 'error');
+          return
+        }
+        showSnackbar(`Successfully accepted ${name}`, 'success');
+        onRefetch();
+      }
+    }
+
+    const targetMapping = actionMapping[status as keyof typeof actionMapping];
+    if(targetMapping) targetMapping();
+  }, [assignedPersonnels]);
 
   return (
     <div className={B()}>
@@ -98,49 +126,12 @@ export function AssignedPersonnel({ jobId, numberOfPersonnel, assignedPersonnels
                   {assignedPersonnels[index]?.fullName || assignedPersonnels[index]?.email || 'Unassigned'}
                 </UiTypography>
                 <span className={E('action', status)} onClick={() => onActrionHandler(status, index)}>
-                  {actionMapping()[status as keyof typeof actionMapping] || <UiIcon name='AddCircle' size='small'  />}
+                  {buttonMapping[status as keyof typeof buttonMapping] || <UiIcon name='AddCircle' size='small'  />}
                 </span>
               </li>  
             )
           })
         }
-
-
-        {/* <li className={E('personnel')}>
-          <span className={E('status', 'accepted')}></span>
-          <UiTypography variant='h6'>John Wick</UiTypography>
-          <span className={E('action', 'remove')}>
-            <UiIcon name='Cancel' size='small'/>
-          </span>
-        </li>    
-        <li className={E('personnel')}>
-          <span className={E('status', 'pending')}></span>
-          <UiTypography variant='h6'>Jobh Wick</UiTypography>
-          <span className={E('action', 'approve')}>
-            <UiIcon name='CheckCircle' size='small'/>
-          </span>
-        </li>    
-        <li className={E('personnel')}>
-          <span className={E('status', 'declined')}></span>
-          <UiTypography variant='h6'>John Wick</UiTypography>
-          <span className={E('action')}>
-            <UiIcon name='AddCircle' size='small'/>
-          </span>
-        </li>    
-        <li className={E('personnel')}>
-          <span className={E('status', 'requested')}></span>
-          <UiTypography variant='h6'>Jobh Wick</UiTypography>
-          <span className={E('action')}>
-            <UiIcon name='AddCircle' size='small'/>
-          </span>
-        </li>    
-        <li className={E('personnel')}>
-          <span className={E('status')}></span>
-          <UiTypography variant='h6'>Jobh Wick</UiTypography>
-          <span className={E('action')}>
-            <UiIcon name='AddCircle' size='small'/>
-          </span>
-        </li>     */}
       </ul>
     </div>
   );

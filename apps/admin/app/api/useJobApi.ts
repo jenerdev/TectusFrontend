@@ -1,5 +1,4 @@
 import { useApi } from '@/app/hooks';
-import { useEffect, useRef, useState } from 'react';
 import { AuthRoleEnum, JobModel, JobStatusType } from './models';
 import endpoints from './endpoints';
 import { HttpError } from '@tectus/hooks';
@@ -28,9 +27,6 @@ type useGetJobProps = {
 
 type useGetJobReturn = {
   loading: boolean;
-  list: JobModel[];
-  details: JobModel | null;
-  refetch: () => void;
   acceptJob: () => Promise<{
     data: any;
     error: HttpError | null;
@@ -47,20 +43,31 @@ type useGetJobReturn = {
     data: any;
     error: HttpError | null;
   }>;
+  acceptPersonnelAssignment: (id: string) => Promise<{
+    data: any;
+    error: HttpError | null;
+  }>;
+  cancelPersonnelAssignment: (personnelId: string) => Promise<{
+    data: any;
+    error: HttpError | null;
+  }>;
+  getJobDetails: () => Promise<{
+    data: JobModel | null;
+    error: HttpError | null;
+  }>;
+  getJobList: () => Promise<{
+    data: JobModel[] | null;
+    error: HttpError | null;
+  }>;
 };
 
 export const useJobApi = ({
   status,
   id,
   role = AuthRoleEnum.PROVIDER,
-  disable = false,
 }: useGetJobProps): useGetJobReturn => {
-  const [list, setList] = useState<JobModel[]>([]);
-  const [details, setDetails] = useState<JobModel | null>(null);
-  const [refetchFlag, setRefetchFlag] = useState(0);
-
-  const loaded = useRef(false);
   const listEndpoint = endpoints.job.list(status as JobStatusType, role);
+  const jobId = id || '';
 
   const { loading: listLoading, sendRequest: sendRequestList } = useApi<JobModel[], any>(
     listEndpoint,
@@ -70,14 +77,14 @@ export const useJobApi = ({
   );
 
   const { loading: detailsLoading, sendRequest: sendRequestDetails } = useApi<JobModel, any>(
-    endpoints.job.detail(id || ''),
+    endpoints.job.detail(jobId),
     {
       method: 'GET',
     },
   );
 
   const { loading: acceptJobLoading, sendRequest: acceptJobRequest } = useApi<any, any>(
-    endpoints.job.accept(id || ''),
+    endpoints.job.accept(jobId),
     {
       method: 'POST',
     },
@@ -86,76 +93,37 @@ export const useJobApi = ({
   const { loading: getAssignedPersonnelsLoading, sendRequest: getAssignedPersonnels } = useApi<
     any,
     any
-  >(endpoints.job.assignedPersonnel(id || ''), {
+  >(endpoints.job.assignedPersonnel(jobId), {
     method: 'GET',
   });
 
   const { loading: getAvailablePersonnelsLoading, sendRequest: getAvailablePersonnels } = useApi<
     any,
     any
-  >(endpoints.job.availablePersonnels(id || ''), {
+  >(endpoints.job.availablePersonnels(jobId), {
     method: 'GET',
   });
 
   const { loading: assignPersonnelRequestLoading, sendRequest: assignPersonnelRequest } = useApi<
     any,
     any
-  >(endpoints.job.assignPersonnel(id || ''), {
+  >(endpoints.job.assignPersonnel(jobId), {
     method: 'POST',
   });
 
-  useEffect(() => {
-    if (refetchFlag === 0) return;
-    loaded.current = false;
-  }, [refetchFlag, status]);
+  const { loading: acceptPersonnelAssignmentLoading, sendRequest: acceptPersonnelAssignmentRequest } = useApi<
+    any,
+    any
+  >(endpoints.job.acceptPersonnelAssignment, {
+    method: 'POST',
+  });
 
-  useEffect(() => {
-    if (!status) return;
-    loaded.current = false;
-  }, [status]);
-
-  useEffect(() => {
-    if (loaded.current || !status || disable) return;
-    (async () => {
-      const results = await sendRequestList();
-      let list = results?.data || [];
-
-      if (status === 'accepted') {
-        list = (list as any[]).map((item) => item.job);
-      }
-
-      const dataWithFormattedDates = list.map(({ startAt, endAt, location, budget, ...others }) => {
-        const { address = '', lat = 0, lng = 0 } = location || {};
-        return {
-          ...others,
-          startAt: formatDate(startAt),
-          endAt: formatDate(endAt),
-          location: { address, lat, lng },
-          budget: budget || '0',
-        };
-      });
-
-      setList(dataWithFormattedDates as JobModel[]);
-    })();
-    loaded.current = true;
-  }, [refetchFlag, status]);
-
-  useEffect(() => {
-    if (loaded.current || !id) return;
-    (async () => {
-      const result = await sendRequestDetails();
-      if (!result.error && result?.data) {
-        setDetails(result?.data || null);
-        return;
-      }
-      console.log(result.error);
-    })();
-    loaded.current = true;
-  }, [refetchFlag, id]);
-
-  const refetch = () => {
-    setRefetchFlag((prev) => prev + 1);
-  };
+  const { loading: cancelPersonnelAssignmentLoading, sendRequest: cancelPersonnelAssignmentRequest } = useApi<
+    any,
+    any
+  >(endpoints.job.cancelPersonnelAssignment(jobId), {
+    method: 'POST',
+  });
 
   const acceptJob = async () => {
     return await acceptJobRequest();
@@ -169,6 +137,38 @@ export const useJobApi = ({
     });
   };
 
+  const acceptPersonnelAssignment = async (id: string) => acceptPersonnelAssignmentRequest({}, { id });
+  const cancelPersonnelAssignment = async (personnelId: string) => cancelPersonnelAssignmentRequest({}, { personnelId });
+
+  const getJobDetails = async () => {
+    return await sendRequestDetails();
+  };
+
+  const getJobList = async () => {
+    const results = await sendRequestList();
+    let list = results?.data || [];
+
+    if (status === 'accepted') {
+      list = (list as any[]).map((item) => item.job);
+    }
+
+    const dataWithFormattedDates = list.map(({ startAt, endAt, location, budget, ...others }) => {
+      const { address = '', lat = 0, lng = 0 } = location || {};
+      return {
+        ...others,
+        startAt: formatDate(startAt),
+        endAt: formatDate(endAt),
+        location: { address, lat, lng },
+        budget: budget || '0',
+      };
+    });
+
+    return {
+      ...results,
+      data: dataWithFormattedDates,
+    };
+  };
+
   return {
     loading:
       listLoading ||
@@ -176,13 +176,16 @@ export const useJobApi = ({
       acceptJobLoading ||
       getAssignedPersonnelsLoading ||
       getAvailablePersonnelsLoading ||
-      assignPersonnelRequestLoading,
-    list,
-    details,
-    refetch,
+      assignPersonnelRequestLoading || 
+      acceptPersonnelAssignmentLoading || 
+      cancelPersonnelAssignmentLoading,
     acceptJob,
     getAssignedPersonnels,
     getAvailablePersonnels,
     assignPersonnel,
+    acceptPersonnelAssignment,
+    cancelPersonnelAssignment,
+    getJobDetails,
+    getJobList
   };
 };

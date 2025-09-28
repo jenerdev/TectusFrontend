@@ -1,7 +1,7 @@
 'use client';
 
 import { Container, GoogleMap, Page } from '../../components';
-import { useBEM, useBreakpoint } from '@tectus/hooks';
+import { useBEM, useBreakpoint, useEffectDebounce } from '@tectus/hooks';
 import './dashboard-page.scss';
 import { DashboardCard, DashboardCardProps } from './components';
 import { UiTabs, UiTypography } from '@tectus/ui';
@@ -64,8 +64,12 @@ export default function DashboardPage() {
   const { isLessThan } = useBreakpoint();
   const role = useUserStore((state) => state.auth?.role);
   const isPersonnel = role === AuthRoleEnum.PERSONNEL;
-  const { list: availableJobs, loading: availableJobsLoading } = useJobApi({ status: isPersonnel ? 'available' : 'active', role });
-  const { list: jobsForBidding, loading: jobsForBiddingLoading } = useJobApi({ status: 'bidding', role, disable: isPersonnel});
+  const { loading: availableJobsLoading, getJobList: getAvailableJobs } = useJobApi({ status: isPersonnel ? 'available' : 'active', role });
+  const { loading: jobsForBiddingLoading, getJobList: getJobsForBidding } = useJobApi({ status: 'bidding', role });
+
+  const [availableJobs, setAvailableJobs] = useState<JobModel[]>([]);
+  const [jobsForBidding, setJobsForBidding] = useState<JobModel[]>([]);
+
   const [dashboardCardsState, setDashboardCardState] = useState(dashboardCards);
 
 
@@ -90,6 +94,18 @@ export default function DashboardPage() {
       },
     };
   };
+
+  useEffectDebounce(() => {
+    (async () => {
+      const promises = Promise.all([
+        getAvailableJobs(),
+        getJobsForBidding()
+      ]);
+      const [available, forBidding] = await promises;
+      setAvailableJobs(available?.data || []);
+      setJobsForBidding(forBidding?.data || []);
+    })();
+  },[])
 
   const mapLocations = useMemo(() => {
     if (availableJobsLoading || jobsForBiddingLoading) return [];

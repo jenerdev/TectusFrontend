@@ -18,6 +18,8 @@ const endpoints = {
     assignedPersonnel: (id: string) => `api/go/vendor/job/${id}/personnel-assignments`,
     availablePersonnels: (id: string) => `api/go/vendor/available-personnel/${id}`,
     assignPersonnel: (id: string) => `api/go/vendor/assign-personnel/${id}`,
+    acceptPersonnelAssignment: `api/go/vendor/accept-personnel-request/{{id}}`,
+    cancelPersonnelAssignment: (jobId: string) => `api/go/vendor/cancel-personnel-assignment/${jobId}/{{personnelId}}`,
   },
   personnel: {
     list: 'api/go/personnel/employees',

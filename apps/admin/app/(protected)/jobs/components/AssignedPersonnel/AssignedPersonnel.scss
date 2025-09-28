@@ -83,11 +83,7 @@
     }
     color: #cccccc;
 
-    &--accepted {
-      color: #c94343;
-    }
-
-    &--assigned {
+    &--accepted, &--declined, &--assigned{
       color: #c94343;
     }
 

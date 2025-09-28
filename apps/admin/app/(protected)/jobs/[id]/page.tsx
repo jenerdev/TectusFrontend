@@ -1,6 +1,6 @@
 'use client';
 
-import { useBEM } from '@tectus/hooks';
+import { useBEM, useEffectDebounce } from '@tectus/hooks';
 import './job-details-page.scss';
 import { Container, Page } from '@/app/components';
 import React, { useMemo, useEffect, useState } from 'react';
@@ -8,6 +8,8 @@ import { JobDetails, JobDetailsActionType } from '../components';
 import { UiTypography, useUiSnackbar } from '@tectus/ui';
 import { useRouter } from 'next/navigation';
 import { useJobApi } from '@/app/api';
+import { J } from 'vitest/dist/chunks/environment.d.cL3nLXbE.js';
+import { JobModel } from '@/app/api/models';
 
 interface PageProps {
   params: Promise<{
@@ -22,8 +24,21 @@ export default function JobsPage({ params }: PageProps) {
   const { showSnackbar } = useUiSnackbar();
   const [availablePersonnels, setAvailablePersonnels] = useState([]);
   const [assignedPersonnels, setAssignedPersonnels] = useState([]);
+  const [selectedJob, setSelectedJob] = useState<JobModel | null>(null);
+  const [refetchAssignmentFlag, setRefetchAssignmentFlag] = useState(0);
+  const { loading, acceptJob, getAvailablePersonnels, getAssignedPersonnels, getJobDetails } = useJobApi({id: unwrappedParams.id});
 
-  const { loading, details: selectedJob, acceptJob, refetch, getAvailablePersonnels, getAssignedPersonnels } = useJobApi({id: unwrappedParams.id});
+  
+  useEffectDebounce(() => {
+    (async () => {
+      const job = await getJobDetails();
+      if(job.error) {
+        showSnackbar(job.error.message || 'Failed to fetch job details', 'error');
+        return;
+      };
+      setSelectedJob(job.data || null);
+    })();
+  }, [unwrappedParams.id, refetchAssignmentFlag]);
 
   const isAccepted = useMemo(() => {
     if(!selectedJob) return false;
@@ -32,8 +47,6 @@ export default function JobsPage({ params }: PageProps) {
     return false;
   }, [selectedJob]);
 
-
-  const [refetchAssignmentFlag, setRefetchAssignmentFlag] = useState(0);
   useEffect(() => {
     if(!isAccepted) return;
     (async () => {
@@ -59,6 +72,7 @@ export default function JobsPage({ params }: PageProps) {
     })();
   }, [isAccepted, refetchAssignmentFlag])
   
+  const refetch = () => setRefetchAssignmentFlag(flag => flag + 1);
 
   const actionHandler = (action: JobDetailsActionType) => {
     const mapping = {
@@ -75,7 +89,7 @@ export default function JobsPage({ params }: PageProps) {
         router.back();
       },
       refetch: () => {
-        setRefetchAssignmentFlag(flag => flag + 1);
+        refetch();
       },
     }
 

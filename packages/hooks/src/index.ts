@@ -2,3 +2,4 @@ export * from './useBEM';
 export * from './useForm';
 export * from './useHttp';
 export * from './useBreakpoint';
+export * from './useEffectDebounce';
