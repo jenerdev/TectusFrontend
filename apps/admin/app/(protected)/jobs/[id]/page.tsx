@@ -25,18 +25,30 @@ export default function JobsPage({ params }: PageProps) {
   const [availablePersonnels, setAvailablePersonnels] = useState([]);
   const [assignedPersonnels, setAssignedPersonnels] = useState([]);
   const [selectedJob, setSelectedJob] = useState<JobModel | null>(null);
+  const [bidAmount, setBidAmount] = useState<string | undefined>();
   const [refetchAssignmentFlag, setRefetchAssignmentFlag] = useState(0);
-  const { loading, acceptJob, getAvailablePersonnels, getAssignedPersonnels, getJobDetails } = useJobApi({id: unwrappedParams.id});
+  const { 
+    loading, 
+    acceptJob, 
+    getAvailablePersonnels, 
+    getAssignedPersonnels, 
+    getJobDetails, 
+    placeBid,
+    getJobBidding 
+  } = useJobApi({id: unwrappedParams.id});
 
   
   useEffectDebounce(() => {
-    (async () => {
-      const job = await getJobDetails();
+    (async () => { 
+      const requests = Promise.all([getJobDetails(), getJobBidding()]);
+      const [job, jobBidding] = await requests;
+
       if(job.error) {
         showSnackbar(job.error.message || 'Failed to fetch job details', 'error');
         return;
       };
       setSelectedJob(job.data || null);
+      setBidAmount(jobBidding.data?.amount);
     })();
   }, [unwrappedParams.id, refetchAssignmentFlag]);
 
@@ -74,7 +86,7 @@ export default function JobsPage({ params }: PageProps) {
   
   const refetch = () => setRefetchAssignmentFlag(flag => flag + 1);
 
-  const actionHandler = (action: JobDetailsActionType) => {
+  const actionHandler = (action: JobDetailsActionType, data?: string | number) => {
     const mapping = {
       accept: async () => {
         const result = await acceptJob();
@@ -91,6 +103,15 @@ export default function JobsPage({ params }: PageProps) {
       refetch: () => {
         refetch();
       },
+      placeBid: async () => {
+        const res = await placeBid({amount: String(data)});
+        if(res.error) {
+          showSnackbar(res.error.message || 'Failed to place bid', 'error');
+          return;
+        }
+        setBidAmount(res.data.amount)
+        showSnackbar('Bid placed successfully!', 'success');
+      },
     }
 
     mapping[action]();
@@ -106,6 +127,7 @@ export default function JobsPage({ params }: PageProps) {
           loading={loading} 
           assignedPersonnels={assignedPersonnels} 
           availablePersonnels={availablePersonnels} 
+          bidAmount={bidAmount}
         />
       }
 

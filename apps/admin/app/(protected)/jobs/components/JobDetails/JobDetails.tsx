@@ -11,21 +11,29 @@ import {
   UiTextField,
 } from '@tectus/ui';
 import { GoogleMap } from '@/app/components';
-import { useMemo, useState } from 'react';
+import { use, useCallback, useMemo, useState } from 'react';
 import { JobModel } from '@/app/api/models/JobModel';
 import { AssignedPersonnel } from '../AssignedPersonnel';
 
-export type JobDetailsActionType = 'accept' | 'back' | 'refetch';
+export type JobDetailsActionType = 'accept' | 'back' | 'refetch' | 'placeBid';
 
 export interface JobDetailsProps {
   job: JobModel;
-  actionHandler: (action: JobDetailsActionType) => void;
+  actionHandler: (action: JobDetailsActionType, data?: string | number) => void;
   loading?: boolean;
   assignedPersonnels?: any[];
   availablePersonnels?: any[];
+  bidAmount?: string;
 }
 
-export function JobDetails({ job, actionHandler, loading, assignedPersonnels = [], availablePersonnels = []}: JobDetailsProps) {
+export function JobDetails({ 
+  job, 
+  actionHandler, 
+  loading, 
+  assignedPersonnels = [], 
+  availablePersonnels = [],
+  bidAmount: bidAmountInput,
+}: JobDetailsProps) {
   const { B, E } = useBEM('job-details');
   const isForBidding = useMemo(() => job.status === 'Bidding' && job.type === 'Scheduled', [job]);
   const isAccepted = useMemo(() => {
@@ -34,8 +42,11 @@ export function JobDetails({ job, actionHandler, loading, assignedPersonnels = [
     return false;
   }, [job]);
   const isForAccept = useMemo(() => job.type === 'Instant' && job.status !== 'Accepted', [job]);
+  const [bidAmount, setBidAmount] = useState<number>(Number(bidAmountInput || job.budget));
 
-  const [bidAmount, setBidAmount] = useState<number>(Number(job.budget));
+  const isAlreadySubmittedBid = useMemo(() => {
+    return !isAccepted && Boolean(bidAmountInput);
+  }, [bidAmountInput, isAccepted]);
 
   const renderInfo = ({
     value,
@@ -56,11 +67,11 @@ export function JobDetails({ job, actionHandler, loading, assignedPersonnels = [
   };
 
   const rate = useMemo(() => {
-    const budget = Number(job.budget) || 0;
+    const budget = Number(bidAmount) || 0;
     const computedRate = (budget / Number(job.numberOfPersonnel)).toFixed(2);
 
     return `≈ $${computedRate}/person/hour`;
-  }, [job.budget, job.numberOfPersonnel]);
+  }, [bidAmount, job.numberOfPersonnel]);
 
   const formattedDate = useMemo(() => {
     const formatter = new Intl.DateTimeFormat('en-US', {
@@ -101,6 +112,24 @@ export function JobDetails({ job, actionHandler, loading, assignedPersonnels = [
       },
     ];
   }, [job.location]);
+
+  const renderPlacedBid = useCallback((device?: 'desktop' | 'mobile') => {
+    if(!isAlreadySubmittedBid) return null;
+
+    return (
+      <div className={E('placed-bid', device || 'mobile')}>
+        <UiTypography variant='h6'>
+          Placed bid:
+        </UiTypography>
+        <UiTypography className={E('price')} variant="h4" fontWeight={700}>
+          ${bidAmountInput}
+        </UiTypography>
+        <UiTypography variant="h6" >
+          {rate}
+        </UiTypography>
+      </div>
+    );
+  }, [rate, isAlreadySubmittedBid]);
 
   return (
     <div className={B()}>
@@ -184,7 +213,7 @@ export function JobDetails({ job, actionHandler, loading, assignedPersonnels = [
         <div className={E('info-group')}>
           {renderInfo({
             value: 'Job details',
-            icon: 'Assignment',
+            icon: 'AssignmentOutlined',
             className: 'details',
           })}
 
@@ -217,7 +246,7 @@ export function JobDetails({ job, actionHandler, loading, assignedPersonnels = [
         </div>
 
 
-        {isForBidding && (
+        {isForBidding && !isAlreadySubmittedBid &&(
           <div className={E('place-bid', 'desktop')}>
             <UiTextField
               label="Bid amount"
@@ -226,14 +255,18 @@ export function JobDetails({ job, actionHandler, loading, assignedPersonnels = [
               value={bidAmount}
               onChange={(e) => setBidAmount(Number(e.target.value))}
             />
-            <UiButton className={E('bid-button')}>Place Bid</UiButton>
+            <UiButton className={E('bid-button')} onClick={() => actionHandler('placeBid', bidAmount)} loading={loading}>
+              Place Bid
+            </UiButton>
           </div>
         )}
+
+        { renderPlacedBid('desktop') }
         
         <div className={E('buttons', 'desktop')}>
-          <UiButton variant="outlined" onClick={() => actionHandler('back')}>
+          {/* <UiButton variant="outlined" onClick={() => actionHandler('back')}>
             Back
-          </UiButton>
+          </UiButton> */}
 
           {isForAccept && <UiButton className={E('accept-button')} onClick={() => actionHandler('accept')} loading={loading}>Accept Job</UiButton>}
         </div>
@@ -256,7 +289,7 @@ export function JobDetails({ job, actionHandler, loading, assignedPersonnels = [
         )}
 
         {
-          isForBidding && <div className={E('for-bidding')}>
+          isForBidding && !isAlreadySubmittedBid && <div className={E('for-bidding')}>
             <div>
               <UiTypography className={E('price')} variant="h4" fontWeight={700}>
                 For Bidding
@@ -290,13 +323,15 @@ export function JobDetails({ job, actionHandler, loading, assignedPersonnels = [
             onRefetch={() => actionHandler('refetch')} />
         }
 
-        <UiButton
+        { renderPlacedBid() }
+
+        {/* <UiButton
           className={E('cancel')}
           variant="outlined"
           onClick={() => actionHandler('back')}
         >
           Back
-        </UiButton>
+        </UiButton> */}
       </div>
     </div>
   );

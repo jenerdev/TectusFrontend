@@ -76,6 +76,7 @@ export function AssignedPersonnel({ jobId, numberOfPersonnel, assignedPersonnels
       unassigned: () => setAddIndex(index),
       assigned: () => cancelPersonnel(assignment.id, name),
       declined: () => cancelPersonnel(assignment.id, name),
+      accepted: () => cancelPersonnel(assignment.id, name),
       // Note: Accept personnel requested to join
       requested: async () => {
         const assignment = assignedPersonnels[index];
@@ -88,7 +89,6 @@ export function AssignedPersonnel({ jobId, numberOfPersonnel, assignedPersonnels
         onRefetch();
       }
     }
-
     const targetMapping = actionMapping[status as keyof typeof actionMapping];
     if(targetMapping) targetMapping();
   }, [assignedPersonnels]);
@@ -99,7 +99,7 @@ export function AssignedPersonnel({ jobId, numberOfPersonnel, assignedPersonnels
         <UiTypography variant='h6' bold>Assigned Personnel</UiTypography>
         
         <div className={E('count', isAllAssigned ? 'all-assigned' : '')}>
-          <UiIcon name='Warning' />
+          {!isAllAssigned && <UiIcon name='Warning' />}
           <UiTypography variant='h6' bold>{assignedPersonnels.length}/{numberOfPersonnel}</UiTypography>
         </div>
       </div>

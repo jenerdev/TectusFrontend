@@ -18,6 +18,13 @@ const formatDate = (date: string) => {
   return formatter.format(dateObj).replace(',', '');
 };
 
+export type PlaceBidPayload = {
+  amount: string;
+  message?: string;
+  proposedStartAt?: string;
+  proposedEndAt?: string;
+};
+
 type useGetJobProps = {
   status?: JobStatusType;
   id?: string;
@@ -25,7 +32,7 @@ type useGetJobProps = {
   disable?: boolean;
 };
 
-type useGetJobReturn = {
+type UseJobApiReturn = {
   loading: boolean;
   acceptJob: () => Promise<{
     data: any;
@@ -59,35 +66,37 @@ type useGetJobReturn = {
     data: JobModel[] | null;
     error: HttpError | null;
   }>;
+  placeBid: (payload: PlaceBidPayload) => Promise<{
+    data: any | null;
+    error: HttpError | null;
+  }>;
+  getJobBidding: () => Promise<{
+    data: any;
+    error: HttpError | null;
+  }>;
 };
 
 export const useJobApi = ({
   status,
   id,
   role = AuthRoleEnum.PROVIDER,
-}: useGetJobProps): useGetJobReturn => {
+}: useGetJobProps): UseJobApiReturn => {
   const listEndpoint = endpoints.job.list(status as JobStatusType, role);
   const jobId = id || '';
 
   const { loading: listLoading, sendRequest: sendRequestList } = useApi<JobModel[], any>(
     listEndpoint,
-    {
-      method: 'GET',
-    },
+    { method: 'GET' },
   );
 
   const { loading: detailsLoading, sendRequest: sendRequestDetails } = useApi<JobModel, any>(
     endpoints.job.detail(jobId),
-    {
-      method: 'GET',
-    },
+    { method: 'GET' },
   );
 
   const { loading: acceptJobLoading, sendRequest: acceptJobRequest } = useApi<any, any>(
     endpoints.job.accept(jobId),
-    {
-      method: 'POST',
-    },
+    { method: 'POST' },
   );
 
   const { loading: getAssignedPersonnelsLoading, sendRequest: getAssignedPersonnels } = useApi<
@@ -111,19 +120,33 @@ export const useJobApi = ({
     method: 'POST',
   });
 
-  const { loading: acceptPersonnelAssignmentLoading, sendRequest: acceptPersonnelAssignmentRequest } = useApi<
-    any,
-    any
-  >(endpoints.job.acceptPersonnelAssignment, {
+  const {
+    loading: acceptPersonnelAssignmentLoading,
+    sendRequest: acceptPersonnelAssignmentRequest,
+  } = useApi<any, any>(endpoints.job.acceptPersonnelAssignment, {
     method: 'POST',
   });
 
-  const { loading: cancelPersonnelAssignmentLoading, sendRequest: cancelPersonnelAssignmentRequest } = useApi<
-    any,
-    any
-  >(endpoints.job.cancelPersonnelAssignment(jobId), {
+  const {
+    loading: cancelPersonnelAssignmentLoading,
+    sendRequest: cancelPersonnelAssignmentRequest,
+  } = useApi<any, any>(endpoints.job.cancelPersonnelAssignment(jobId), {
     method: 'POST',
   });
+
+  const { loading: placeBidLoading, sendRequest: placeBidRequest } = useApi<any, any>(
+    endpoints.job.placeBid(jobId),
+    {
+      method: 'POST',
+    },
+  );
+
+  const { loading: getJobBiddingLoading, sendRequest: getJobBiddingRequest } = useApi<any, any>(
+    endpoints.job.getJobBidding(jobId),
+    {
+      method: 'GET',
+    },
+  );
 
   const acceptJob = async () => {
     return await acceptJobRequest();
@@ -137,8 +160,10 @@ export const useJobApi = ({
     });
   };
 
-  const acceptPersonnelAssignment = async (id: string) => acceptPersonnelAssignmentRequest({}, { id });
-  const cancelPersonnelAssignment = async (personnelId: string) => cancelPersonnelAssignmentRequest({}, { personnelId });
+  const acceptPersonnelAssignment = async (id: string) =>
+    acceptPersonnelAssignmentRequest({}, { id });
+  const cancelPersonnelAssignment = async (personnelId: string) =>
+    cancelPersonnelAssignmentRequest({}, { personnelId });
 
   const getJobDetails = async () => {
     return await sendRequestDetails();
@@ -169,6 +194,12 @@ export const useJobApi = ({
     };
   };
 
+  const placeBid = async (payload: PlaceBidPayload) => {
+    return placeBidRequest({
+      body: payload,
+    });
+  };
+
   return {
     loading:
       listLoading ||
@@ -176,9 +207,11 @@ export const useJobApi = ({
       acceptJobLoading ||
       getAssignedPersonnelsLoading ||
       getAvailablePersonnelsLoading ||
-      assignPersonnelRequestLoading || 
-      acceptPersonnelAssignmentLoading || 
-      cancelPersonnelAssignmentLoading,
+      assignPersonnelRequestLoading ||
+      acceptPersonnelAssignmentLoading ||
+      cancelPersonnelAssignmentLoading ||
+      placeBidLoading ||
+      getJobBiddingLoading,
     acceptJob,
     getAssignedPersonnels,
     getAvailablePersonnels,
@@ -186,6 +219,8 @@ export const useJobApi = ({
     acceptPersonnelAssignment,
     cancelPersonnelAssignment,
     getJobDetails,
-    getJobList
+    getJobList,
+    placeBid,
+    getJobBidding: getJobBiddingRequest,
   };
 };

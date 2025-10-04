@@ -65,10 +65,8 @@ export default function JobsPage() {
   useEffectDebounce(() => {
     if(!tab) return;
     (async () => {
-      const result = await getJobList();
-      if (!result.error) {
-        setJobList(result.data || []);
-      }
+      const result = await getJobList();  
+      setJobList(result.data || []);
     })();
   }, [tab]);  
 
