@@ -6,12 +6,27 @@ import { useBEM, useForm } from "@tectus/hooks";
 import "./reset-password-page.scss";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ConfirmPasswordValues, ResetPasswordPayload } from "./reset-password.types";
-import { ApiErrorCode, apiErrorMessageMapping } from "@/app/constants";
 import { useApi } from "@/app/hooks";
-import { PageBanner } from "@/app/components";
+import { PageBanner, useSignInForm } from "@/app/components";
+import { AuthRoleEnum } from "@/app/api/models";
+
+const contentMapping = {
+  personnel: {
+    title: 'Sign up for Tectus GO',
+    subTitle: '',
+    submitButtonText: 'Sign Up',
+    nextPageUrl: '',
+  },
+  vendor: {
+    title: 'Set new password',
+    subTitle: 'Please enter your new password',
+    submitButtonText: 'Set New password',
+    nextPageUrl: '/signin',
+  }
+}
 
 // Isolated component that uses useSearchParams()
-function ResetPasswordForm() {
+function ResetPasswordForm({ role }: { role?: string }) {
   const { B, E } = useBEM("reset-password-page");
   const router = useRouter();
   const { showSnackbar } = useUiSnackbar();
@@ -19,6 +34,10 @@ function ResetPasswordForm() {
   const email = searchParams.get("email");
   const code = searchParams.get("code");
 
+  const isPersonnel = role === AuthRoleEnum.PERSONNEL;
+  const content = contentMapping[isPersonnel ? 'personnel' : 'vendor'];
+
+  const { handleSignIn, loading: signInLoading } = useSignInForm();
   // TODO: create a model and hook for this on /api
   const { loading, sendRequest } = useApi<any, ResetPasswordPayload>(
     `api/go/user/confirmPasswordReset`,
@@ -33,6 +52,7 @@ function ResetPasswordForm() {
     handleSubmit,
     validate: { required, minLength, password },
     errors,
+    reset
   } = useForm<ConfirmPasswordValues>({
     password: "",
     confirmPassword: "",
@@ -70,20 +90,38 @@ function ResetPasswordForm() {
         showSnackbar(result.error.message, "error");
         return;
       }
-
+      reset();
       showSnackbar("Password successfully updated.", "success", {
         anchorOrigin: {
           vertical: "bottom",
           horizontal: "left",
         },
-        onClose: () => router.push("/signin"),
+        onClose: () => {
+          if(content.nextPageUrl) router.push(content.nextPageUrl)
+        },
       });
+      
+      // Auto login for personnel after password reset
+      // and redirected to create profile page
+      if(isPersonnel && email) {
+        handleSignIn({ email, password }, false);
+      }
     },
     [sendRequest, email, code, showSnackbar, router, passwordsMatch]
   );
 
   return (
     <form className={E("form")} onSubmit={handleSubmit(handleOnSubmit)}>
+      {
+        isPersonnel && (
+          <UiTextField
+            label="Email"
+            placeholder="Email"  
+            value={email || ""}
+            disabled
+          />
+        )
+      }
       <UiTextField
         label="Password"
         placeholder="Password"
@@ -115,8 +153,8 @@ function ResetPasswordForm() {
         type="password"
       />
 
-      <UiButton type="submit" topspacing={4} loading={loading}>
-        Set password
+      <UiButton type="submit" topspacing={4} loading={loading || signInLoading}>
+        {content.submitButtonText}
       </UiButton>
     </form>
   );
@@ -124,17 +162,21 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   const { B } = useBEM("reset-password-page");
+  const searchParams = useSearchParams();
+  const role = searchParams.get("role") || undefined;
+  const isPersonnel = role === "personnel";
+  const content = contentMapping[isPersonnel ? 'personnel' : 'vendor'];
 
   return (
     <div className={B()}>
       <PageBanner
-        title="Set new password"
-        subtitle="Please enter your new password."
+        title={content.title}
+        subtitle={content.subTitle}
       />
 
       {/* Suspense boundary only around the part that uses searchParams */}
       <Suspense fallback={<div>Loading reset form...</div>}>
-        <ResetPasswordForm />
+        <ResetPasswordForm role={role} />
       </Suspense>
     </div>
   );

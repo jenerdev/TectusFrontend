@@ -149,7 +149,7 @@ export const getDesignTokens = (mode: 'light' | 'dark') => ({
     },
   },
   typography: {
-    fontFamily: `'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif`,
+    fontFamily: `'Roboto', 'Inter', 'Helvetica', 'Arial', sans-serif`,
   },
 });
 

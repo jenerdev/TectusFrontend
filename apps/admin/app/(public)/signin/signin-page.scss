@@ -7,7 +7,7 @@
   &__main {
     flex: 1;
     @extend %flex-center-column;
-    gap: 2rem;
+    gap: 4rem;
   }
 
   &__forgot {

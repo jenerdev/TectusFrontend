@@ -3,7 +3,7 @@
 .home-page {
   min-height: 100vh;
   @extend %flex-center-column;
-  gap: 5rem;
+  gap: 8rem;
 
   &__main {
     @extend %flex-center;
@@ -85,5 +85,6 @@
   &__buttons {
     display: flex;
     gap: 1rem;
+    flex-direction: column;
   }
 }

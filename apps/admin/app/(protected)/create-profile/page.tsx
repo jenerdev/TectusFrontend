@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { PageBanner, useSignInForm } from '@/app/components';
 import { usePersonnelApi } from '@/app/api';
 import { useUserStore } from '@/store/userStore';
+import { useMemo } from 'react';
 
 type CreateProfileForm = {
   firstName: string;
@@ -20,20 +21,30 @@ export default function CreateProfile() {
   const { B, E } = useBEM('create-profile-page');
   const { showSnackbar } = useUiSnackbar();
   const { loading, createProfile } = usePersonnelApi(true)
+  const { personnelInfo = {}, lastName, middleName, firstName, phoneNumber } = useUserStore((state) => state.personnel);
 
   const {
     register,
     handleSubmit,
     validate: { required, minLength },
     errors,
-    reset
+    reset,
+    isValid
   } = useForm<CreateProfileForm>({
-    firstName: '',
-    middleName: '',
-    lastName: '',
-    phoneNumber: '',
+    firstName: firstName || '',
+    middleName: middleName || '',
+    lastName: lastName || '',
+    phoneNumber: phoneNumber || '',
     bio: '',
   });
+
+  const profileIsAlreadyCreated = useMemo(() => {
+    return personnelInfo?.status !== "SignedUp";
+  }, [personnelInfo?.status]);
+
+  const actionLabel = useMemo(() => {
+    return profileIsAlreadyCreated ? 'Update' : 'Create';
+  }, [profileIsAlreadyCreated]);
 
   const handleOnSubmit = async (form: CreateProfileForm) => {
     const { middleName, ...values } = form;
@@ -70,7 +81,7 @@ export default function CreateProfile() {
       
       <div className={E('banner')}>
         <PageBanner
-          title="Create your profile"
+          title={`${actionLabel} your profile`}
           subtitle='Profile details are subject to approval by your company.'
           hideLogo
         />
@@ -115,8 +126,8 @@ export default function CreateProfile() {
           error={Boolean(errors.bio)}
         />
 
-        <UiButton type="submit" topspacing={3} loading={loading}>
-          Create Profile
+        <UiButton type="submit" topspacing={3} loading={loading} disabled={!isValid}>
+          {actionLabel} Profile
         </UiButton>
       </form>
     </div>

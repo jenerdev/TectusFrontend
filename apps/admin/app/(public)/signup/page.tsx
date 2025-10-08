@@ -144,7 +144,7 @@ export default function Signup() {
           helperTextPosition='relative'
         />
 
-        <UiButton type="submit" loading={loading || signInLoading} topspacing={3}>
+        <UiButton type="submit" loading={loading || signInLoading} topspacing={4}>
           Sign up
         </UiButton>
       </form>

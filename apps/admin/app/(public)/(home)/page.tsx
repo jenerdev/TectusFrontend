@@ -44,20 +44,20 @@ export default function Home() {
   };
 
   const renderInitialButtons = () => (
-    <>
+    <div className={E('buttons')}>
       <UiButton onClick={() => handleButtonAction('signin')} className={E('signin-button')}>
         Sign in
       </UiButton>
       <UiButton variant="outlined" onClick={() => handleButtonAction('joinnow')}>
         Join now
       </UiButton>
-    </>
+    </div>
   );
 
   const renderSignupTypeButtons = () => (
     <div className={E('buttons')}>
       <UiButton onClick={() => handleButtonAction('individual')}>Individual</UiButton>
-      <UiButton variant="outlined" onClick={() => handleButtonAction('company')}>
+      <UiButton onClick={() => handleButtonAction('company')}>
         Company
       </UiButton>
     </div>

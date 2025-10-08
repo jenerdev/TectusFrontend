@@ -32,8 +32,8 @@ export const useUserStore: UseBoundStore<StoreApi<UserState>> = create<UserState
       hasHydrated: false,
 
       setAuth: (auth) => set({ auth }),
-      setVendor: (vendor) => set({ vendor }),
-      setPersonnel: (personnel) => set({ personnel }),
+      setVendor: (vendor) => set({ vendor, personnel: undefined }),
+      setPersonnel: (personnel) => set({ personnel, vendor: undefined }),
       logout: () => {
         document.cookie = 'token=; path=/; max-age=0';
         set({ vendor: undefined, auth: undefined, personnel: undefined });

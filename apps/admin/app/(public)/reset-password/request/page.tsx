@@ -59,7 +59,7 @@ export default function ResetPasswordRequestPage() {
           helperText={errors.email}
           error={Boolean(errors.email)}
         />
-        <UiButton className={E('submit')} type="submit" loading={loading} topspacing={3}>
+        <UiButton className={E('submit')} type="submit" loading={loading} topspacing={4}>
           Reset password
         </UiButton>
       </form>

@@ -2,10 +2,24 @@
 
 html {
   overflow-y: overlay;
-  font-size: calc(var(--base-font-size, 14px) + 2px);
 
-  @include respond-to(tablet-lg) {
-    font-size: var(--base-font-size, 16px);
+  font-size: var(--base-font-size, 16px);
+  transition: font-size 0.3s ease; /* smooth transition */
+
+  @media (max-height: 900px) {
+    font-size: calc(var(--base-font-size, 16px) - 2px);
+  }
+
+  @media (max-height: 750px) {
+    font-size: calc(var(--base-font-size, 16px) - 4px);
+  }
+
+  @media (max-height: 600px) {
+    font-size: calc(var(--base-font-size, 16px) - 6px);
+  }
+
+  @media (max-height: 480px) {
+    font-size: calc(var(--base-font-size, 16px) - 8px);
   }
 }
 

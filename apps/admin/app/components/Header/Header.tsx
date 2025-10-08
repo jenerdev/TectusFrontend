@@ -18,6 +18,7 @@ export function Header({ center = false, noMenu = false }: HeaderProps) {
   const { B, E } = useBEM('header');
   const { logout } = useAuthApi();
   const user = useUserStore.getState().getUser();
+  console.log({user});
   const userStatus = useUserStore.getState().getUserStatus();
   const router = useRouter();
   const logoRedirectMapping = {
@@ -35,6 +36,8 @@ export function Header({ center = false, noMenu = false }: HeaderProps) {
   const logoRedirect = useMemo(() => {
     return logoRedirectMapping[userStatus] || '/';
   }, [userStatus]);
+
+  
 
   return (
     <div className={B()}>
@@ -73,11 +76,13 @@ export function Header({ center = false, noMenu = false }: HeaderProps) {
                     label: user?.email || '',
                     icon: <UiIcon name="Email" size="small" />,
                   },
-                  {
-                    label: 'Profile',
-                    icon: <UiIcon name="AccountBox" size="small" />,
-                    onClick: () => router.push(`/profile`),
-                  },
+                  ...(!user.isPersonnel ?[
+                    {
+                      label: 'Profile',
+                      icon: <UiIcon name="AccountBox" size="small" />,
+                      onClick: () => router.push(`/profile`),
+                    }
+                  ]: []),
                   {
                     label: 'Change Password',
                     icon: <UiIcon name="Password" size="small" />,

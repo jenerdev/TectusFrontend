@@ -71,7 +71,13 @@ export function useProtectedRoute(props?: useProtectedRouteProps) {
     }
 
     if (role === AuthRoleEnum.PERSONNEL) {
-      // TODO: handle personnel route guarding
+      const personnelAllowedRoutes = ['/create-profile', '/change-password'];
+      console.log(!personnelAllowedRoutes.includes(pathname) ? 'A' : 'B');
+      if (!personnelAllowedRoutes.includes(pathname)) {
+        router.push('/create-profile');
+        return;
+      }
+
       setDecided(true);
     }
   }, [hasHydrated, token, status, user?.emailVerified, pathname, router, setDecided]);

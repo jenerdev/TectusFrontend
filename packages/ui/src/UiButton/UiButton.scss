@@ -3,10 +3,20 @@
 button.ui-button {
   font-weight: 700;
   text-transform: initial;
-  border-radius: 2em;
-  min-width: 11.25rem;
+  border-radius: 1rem;
+  border-width: 1px;
+  // min-width: 11.25rem;
+
+  &--medium {
+    height: 3.5rem;
+    min-width: 17.5rem;
+  }
 
   &--default-min-width {
     min-width: auto;
+  }
+
+  &--outlined {
+    background-color: transparent;
   }
 }

@@ -14,7 +14,7 @@ export function useSignInForm() {
 
   const { loading: loginLoading, login } = useAuthApi();
   const { loading: vendorLoading, getVendorDetails } = useVendorApi();
-  const { loading: personnelLoading, getPersonnelDetails } = usePersonnelApi();
+  const { loading: personnelLoading, getPersonnelDetails } = usePersonnelApi(true);
 
   // TODO: create a model and hook for this on /api
   const { loading: verifyEmailLoading, sendRequest: verifyEmailRequest } = useApi<any>(
@@ -46,9 +46,18 @@ export function useSignInForm() {
     }
 
     let userStatus;
+    const isVendor = role === AuthRoleEnum.PROVIDER;
     const isPersonnel = role === AuthRoleEnum.PERSONNEL;
 
-    if (role === AuthRoleEnum.PROVIDER) {
+    if (!isVendor && !isPersonnel) {
+      showSnackbar(
+        'This account can only be accessed from the mobile app. Please use the app to log in.',
+        'info',
+      );
+      return;
+    }
+
+    if (isVendor) {
       const vendorResult = await getVendorDetails({
         token: token,
         refreshToken: refreshToken,
@@ -84,19 +93,7 @@ export function useSignInForm() {
     useUserStore.getState().setAuth(loginResult.data);
 
     if (isPersonnel) {
-      // TODO: improve handling personnel specific logic
-      if (userStatus === 'SignedUp') {
-        router.push('/create-profile');
-        return;
-      }
-
-      if (userStatus === 'Pending') {
-        router.push('/application-submitted');
-        return;
-      }
-
-      router.push('/dashboard');
-
+      router.push('/create-profile');
       return;
     }
 

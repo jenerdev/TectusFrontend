@@ -4,5 +4,6 @@
   min-height: calc(100vh - 7.5rem);
 
   @extend %flex-center-column;
-  justify-content: space-around;
+  justify-content: center;
+  gap: 4rem;
 }

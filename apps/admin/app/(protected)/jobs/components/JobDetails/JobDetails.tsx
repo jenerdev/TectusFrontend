@@ -308,6 +308,7 @@ export function JobDetails({
                 helperText={rate}
                 value={bidAmount}
                 onChange={(e) => setBidAmount(Number(e.target.value))}
+                helperTextPosition="relative"
               />
               <UiButton className={E('bid-button')}>Place Bid</UiButton>
             </div>

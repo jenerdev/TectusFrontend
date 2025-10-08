@@ -25,7 +25,7 @@ export interface UIButtonProps {
 
 export function UiButton({
   variant = 'contained',
-  size = 'large',
+  size = 'medium',
   children,
   className,
   onClick,
@@ -51,7 +51,7 @@ export function UiButton({
      <Button  
         variant={variant}
         size={size}
-        className={B( defaultMinWidth ? 'default-min-width' : '')}
+        className={B([defaultMinWidth ? 'default-min-width' : '', size, variant] )}
         onClick={onClick}
         type={type}
         disabled={disabled}

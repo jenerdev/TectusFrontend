@@ -19,7 +19,7 @@ export function PageBanner({ title, subtitle, hideLogo = false }: PageBannerProp
           <Image src="/logo-tectus-go.png" alt="Logo" width={150} height={150} />
         </div>
       )}
-      <UiTypography className={E('title')} variant="h5" fontWeight={700}>
+      <UiTypography className={E('title')} variant="h4" fontWeight={500}>
         {title}
       </UiTypography>
       {subtitle && (

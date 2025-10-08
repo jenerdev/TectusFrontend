@@ -12,7 +12,7 @@ import { usePersonnelApi, useVendorApi } from '@/app/api';
 import { AuthRoleEnum } from '@/app/api/models';
 
 
-const BannerPropsMapping = {
+const contentMapping = {
   [AuthRoleEnum.PROVIDER]: {
     title: 'Application submitted',
     subtitle: "Thanks for submitting your application.<br/>You'll be notified once reviewed.",
@@ -88,8 +88,8 @@ export default function ApplicationSubmittedPage() {
       { 
         auth?.role && 
         <PageBanner
-          title={BannerPropsMapping[auth?.role]?.title}
-          subtitle={BannerPropsMapping[auth?.role]?.subtitle}
+          title={contentMapping[auth?.role]?.title}
+          subtitle={contentMapping[auth?.role]?.subtitle}
           hideLogo
         />      
       }

@@ -48,9 +48,9 @@ export function SignInForm({ onSubmit, loading }: SigninFormProps) {
         error={Boolean(errors.password)}
       />
 
-      <UiSwitch checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} label='Remember me' />
+      {/* <UiSwitch checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} label='Remember me' /> */}
 
-      <UiButton type="submit" className={E('submit')} loading={loading}>
+      <UiButton type="submit" className={E('submit')} loading={loading} topspacing={4}>
         Sign in
       </UiButton>
     </form>

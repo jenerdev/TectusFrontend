@@ -33,7 +33,7 @@ export const usePersonnelApi = (manual = false): usePersonnelApiType => {
     method: 'GET',
   });
 
-  const { loading: createProfileLoading, sendRequest: createProfile } = useApi<
+  const { loading: createProfileLoading, sendRequest: createProfileRequest } = useApi<
     PersonnelModel[],
     any
   >(endpoints.personnel.details, {
@@ -68,6 +68,8 @@ export const usePersonnelApi = (manual = false): usePersonnelApiType => {
   const refetch = () => {
     setRefetchFlag((prev) => prev + 1);
   };
+
+  const createProfile = async (data: any) => createProfileRequest({ body: data });
 
   return {
     loading: getPersonnelListLoading || createProfileLoading || getPersonnelDetailsLoading,
