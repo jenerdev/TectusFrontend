@@ -37,7 +37,7 @@ function ResetPasswordForm({ role }: { role?: string }) {
   const isPersonnel = role === AuthRoleEnum.PERSONNEL;
   const content = contentMapping[isPersonnel ? 'personnel' : 'vendor'];
 
-  const { handleSignIn, loading: signInLoading } = useSignInForm();
+  const { handleSignIn, loading: signInLoading } = useSignInForm(false);
   // TODO: create a model and hook for this on /api
   const { loading, sendRequest } = useApi<any, ResetPasswordPayload>(
     `api/go/user/confirmPasswordReset`,

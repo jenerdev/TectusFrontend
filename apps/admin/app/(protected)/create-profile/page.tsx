@@ -21,7 +21,7 @@ export default function CreateProfile() {
   const { B, E } = useBEM('create-profile-page');
   const { showSnackbar } = useUiSnackbar();
   const { loading, createProfile } = usePersonnelApi(true)
-  const { personnelInfo = {}, lastName, middleName, firstName, phoneNumber } = useUserStore((state) => state.personnel);
+  const { status, lastName, middleName, firstName, phoneNumber } = useUserStore((state) => state.personnel);
 
   const {
     register,
@@ -39,8 +39,8 @@ export default function CreateProfile() {
   });
 
   const profileIsAlreadyCreated = useMemo(() => {
-    return personnelInfo?.status !== "SignedUp";
-  }, [personnelInfo?.status]);
+    return status !== "SignedUp";
+  }, [status]);
 
   const actionLabel = useMemo(() => {
     return profileIsAlreadyCreated ? 'Update' : 'Create';
@@ -64,12 +64,7 @@ export default function CreateProfile() {
       lastName: form.lastName,
       name: fullName,
       phoneNumber: form.phoneNumber,
-      personnelInfo: {
-        ...currentPersonnelData?.personnelInfo,
-        contactNumber: form.phoneNumber,
-        fullName,
-        status: 'Pending'
-      }
+      status: 'Pending',
     });
     router.push('/application-submitted');
   };

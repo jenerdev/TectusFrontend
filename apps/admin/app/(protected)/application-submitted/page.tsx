@@ -42,7 +42,7 @@ export default function ApplicationSubmittedPage() {
 
     if(isPersonnel){
       const personnelResult = await getPersonnelDetails();
-      const status = (personnelResult.data?.personnelInfo.status || '').toUpperCase() as UserStatus;
+      const status = (personnelResult.data?.status || '').toUpperCase() as UserStatus;
       if (status === UserStatus.PENDING) return;
       
       router.push('/dashboard');

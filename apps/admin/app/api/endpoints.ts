@@ -27,6 +27,7 @@ const endpoints = {
   personnel: {
     list: 'api/go/personnel/employees',
     details: 'api/go/personnel/me',
+    create: 'api/user/me',
   },
   user: {
     login: 'api/user/login',

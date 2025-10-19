@@ -36,7 +36,7 @@ export const usePersonnelApi = (manual = false): usePersonnelApiType => {
   const { loading: createProfileLoading, sendRequest: createProfileRequest } = useApi<
     PersonnelModel[],
     any
-  >(endpoints.personnel.details, {
+  >(endpoints.personnel.create, {
     method: 'PUT',
   });
 

@@ -7,7 +7,7 @@ import { ApiErrorCode } from '@/app/constants';
 import { useAuthApi, usePersonnelApi, useVendorApi } from '@/app/api';
 import { AuthRoleEnum, LoginDTO } from '@/app/api/models';
 
-export function useSignInForm() {
+export function useSignInForm(manual = true) {
   const router = useRouter();
   const { showSnackbar } = useUiSnackbar();
   const { getErrorMessage } = useApiErrorMessage();
@@ -48,8 +48,7 @@ export function useSignInForm() {
     let userStatus;
     const isVendor = role === AuthRoleEnum.PROVIDER;
     const isPersonnel = role === AuthRoleEnum.PERSONNEL;
-
-    if (!isVendor && !isPersonnel) {
+    if (manual && !isVendor) {
       showSnackbar(
         'This account can only be accessed from the mobile app. Please use the app to log in.',
         'info',
@@ -85,7 +84,7 @@ export function useSignInForm() {
         return;
       }
       useUserStore.getState().setPersonnel(data);
-      userStatus = data.personnelInfo.status;
+      userStatus = data.status;
     }
 
     // Note: this cookie will be used for authentication in the middleware for route guarding

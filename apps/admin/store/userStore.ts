@@ -45,7 +45,7 @@ export const useUserStore: UseBoundStore<StoreApi<UserState>> = create<UserState
       },
       getUserStatus: () => {
         const isPersonnel = get().auth?.role === AuthRoleEnum.PERSONNEL;
-        const status = isPersonnel ? get().personnel?.personnelInfo.status : get().vendor?.status;
+        const status = isPersonnel ? get().personnel?.status : get().vendor?.status;
         return (status || '').toUpperCase() as UserStatus;
       },
       getUser: () => {
