@@ -2,8 +2,10 @@
 
 import { useBEM } from '@tectus/hooks';
 import './UserList.scss';
-import { UiTable } from '@tectus/ui'; 
+import { UiButton, UiTable, useUiSnackbar } from '@tectus/ui'; 
 import { PersonnelModel } from '@/app/api/models';
+import { usePersonnelApi } from '@/app/api';
+import { useState } from 'react';
 
 export type ActionType = 'invite_user' | 'invite_user_bulk';
 
@@ -36,6 +38,26 @@ export interface UserListProps {
 
 export function UserList({ data, loading = false }: UserListProps) {
   const { B, E } = useBEM('user-list');
+  const { approvePersonnel, loading: approvingLoading } = usePersonnelApi();
+  const { showSnackbar } = useUiSnackbar();
+
+  const [inProgressId, setInProgressId] = useState<string | null>(null);
+  const [approvedPersonnels, setApprovedPersonnels] = useState<string[]>([]);
+
+
+  const actionHandler = async (action: string, user: PersonnelModel) => {
+    setInProgressId(user.id);
+    if (action === 'approve') {
+      const { data, error } = await approvePersonnel(user.id);
+      setInProgressId(null);
+      if (error) {
+        showSnackbar(`Error approving personnel: ${user.email}`, 'error');
+      } else {
+        showSnackbar(`Personnel approved successfully: ${user.email}`, 'success');
+        setApprovedPersonnels((prev) => [...prev, user.id]);
+      }
+    }
+  }
 
   return (
     <div className={B()}>
@@ -50,14 +72,52 @@ export function UserList({ data, loading = false }: UserListProps) {
             key: 'status',
             label: 'Status',
             template: {
-              td: (row) => (
-                <span className={E('status', row.status)}>
-                  {statusLabels[row.status as EmployeeStatusType] || row.status}
-                </span>
-              ),
+              td: (row) => {
+                let status = row.status
+                if(row.status === 'Pending' && approvedPersonnels.includes(row.id)) {
+                  status = 'Approved'
+                }
+
+                return (
+                  <span className={E('status', status)}>
+                    {statusLabels[status as EmployeeStatusType] || status}
+                  </span>
+                )
+              },
             },
           },
-          { key: 'actions', label: 'Actions', isMobile: true},
+          { 
+            key: 'actions', 
+            label: 'Actions', 
+            isMobile: true,
+            template: {
+              td: (row) => {
+                let actions = [];
+                if(row.status === 'Pending' && !approvedPersonnels.includes(row.id)) {
+                  actions.push({
+                    label: 'Approve',
+                    action: 'approve',
+                  });
+                }
+                
+                return (
+                  <ul className={E('actions')}>
+                    {actions.map((actionItem, index) => (
+                      <li key={index} className={E('action')}>
+                        <UiButton 
+                          size='small' 
+                          loading={inProgressId === row.id && approvingLoading} 
+                          onClick={() => actionHandler(actionItem.action, row as PersonnelModel)}
+                        >
+                          {actionItem.label}
+                        </UiButton>
+                      </li>
+                    ))}
+                  </ul>
+                )
+              },
+            },
+          },
         ]}
         data={data}
       />

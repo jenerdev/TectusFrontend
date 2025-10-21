@@ -16,6 +16,11 @@ type usePersonnelApiType = {
     data: any | null;
     error: HttpError | null;
   }>;
+
+  approvePersonnel: (id: string) => Promise<{
+    data: any | null;
+    error: HttpError | null;
+  }>;
 };
 
 // TODO: add types for personnel remove type any
@@ -47,6 +52,13 @@ export const usePersonnelApi = (manual = false): usePersonnelApiType => {
     method: 'GET',
   });
 
+  const { loading: approvePersonnelLoading, sendRequest: approvePersonnelRequest } = useApi<
+    PersonnelModel[],
+    any
+  >(endpoints.personnel.approve, {
+    method: 'POST',
+  });
+
   useEffect(() => {
     if (refetchFlag === 0) return;
     loaded.current = false;
@@ -71,11 +83,14 @@ export const usePersonnelApi = (manual = false): usePersonnelApiType => {
 
   const createProfile = async (data: any) => createProfileRequest({ body: data });
 
+  const approvePersonnel = async (id: string) => approvePersonnelRequest({ body: { personnelId: id } });
+
   return {
-    loading: getPersonnelListLoading || createProfileLoading || getPersonnelDetailsLoading,
+    loading: getPersonnelListLoading || createProfileLoading || getPersonnelDetailsLoading || approvePersonnelLoading,
     list,
     refetch,
     createProfile,
     getPersonnelDetails,
+    approvePersonnel
   };
 };

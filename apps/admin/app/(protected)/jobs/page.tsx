@@ -27,11 +27,11 @@ const tabItems = [
       value: 'bidding',
       roles: [AuthRoleEnum.PROVIDER],
     },
-    {
-      label: 'Accepted Jobs',
-      value: 'accepted',
-      roles: [AuthRoleEnum.PROVIDER],
-    },
+    // {
+    //   label: 'Accepted Jobs',
+    //   value: 'accepted',
+    //   roles: [AuthRoleEnum.PROVIDER],
+    // },
     {
       label: 'Completed Jobs',
       value: 'completed',
