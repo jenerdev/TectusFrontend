@@ -154,6 +154,7 @@ export default function SubmitInfo() {
 
     if(!agreedWithTermsAndConditions) {
       showSnackbar('Please accept the terms and conditions to continue.', 'error');
+      return;
     }
 
     const insuranceDocuments = await uploadPerAttachmentType('insurance');
