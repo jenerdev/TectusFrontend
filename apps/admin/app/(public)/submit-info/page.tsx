@@ -152,6 +152,10 @@ export default function SubmitInfo() {
       }
     }
 
+    if(!agreedWithTermsAndConditions) {
+      showSnackbar('Please accept the terms and conditions to continue.', 'error');
+    }
+
     const insuranceDocuments = await uploadPerAttachmentType('insurance');
     if(!isValidDocuments(insuranceDocuments)) {
       showSnackbar('Certificate of Insurance failed to upload. Please try again', 'error');
@@ -645,7 +649,7 @@ export default function SubmitInfo() {
 
           <UiButton
             type="submit"
-            disabled={!agreedWithTermsAndConditions || !isValid}
+            // disabled={!agreedWithTermsAndConditions || !isValid}
             loading={uploadLoading || vendorLoading}
           >
             Submit application
