@@ -276,7 +276,7 @@ export default function SubmitInfo() {
 
     let citiesGroupedByState: GroupedOptions = [];
     (values.statesCovered || []).forEach((state) => {
-      const stateCities = (STATE_CITIES[state] || []).map((city) => ({ value: city, label: city }));
+      const stateCities = (STATE_CITIES[state] || []).sort().map((city) => ({ value: city, label: city }));
 
       citiesGroupedByState = [
         ...citiesGroupedByState,
