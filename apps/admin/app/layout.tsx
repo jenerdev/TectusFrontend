@@ -48,7 +48,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" style={{ '--base-font-size': baseFontSize } as React.CSSProperties} className={`${orbitron.variable} ${inter.variable} ${roboto.variable}`}>
-      <body>
+      <body id="staging">
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
           strategy="beforeInteractive"
